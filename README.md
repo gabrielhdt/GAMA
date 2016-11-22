@@ -1,0 +1,2 @@
+# GAMA
+Vectorisation d'images
