@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#    Defines elements of the svg file
+#    Defines elements which will be used in svg file (e.g. Bezier curves)
 #    Copyright (C) 2016  Gabriel Hondet
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,26 @@ class BernsteinBasisPoly(sp.poly1d):
         n -- int, degree
         """
         assert nu <= n
-        pol = sp.poly1d([1, 0])**nu  # P(X) = X^\nu
-        pol *= sp.poly1d([-1, 1])**(n - nu)  # P(X) = (1 - X)^(n-\nu)
+        pol = sp.poly1d((1, 0))**nu  # P(X) = X^\nu
+        pol *= sp.poly1d((-1, 1))**(n - nu)  # P(X) = (1 - X)^(n-\nu)
         pol *= scipy.special.binom(n, nu)
         super().__init__(pol)
+
+
+class BezierCurve:
+    def __init__(self, ctrl_pts):
+        """Defines a Bezier curve from control points
+        ctrl_pts -- tuple of vectors containing at least two
+            points: start point and end point
+        """
+        self.start = ctrl_pts[0]
+        self.stop = ctrl_pts[-1]
+        self.ctrl = ctrl_pts[1:-1]
+        self.deg = len(ctrl_pts)
+
+        def coef_bezier(k):
+            return ctrl_pts[k]*BernsteinBasisPoly(k, self.deg)
+        pol_coeffs = sum((coef_bezier(i) for i in range(self.deg)))
+        self.polytuple = (sp.poly1d(pol_coeffs[0]), sp.poly1d(pol_coeffs[1]))
+        self.fct = lambda t: sp.array([[self.polytuple[0](t)],
+                                       [self.polytuple[1](t)]])
