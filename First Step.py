@@ -23,6 +23,6 @@ def Matriceniveauxdegris(matriceRGB):
     return MNG
 
 matrix=Matriceniveauxdegris(MatriceRGB)
-plt.imshow(matrix)
+plt.imshow(matrix, cmap=plt.cm.gray)
 plt.show()
 
