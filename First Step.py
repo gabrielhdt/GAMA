@@ -4,7 +4,7 @@
 #chaque zone
 
 #Notations:
-#Matriceniveauxdegris: mniveau de gris entre 0 et 1, avec coefficients (0.2126,0.7152,0.0722) pour (R,G,B)/ Wikipedia
+#Matriceniveauxdegris: niveau de gris entre 0 et 1, avec coefficients (0.2126,0.7152,0.0722) pour (R,G,B)/ Wikipedia
 
 import scipy.misc as smp
 import numpy as np
