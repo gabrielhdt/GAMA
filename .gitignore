@@ -93,3 +93,6 @@ ENV/
 *.png
 *.svg
 *.gif
+
+# Ignore test script
+test.py
