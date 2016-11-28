@@ -62,6 +62,7 @@ class Pixel(object):
         diff_y = abs(self.y-other.y)
         return diff_x <= 1 and diff_y <= 1 and diff_x+diff_y != 0
 
+
 class Contour(object):
     def __init__(self, xys):
         """
