@@ -44,11 +44,49 @@ def contours(matriceNG, s):
         for j in range(col):
             pixel = image_elements.Pixel(i,j)
             voisins = []
-            
+
 
 if __name__ == "__main__":
     MatriceRGB = smp.imread("imagesimple.jpg")
     matrix=Matriceniveauxdegris(MatriceRGB)
-    #plt.imshow(matrix, cmap=plt.cm.gray)
-    #plt.show()
+    plt.imshow(matrix, cmap=plt.cm.gray)
+    plt.show()
+
+#Liste de liste pour les zones (liste de contours avec une couleur et les coordonees de chaque points du contour)
+#Class Pixel
+#Class Contour
+
+
+def Detection_contours(matrice_gray,seuil=0.1):
+    L=[[]]
+    (a,b)=matrice_gray.shape
+    matrice_bord = np.zeros(shape=(a + 2, b + 2)) #Creer matrice pour image niveau de gris avec contour noir.
+    matrice_bord[1:a+1,1:b+1] = matrix
+    matrice_bord[0,:] = 0
+    matrice_bord[a+1,:] = 0
+    matrice_bord[:,0] = 0
+    matrice_bord[:,b+1] = 0
+    for i in range (a+1):
+        for j in range (b+1):
+            pixel=image_elements.Pixel(i,j)
+            pixel_voisins=[image_elements.Pixel(k,l) for k in range (i-1,i+2) for l in range (j-1,j+2)]
+            for voisin in pixel_voisins:
+                if abs(matrice_bord[pixel.x,pixel.y]-matrice_bord[voisin.x,voisin.y])<=seuil:
+                        pass
+                else:
+                    L.append([voisin.x,voisin.y])
+                    pixel=voisin
+    return L
+
+
+
+MatriceRGB = smp.imread("imagesimple.jpg")
+matrix = Matriceniveauxdegris(MatriceRGB)
+print(Detection_contours(matrix))
+
+
+
+
+
+
 
