@@ -27,3 +27,16 @@ def svgskel(dim, svgfile):
     svgfile.write("\twidth=\"{}\" height=\"{}\">\n".format(dim[0], dim[1]))
     svgfile.write("\t<desc>A short description</desc>\n")
     svgfile.write("</svg>")
+
+
+def write_bezier(ctrl_pts, svgfile):
+    """Writes Bezier curves to file, see:
+    http://commons.oreilly.com/wiki/index.php/SVG_Essentials/Paths
+    ctrl_pts -- tuple of vectors which are control points
+    svgfile -- writable file
+    """
+    svgfile.write("\t<path d=\"")  # Beginning of line
+    svgfile.write("M {} {}".format(ctrl_pts[0][0], ctrl_pts[0][1]))
+    svgfile.write("Q {} {}".format(ctrl_pts[1][0], ctrl_pts[1][1]))
+    svgfile.write(", {} {}\"".format(ctrl_pts[2][0], ctrl_pts[2][1]))
+    svgfile.write(" style=\"stroke: black; fill: none;\"/>")
