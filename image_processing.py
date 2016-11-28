@@ -1,7 +1,7 @@
 #Author: Maelys
 
-#Matrice de niveaux de gris, "moyenne" pour chaque triplet RGB. Classement par seuils de niveaux de gris,detection des contours pour
-#chaque zone
+#Matrice de niveaux de gris, "moyenne" pour chaque triplet RGB.
+#  Classement par seuils de niveaux de gris,detection des contours pour chaque zone
 
 #Notations:
 #Matriceniveauxdegris: niveau de gris entre 0 et 1, avec coefficients (0.2126,0.7152,0.0722) pour (R,G,B)/ Wikipedia
