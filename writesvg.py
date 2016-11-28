@@ -24,6 +24,6 @@ def svgskel(dim, svgfile):
     """
     svgfile.write("<?xml version=\"1.0\" standalone=\"yes\"?>\n")
     svgfile.write("<svg xmlns=\"http://www.w3.org/2000/svg\"\n")
-    svgfile.write("\t width=\"{}\" height=\"{}\">\n".format(dim[0], dim[1]))
-    svgfile.write("\t <desc>A short description</desc>\n")
+    svgfile.write("\twidth=\"{}\" height=\"{}\">\n".format(dim[0], dim[1]))
+    svgfile.write("\t<desc>A short description</desc>\n")
     svgfile.write("</svg>")
