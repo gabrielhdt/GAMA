@@ -26,7 +26,6 @@ def svgskel(dim, svgfile):
     svgfile.write("<svg xmlns=\"http://www.w3.org/2000/svg\"\n")
     svgfile.write("\twidth=\"{}\" height=\"{}\">\n".format(dim[0], dim[1]))
     svgfile.write("\t<desc>A short description</desc>\n")
-    svgfile.write("</svg>")
 
 
 def write_bezier(ctrl_pts, svgfile):
@@ -35,8 +34,21 @@ def write_bezier(ctrl_pts, svgfile):
     ctrl_pts -- tuple of vectors which are control points
     svgfile -- writable file
     """
+    bdeg = 'Q' if len(ctrl_pts) == 3 else 'C'  # Quadratic or cubic
     svgfile.write("\t<path d=\"")  # Beginning of line
     svgfile.write("M {} {}".format(ctrl_pts[0][0], ctrl_pts[0][1]))
-    svgfile.write("Q {} {}".format(ctrl_pts[1][0], ctrl_pts[1][1]))
-    svgfile.write(", {} {}\"".format(ctrl_pts[2][0], ctrl_pts[2][1]))
-    svgfile.write(" style=\"stroke: black; fill: none;\"/>")
+    svgfile.write(" {} {} {}".format(bdeg, ctrl_pts[1][0], ctrl_pts[1][1]))
+    svgfile.write(", {} {}".format(ctrl_pts[2][0], ctrl_pts[2][1]))
+    if bdeg is 'C':
+        svgfile.write(", {} {}\"".format(ctrl_pts[3][0], ctrl_pts[3][1]))
+    else:
+        svgfile.write("\"")
+    svgfile.write(" style=\"stroke: black; fill: none;\"/>\n")
+
+
+def close_svg(svgfile):
+    """Closes svg file
+    svgfile -- writable file object
+    """
+    svgfile.write("</svg>")
+    svgfile.close()
