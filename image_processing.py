@@ -31,8 +31,6 @@ def ajout_contour(matriceNG):
             mat_ajoutcontour[i][j] = matriceNG[i][j]
     return mat_ajoutcontour
 
-mat = np.zeros((3,4))
-print(ajout_contour(mat))
 
 if __name__ == "__main__":
     MatriceRGB = smp.imread("imagesimple.jpg")
