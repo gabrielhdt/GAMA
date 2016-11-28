@@ -50,3 +50,22 @@ class BezierCurve:
         self.polytuple = (sp.poly1d(pol_coeffs[0]), sp.poly1d(pol_coeffs[1]))
         self.fct = lambda t: sp.array([[self.polytuple[0](t)],
                                        [self.polytuple[1](t)]])
+
+class Pixel(object):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.read = None
+
+    def adj(self,other):
+        diff_x = abs(self.x-other.x)
+        diff_y = abs(self.y-other.y)
+        return diff_x <= 1 and diff_y <= 1 and diff_x+diff_y != 0
+
+class Contour(object):
+    def __init__(self, xys):
+        """
+        xys -- list of points
+        """
+        self.xys = xys
+        self.color = None
