@@ -13,11 +13,11 @@ import matplotlib.pyplot as plt
 
 def Matriceniveauxdegris(matriceRGB):
     (a,b,c)=matriceRGB.shape #ici matriceRGB est la matrice RGB de l'image choisie
-    MNG=np.zeros(shape=(a,b)) #MNG pour Matriceniveauxdegris
+    Matrice_gray=np.zeros(shape=(a,b)) #Matrice_gray pour Matriceniveauxdegris
     for i in range (a):
         for j in range (b):
-            MNG[i][j]+=((matriceRGB[i][j][0]/255)*0.2126+(matriceRGB[i][j][1]/255)*0.7152+(matriceRGB[i][j][2]/255)*0.0722)
-    return MNG
+            Matrice_gray[i][j]+=((matriceRGB[i][j][0]/255)*0.2126+(matriceRGB[i][j][1]/255)*0.7152+(matriceRGB[i][j][2]/255)*0.0722)
+    return Matrice_gray
 
 if __name__ == "__main__":
     MatriceRGB = smp.imread("imagesimple.jpg")
