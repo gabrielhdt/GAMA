@@ -52,3 +52,11 @@ def close_svg(svgfile):
     """
     svgfile.write("</svg>")
     svgfile.close()
+
+
+def write_contour(curve_set, svgfile):
+    """Write a set of Bezier
+    curve_set -- list of BezierCurve objects
+    """
+    for curve in curve_set:
+        write_bezier([curve.start, curve.ctrl, curve.stop], svgfile)
