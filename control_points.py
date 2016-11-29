@@ -1,7 +1,7 @@
 import image_elements
 import scipy as sp
 
-
+z
 def pente_moy(pixel, contour, precision=1):
     """pixel un objet de la classe Pixel
     contour un objet de la classe Contour
@@ -47,8 +47,9 @@ def control(contour, start):
     pente_s = pente_moy(start, contour)
     end = find_inflexion(contour, start)
     pente_e = pente_moy(end, contour)
-    middle = (end - start) / (pente_s - pente_e)
-    return image_elements.BezierCurve(sp.array((start.x, start.y), (middle.x, middle.y), (end.x, end.y)))
+    middle_x = (end - start) / (pente_s - pente_e)
+    middle_y = start.y + pente_s * middle_x
+    return image_elements.BezierCurve(sp.array((start.x, start.y), (middle_x, middle_y), (end.x, end.y)))
 
 
 
