@@ -59,4 +59,4 @@ def write_contour(curve_set, svgfile):
     curve_set -- list of BezierCurve objects
     """
     for curve in curve_set:
-        write_bezier([curve.start, curve.ctrl, curve.stop], svgfile)
+        write_bezier(curve.ctrl_pts, svgfile)
