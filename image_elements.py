@@ -37,20 +37,22 @@ class BernsteinBasisPoly(sp.poly1d):
 class BezierCurve:
     def __init__(self, ctrl_pts):
         """Defines a Bezier curve from control points
-        ctrl_pts -- tuple of vectors containing at least two
-            points: start point and end point
+        ctrl_pts -- tuple of vectors containing at least three
+            points: start point, control point and end point
         """
-        self.start = ctrl_pts[0]
-        self.stop = ctrl_pts[-1]
-        self.ctrl = ctrl_pts[1:-1]
         self.deg = len(ctrl_pts)
+        self.ctrl_pts = ctrl_pts
 
         def coef_bezier(k):
-            return ctrl_pts[k]*BernsteinBasisPoly(k, self.deg)
+            ctrl_pts_col = []  # Column vectors for polynomial
+            for i, vec in enumerate(ctrl_pts):
+                ctrl_pts_col.append(sp.array([[vec[0]], [vec[1]]]))
+            return ctrl_pts_col[k]*BernsteinBasisPoly(k, self.deg)
         pol_coeffs = sum((coef_bezier(i) for i in range(self.deg)))
         self.polytuple = (sp.poly1d(pol_coeffs[0]), sp.poly1d(pol_coeffs[1]))
         self.fct = lambda t: sp.array([[self.polytuple[0](t)],
                                        [self.polytuple[1](t)]])
+
 
 class Pixel(object):
     def __init__(self, x, y):
@@ -58,6 +60,8 @@ class Pixel(object):
         self.y = y
         self.unread = True
 
+    def __repr__(self):
+        return "<Pixel at {}, {}>".format(self.x, self.y)
 
     def adjs(self):
         x=self.x
@@ -68,7 +72,6 @@ class Pixel(object):
                 if (k!=x and j!=y) and Pixel(k,j).read:
                     pixel_voisins.append(Pixel(k,j))
         return pixel_voisins
-
 
 
 class Contour(object):

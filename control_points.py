@@ -52,24 +52,11 @@ def control(contour, start):
     pente_e = pente_moy(end, contour)
     middle_x = (end.x - start.x) / (pente_s - pente_e)
     middle_y = start.y + pente_s * middle_x
-    return image_elements.BezierCurve(sp.array((start.x, start.y), (middle_x, middle_y), (end.x, end.y)))
+    return image_elements.BezierCurve((sp.array((start.x, start.y)),
+                                       sp.array((middle_x, middle_y)),
+                                       sp.array((end.x, end.y))))
 
 
 def list_curves(Contours):
     for contour in Contours:
         pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
