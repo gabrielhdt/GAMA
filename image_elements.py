@@ -44,6 +44,7 @@ class BezierCurve:
         self.stop = ctrl_pts[-1]
         self.ctrl = ctrl_pts[1:-1]
         self.deg = len(ctrl_pts)
+        self.ctrl_pts = ctrl_pts
 
 #        def coef_bezier(k):
 #            return ctrl_pts[k]*BernsteinBasisPoly(k, self.deg)
