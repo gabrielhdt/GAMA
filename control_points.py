@@ -41,6 +41,7 @@ def find_inflexion(contour,start):
         start_index +=1
     return contour.xys[start_index + 1]
 
+
 def control(contour, start):
     pente_s = pente_moy(start, contour)
     end = find_inflexion(contour, start)
