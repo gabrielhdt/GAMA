@@ -1,6 +1,6 @@
 import image_elements
 
-def pente_moy(pixel, contour, precision=5, sens=1):
+def pente_moy(pixel, contour, sens=1, precision=5):
     """pixel un objet de la classe Pixel
     contour un objet de la classe Contour
     sens orientation de la tangente
@@ -34,6 +34,14 @@ def find_inflexion(contour,start):
             return contour.xys[start_index + 2]
         start_index +=1
     return contour.xys[start_index + 1]
+
+def control(contour, start):
+    pente_s = pente_moy(start, contour)
+    end = find_inflexion(contour, start)
+    pente_e = pente_moy(end, contour)
+    middle = (end - start) / (pente_s - pente_e)
+    return ((start.x, start.y), (middle.x, middle.y), (end.x, end.y))
+
 
 
 
