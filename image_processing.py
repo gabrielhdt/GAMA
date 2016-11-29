@@ -48,16 +48,6 @@ def contour(matriceNG, pixel,seuil):
         contour(matriceNG, voisins[0], seuil)
     return contour
 
-def contour_ordonne(contour):
-    cont_ordonne = image_elements.Contour()
-    cont = [] # sert à stocker les tuples avec les coordonnées des pixels
-    for pixel in contour :
-        x = pixel.x
-        y = pixel.y
-        cont.appen((x,y))
-        cont_tri = cont.sort() # sera la liste des pixels ordonnés d'après leur coordonnées pour creer le contour ordonné
-    for couple in cont_tri:
-        
 
 
 
