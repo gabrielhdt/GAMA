@@ -45,12 +45,12 @@ class BezierCurve:
         self.ctrl = ctrl_pts[1:-1]
         self.deg = len(ctrl_pts)
 
-        def coef_bezier(k):
-            return ctrl_pts[k]*BernsteinBasisPoly(k, self.deg)
-        pol_coeffs = sum((coef_bezier(i) for i in range(self.deg)))
-        self.polytuple = (sp.poly1d(pol_coeffs[0]), sp.poly1d(pol_coeffs[1]))
-        self.fct = lambda t: sp.array([[self.polytuple[0](t)],
-                                       [self.polytuple[1](t)]])
+#        def coef_bezier(k):
+#            return ctrl_pts[k]*BernsteinBasisPoly(k, self.deg)
+#        pol_coeffs = sum((coef_bezier(i) for i in range(self.deg)))
+#        self.polytuple = (sp.poly1d(pol_coeffs[0]), sp.poly1d(pol_coeffs[1]))
+#        self.fct = lambda t: sp.array([[self.polytuple[0](t)],
+#                                       [self.polytuple[1](t)]])
 
 class Pixel(object):
     def __init__(self, x, y):
@@ -58,6 +58,8 @@ class Pixel(object):
         self.y = y
         self.unread = True
 
+    def __repr__(self):
+        return "<Pixel at {}, {}>".format(self.x, self.y)
 
     def adjs(self):
         x=self.x
@@ -68,7 +70,6 @@ class Pixel(object):
                 if (k!=x and j!=y) and Pixel(k,j).read:
                     pixel_voisins.append(Pixel(k,j))
         return pixel_voisins
-
 
 
 class Contour(object):
