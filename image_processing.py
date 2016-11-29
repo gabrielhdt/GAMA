@@ -1,4 +1,4 @@
-#Author: Maelys
+# Author: Maelys
 
 #    Matrice de niveaux de gris, "moyenne" pour chaque triplet RGB.
 #    Classement par seuils de niveaux de gris,detection des contours pour chaque zone
@@ -47,6 +47,18 @@ def contour(matriceNG, pixel,seuil):
     while len(voisins)>0:
         contour(matriceNG, voisins[0], seuil)
     return contour
+
+def contour_ordonne(contour):
+    cont_ordonne = image_elements.Contour()
+    cont = [] # sert à stocker les tuples avec les coordonnées des pixels
+    for pixel in contour :
+        x = pixel.x
+        y = pixel.y
+        cont.appen((x,y))
+        cont_tri = cont.sort() # sera la liste des pixels ordonnés d'après leur coordonnées pour creer le contour ordonné
+    for couple in cont_tri:
+        
+
 
 
 if __name__ == "__main__":
