@@ -18,7 +18,10 @@ def pente_moy(pixel, contour, precision=1):
         else:
             other_x = contour.xys[(index + i) % n].x
             other_y = contour.xys[(index + i) % n].y
-        pente += (pixel.y-other_y)/(pixel.x-other_x)
+        try:
+            pente += (pixel.y-other_y)/(pixel.x-other_x)
+        except:
+            pass
     return pente/(precision)
 
 
@@ -50,6 +53,10 @@ def control(contour, start):
     middle_x = (end - start) / (pente_s - pente_e)
     middle_y = start.y + pente_s * middle_x
     return image_elements.BezierCurve(sp.array((start.x, start.y), (middle_x, middle_y), (end.x, end.y)))
+
+
+def list_curves(Contours):
+    for contour in Contours:
 
 
 
