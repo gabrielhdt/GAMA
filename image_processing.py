@@ -32,9 +32,9 @@ def ajout_contour(matriceNG):
             mat_ajoutcontour[i][j] = matriceNG[i][j]
     return mat_ajoutcontour
 
-def contour(matriceNG, pixel,seuil):
+def contour(matriceNG, pixel,seuil, pretendants):
     contour = image_elements.Contour()
-    voisins = pixel.adjs
+    voisins = pixel.adjs.append(pretendants)
     colorpixel = matriceNG[pixel.x][pixel.y]
     for (index,vois) in enumerate(voisins):
         vois.unread = False
@@ -45,7 +45,8 @@ def contour(matriceNG, pixel,seuil):
             contour.xys.append(vois)
             voisins.pop(index)
     while len(voisins)>0:
-        contour(matriceNG, voisins[0], seuil)
+        pretendant = voisins
+        contour(matriceNG, voisins[0], seuil, pretendant)
     return contour
 
 
