@@ -1,7 +1,7 @@
 import image_elements
 import scipy as sp
 
-z
+
 def pente_moy(pixel, contour, precision=1):
     """pixel un objet de la classe Pixel
     contour un objet de la classe Contour
