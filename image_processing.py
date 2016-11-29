@@ -32,22 +32,25 @@ def ajout_contour(matriceNG):
             mat_ajoutcontour[i][j] = matriceNG[i][j]
     return mat_ajoutcontour
 
-def contours(matriceNG, s):
-    # prend en argument une matrice en niveau de gris à laquelle on a rajouté un contour de 1
-    # et un seuil de couleurs pour classer les pixels
-    #renvoie la liste des contours de l'image
-    voisins = []
-    contours = image_elements.Contour[]
-    (lig,col) = matriceNG.shape
-    contour = []
-    for i in range(lig):
-        for j in range(col):
-            pixel = image_elements.Pixel(i,j)
-            voisins = []
+def contour(matriceNG, pixel,seuil):
+    contour = image_elements.Contour()
+    voisins = pixel.adjs
+    colorpixel = matriceNG[pixel.x][pixel.y]
+    for (index,vois) in enumerate(voisins):
+        vois.unread = False
+        x1 = vois.x
+        y1 = vois.y
+        colorvois = matriceNG[x1][y1]
+        if abs(colorpixel-colorvois) > seuil :
+            contour.xys.append(vois)
+            voisins.pop(index)
+    while len(voisins)>0:
+        contour(matriceNG, voisins[0], seuil)
+    return contour
 
 
 if __name__ == "__main__":
-    MatriceRGB = smp.imread("imagesimple.jpg")
+    MatriceRGB = smp.imread("essai.png")
     matrix=Matriceniveauxdegris(MatriceRGB)
     plt.imshow(matrix, cmap=plt.cm.gray)
     plt.show()
@@ -81,9 +84,10 @@ def Detection_contours(matrice_gray,seuil=0.1):
 
 
 
-MatriceRGB = smp.imread("imagesimple.jpg")
+MatriceRGB = smp.imread("essai.png")
 matrix = Matriceniveauxdegris(MatriceRGB)
-print(Detection_contours(matrix))
+pixel = matrix[150][150]
+print(contour(matrix, pixel, 0.1))
 
 
 
