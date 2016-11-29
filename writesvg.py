@@ -35,7 +35,6 @@ def write_bezier(ctrl_pts, svgfile):
     svgfile -- writable file
     """
     bdeg = 'Q' if len(ctrl_pts) == 3 else 'C'  # Quadratic or cubic
-    svgfile.write("\t<path d=\"")  # Beginning of line
     svgfile.write("M {} {}".format(ctrl_pts[0][0], ctrl_pts[0][1]))
     svgfile.write(" {} {} {}".format(bdeg, ctrl_pts[1][0], ctrl_pts[1][1]))
     svgfile.write(", {} {}".format(ctrl_pts[2][0], ctrl_pts[2][1]))
@@ -43,7 +42,40 @@ def write_bezier(ctrl_pts, svgfile):
         svgfile.write(", {} {}\"".format(ctrl_pts[3][0], ctrl_pts[3][1]))
     else:
         svgfile.write("\"")
-    svgfile.write(" style=\"stroke: black; fill: none;\"/>\n")
+    svgfile.write(" stroke=\"black\" fill=\"none\"/>\n")
+
+
+def open_path(svgfile):
+    """Opens a path"""
+    svgfile.write("\t<path d=\"")
+
+
+def begin_bezier(ctrl_pts, svgfile):
+    """Draws first Bezier of path
+    ctrl_pts -- list of at least 3 points
+    """
+    svgfile.write("M {} {}".format(ctrl_pts[0, 0], ctrl_pts[0, 1]))
+    svgfile.write(" C {} {}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
+    svgfile.write(", {} {}".format(ctrl_pts[2, 0], ctrl_pts[2, 1]))
+
+
+def close_path(colours, svgfile):
+    """Closes path and add parameters
+    colours -- dictionnary containing colours: stroke and fill
+    """
+    svgfile.write("\" stroke=\"{}\" fill=\"{}\"/>\n".format(colours["stroke"],
+                                                            colours["fill"]))
+
+
+def add_polybezier(ctrl_pts, svgfile):
+    """Adds a quadratic Bezier curve in an opened path, i.e. a
+    polybezier
+    ctrl_pts -- list of two points, control point and stop point, beginning
+        being defined by previous point
+    svgfile -- writable file
+    """
+    for i in range(2):
+        svgfile.write(", {} {}".format(ctrl_pts[i, 0], ctrl_pts[i, 1]))
 
 
 def close_svg(svgfile):
@@ -60,3 +92,22 @@ def write_contour(curve_set, svgfile):
     """
     for curve in curve_set:
         write_bezier(curve.ctrl_pts, svgfile)
+
+
+def draw_contour(ctrl_mat, colours, svgfile):
+    """Draws a contour with quadratic bezier curves whose control points are
+    in ctrl_mat (a point is given by ctrl_mat[k,:]). To make a loop, first
+    point must match last point.
+    ctrl_mat -- (n, 2) int array
+    colours -- dictionnary containing stroke colour and fill colour
+    svgfile -- writable file
+    """
+    assert ctrl_mat[3:, ].shape[0] % 2 == 0  # Pair of points except for first
+    n_bezier = ctrl_mat[3:, ].shape[0]//2  # Number of curves
+    print(n_bezier)
+    open_path(svgfile)
+    begin_bezier(ctrl_mat[:4, ], svgfile)
+    for i in range(3, 3 + 2*n_bezier, 2):
+        add_polybezier(ctrl_mat[i:i + 2, ], svgfile)
+    close_path(colours, svgfile)
+    close_svg(svgfile)
