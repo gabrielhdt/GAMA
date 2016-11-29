@@ -50,7 +50,7 @@ def control(contour, start):
     pente_s = pente_moy(start, contour)
     end = find_inflexion(contour, start)
     pente_e = pente_moy(end, contour)
-    middle_x = (end - start) / (pente_s - pente_e)
+    middle_x = (end.x - start.x) / (pente_s - pente_e)
     middle_y = start.y + pente_s * middle_x
     return image_elements.BezierCurve(sp.array((start.x, start.y), (middle_x, middle_y), (end.x, end.y)))
 
