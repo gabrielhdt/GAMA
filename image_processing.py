@@ -57,6 +57,7 @@ if __name__ == "__main__":
 #Class Contour
 
 
+
 def Detection_contours(matrice_gray,seuil=0.1):
     L=[[]]
     (a,b)=matrice_gray.shape
