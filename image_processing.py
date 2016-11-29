@@ -37,7 +37,7 @@ def contours(matriceNG, s):
     # et un seuil de couleurs pour classer les pixels
     #renvoie la liste des contours de l'image
     voisins = []
-    contours = []
+    contours = image_elements.Contour[]
     (lig,col) = matriceNG.shape
     contour = []
     for i in range(lig):
