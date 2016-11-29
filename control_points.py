@@ -1,17 +1,22 @@
 import image_elements
 import scipy as sp
 
-def pente_moy(pixel, contour, sens=1, precision=5):
+def pente_moy(pixel, contour, precision=1):
     """pixel un objet de la classe Pixel
     contour un objet de la classe Contour
     sens orientation de la tangente
      precision nombre de pixel pris en compte
      renvoie la pente de la tangente au contour au point pixel """
     index = contour.xys.index(pixel)
+    n = len(contour.xys)
     pente = 0
-    for i in range(1,precision+1):
-        other_x = contour.xys[index+i*sens].x
-        other_y = contour.xys[index+i*sens].y
+    for i in range(-precision,precision+1):
+        if index + i < 0:
+            other_x = contour.xys[index + i].x
+            other_y = contour.xys[index + i].y
+        else:
+            other_x = contour.xys[(index + i) % n].x
+            other_y = contour.xys[(index + i) % n].y
         pente += (pixel.y-other_y)/(pixel.x-other_x)
     return pente/(precision)
 
@@ -41,7 +46,7 @@ def control(contour, start):
     end = find_inflexion(contour, start)
     pente_e = pente_moy(end, contour)
     middle = (end - start) / (pente_s - pente_e)
-    return sp.array((start.x, start.y), (middle.x, middle.y), (end.x, end.y))
+    return image_elements.BezierCurve(sp.array((start.x, start.y), (middle.x, middle.y), (end.x, end.y)))
 
 
 
