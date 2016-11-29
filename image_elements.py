@@ -18,6 +18,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import scipy.special
 import scipy as sp
+import control_points
 
 
 class BernsteinBasisPoly(sp.poly1d):
@@ -55,22 +56,38 @@ class Pixel(object):
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.read = None
+        self.unread = True
 
 
     def adjs(self):
         x=self.x
         y=self.y
+        pixel_voisins=[]
         for k in range(x-1,x+2):
             for j in range (y-1,y+2):
-                if k!=x and j!=y:
-                    pixel_voisins=[Pixel(k,j)]
+                if (k!=x and j!=y) and Pixel(k,j).read:
+                    pixel_voisins.append(Pixel(k,j))
         return pixel_voisins
+
+
 
 class Contour(object):
     def __init__(self, xys):
         """
-        xys -- list of points
+        xys -- list of pixels
         """
         self.xys = xys
         self.color = None
+
+    def inflexion(self,start):
+        start_index = self.xys.index(start)
+        if start_index > len(self.xys):
+            return self.xys[start_index + 1]
+        if start_index + 1 > len(self.xys):
+            return self.xys[start_index + 2]
+        sens = self(start, self.xys[start_index + 1], self.xys[start_index + 2])
+        while control_points.clockwise(start, self.xys[start_index + 1], self.xys[start_index + 2]) == sens:
+            if start_index + 2 > len(self.xys):
+                return self.xys[start_index + 2]
+            start_index += 1
+        return (self.xys[start_index + 1].x, self.xys[start_index + 1].y)
