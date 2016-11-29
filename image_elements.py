@@ -57,10 +57,14 @@ class Pixel(object):
         self.y = y
         self.read = None
 
+
     def adjs(self):
         x=self.x
         y=self.y
-        pixel_voisins = [Pixel(k, l) for k in range(x - 1, x + 2) for l in range(y - 1, y+ 2)]-self
+        for k in range(x-1,x+2):
+            for j in range (y-1,y+2):
+                if k!=x and j!=y:
+                    pixel_voisins=[Pixel(k,j)]
         return pixel_voisins
 
 class Contour(object):
