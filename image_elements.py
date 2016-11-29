@@ -52,18 +52,22 @@ class BezierCurve:
         self.fct = lambda t: sp.array([[self.polytuple[0](t)],
                                        [self.polytuple[1](t)]])
 
-
 class Pixel(object):
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.read = None
+        self.unread = True
 
-    def adj(self, other):
-        diff_x = abs(self.x-other.x)
-        diff_y = abs(self.y-other.y)
-        return diff_x <= 1 and diff_y <= 1 and diff_x+diff_y != 0
 
+    def adjs(self):
+        x=self.x
+        y=self.y
+        pixel_voisins=[]
+        for k in range(x-1,x+2):
+            for j in range (y-1,y+2):
+                if (k!=x and j!=y) and Pixel(k,j).read:
+                    pixel_voisins.append(Pixel(k,j))
+        return pixel_voisins
 
 
 
