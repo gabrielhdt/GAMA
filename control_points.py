@@ -33,6 +33,7 @@ def clockwise(p1,p2,p3):
 
 
 def find_inflexion(contour,start):
+    """Renvoie le premier point d inflexion de contour en partant de start"""
     start_index = contour.xys.index(start)
     if start_index  > len(contour.xys):
         return contour.xys[start_index + 1]
@@ -47,6 +48,8 @@ def find_inflexion(contour,start):
 
 
 def control(contour, start):
+    """Renvoie le triple de points de controle pour tracer une courbe de Bezier quadratique
+    correspondant a la portion du contour qui commence au pixel start"""
     pente_s = pente_moy(start, contour)
     end = find_inflexion(contour, start)
     pente_e = pente_moy(end, contour)
@@ -58,5 +61,15 @@ def control(contour, start):
 
 
 def list_curves(Contours):
+    """Renvoie la liste de l ensemble des courbes a tracer,
+    a partir de la liste de l ensemble des contours"""
+    curves=[]
     for contour in Contours:
-        pass
+        start = contour.xys[0]
+        c_end = contour.xys[-1]
+        while start != c_end:
+            curve = control(contour,start)
+            start = curve.ctrl_pts[2]
+        curves.append(curve)
+    return curves
+
