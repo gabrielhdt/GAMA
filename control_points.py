@@ -2,7 +2,7 @@ import image_elements
 import scipy as sp
 
 
-def pente_moy(pixel, contour, precision=1):
+def pente_moy(pixel, contour, precision=5):
     """pixel un objet de la classe Pixel
     contour un objet de la classe Contour
     sens orientation de la tangente
