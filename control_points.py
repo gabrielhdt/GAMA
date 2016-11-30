@@ -36,17 +36,21 @@ def find_inflexion(contour, start):
     """Renvoie le pixel correspondant au point de controle d arrivee de la portion de contour partant du pixel start:
      soit le premier point d'inflexion rencontre, soit le dernier point du contour"""
     start_index = contour.xys.index(start)
-    n = len(contour.xys) - 1    #dernier indice disponible
-    if start_index + 1 > n:     #si dépassement on renvoie le dernier pixel
+    n = len(contour.xys) - 1
+    # dernier indice disponible
+    if start_index + 1 > n:
+        # si dépassement on renvoie le dernier pixel
         return contour.xys[-1]
     if start_index + 2 > n:
         return contour.xys[-1]
     sens = clockwise(start, contour.xys[start_index+1], contour.xys[start_index+2])
     while clockwise(start, contour.xys[start_index+1], contour.xys[start_index+2]) == sens:
         if start_index + 2 > n:
-            return contour.xys[-1]      #le dernier point de contour est atteint sans inflexion
+            # le dernier point de contour est atteint sans inflexion
+            return contour.xys[-1]
         start_index += 1
-    return contour.xys[start_index + 2] #on sort de la boucle while, donc ce pixel correspond au premier point d inflexion rencontre
+    return contour.xys[start_index + 2]
+    # on sort de la boucle while, donc ce pixel correspond au premier point d inflexion rencontre
 
 
 def control(contour, start):
@@ -62,11 +66,11 @@ def control(contour, start):
                                        sp.array((end.x, end.y))))
 
 
-def list_curves(Contours):
+def list_curves(contours):
     """Renvoie la liste de l ensemble des courbes a tracer,
     a partir de la liste de l ensemble des contours"""
     curves = []
-    for contour in Contours:
+    for contour in contours:
         start = contour.xys[0]
         c_end = contour.xys[-1]
         while start != c_end:
