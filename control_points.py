@@ -51,16 +51,16 @@ def find_inflexion(contour, start):
 
 
 def control(contour, start):
-    """Renvoie le triple de points de controle pour tracer une courbe de Bezier quadratique
+    """Renvoie le triple de points de controle pour tracer une courbe de
+    Bezier quadratique sous forme d'un array scipy (concorde avec
+    writesvg.add_polybezier)
     correspondant a la portion du contour qui commence au pixel start"""
     pente_s = pente_moy(start, contour)
     end = find_inflexion(contour, start)
     pente_e = pente_moy(end, contour)
     middle_x = (end.x - start.x) / (pente_s - pente_e)
     middle_y = start.y + pente_s * middle_x
-    return image_elements.BezierCurve((sp.array((start.x, start.y)),
-                                       sp.array((middle_x, middle_y)),
-                                       sp.array((end.x, end.y))))
+    return sp.array([[start.x, start.y], [middle_x, middle_y], [end.x, end.y]])
 
 
 def list_curves(contours):
