@@ -64,12 +64,12 @@ class Pixel(object):
         return "<Pixel at {}, {}>".format(self.x, self.y)
 
     def adjs(self):
-        x=self.x
-        y=self.y
+        x = self.x
+        y = self.y
         pixel_voisins=[]
         for k in range(x-1,x+2):
             for j in range (y-1,y+2):
-                if (k!=x and j!=y) and Pixel(k,j).read:
+                if (k != x and j != y) and Pixel(k, j).unread:
                     pixel_voisins.append(Pixel(k,j))
         return pixel_voisins
 
