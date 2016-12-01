@@ -1,15 +1,17 @@
-# Author: Maelys
-
-#    Matrice de niveaux de gris, "moyenne" pour chaque triplet RGB.
-#    Classement par seuils de niveaux de gris,detection des contours pour chaque zone
-
-#    Notations:
-#    Matriceniveauxdegris: niveau de gris entre 0 et 1, avec coefficients (0.2126,0.7152,0.0722) pour (R,G,B)/ Wikipedia
-
+#!/usr/bin/env python
+"""
+Matrice de niveaux de gris, "moyenne" pour chaque triplet RGB.
+Classement par seuils de niveaux de gris,detection des contours pour
+chaque zone.
+Notations:
+Matriceniveauxdegris: niveau de gris entre 0 et 1, avec coefficients
+(0.2126,0.7152,0.0722) pour (R,G,B)/ Wikipedia
+"""
 import scipy.misc as smp
 import numpy as np
 import matplotlib.pyplot as plt
 import image_elements
+__author__ = "M.B., A.B."
 
 
 def Matriceniveauxdegris(matriceRGB):
