@@ -31,15 +31,16 @@ def ajout_contour(matriceNG):
             mat_ajoutcontour[i][j] = matriceNG[i][j]
     return mat_ajoutcontour
 
+
 def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter):
-    voisins = pixel.adjs.append(pretendants) #creer
+    voisins = pixel.adjs() + pretendants
     colorpixel = matriceNG[pixel.x][pixel.y]
     for (index, vois) in enumerate(voisins):
         vois.unread = False
         x1 = vois.x
         y1 = vois.y
         colorvois = matriceNG[x1][y1]
-        if abs(colorpixel-colorvois) > seuil :
+        if abs(colorpixel-colorvois) > seuil:
             contour_inter.xys.append(vois)
             voisins.pop(index)
     while len(voisins)>0:
@@ -75,9 +76,11 @@ def visualisation_contour(matriceNG,liste_contours):
 
 if __name__ == "__main__":
     MatriceRGB = smp.imread("essai.png")
-    matrix=Matriceniveauxdegris(MatriceRGB)
+    matrix = Matriceniveauxdegris(MatriceRGB)
     plt.imshow(matrix, cmap=plt.cm.gray)
     plt.show()
+    pixel = matrix[150][150]
+    contour_inter = image_elements.Contour([])
 
 #Liste de liste pour les zones (liste de contours avec une couleur et les coordonees de chaque points du contour)
 #Class Pixel
@@ -109,18 +112,3 @@ def Detection_contours(matrice_gray,seuil=0.1):
                     L.append([voisin.x,voisin.y])
                     pixel=voisin
     return L
-
-
-
-#MatriceRGB = smp.imread("essai.png")
-matrix = Matriceniveauxdegris(MatriceRGB)
-pixel = matrix[150][150]
-contour_inter = image_elements.Contour([])
-
-
-
-
-
-
-
-
