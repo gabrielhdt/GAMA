@@ -20,35 +20,56 @@ def Matriceniveauxdegris(matriceRGB):
             Matrice_gray[i][j]+=((matriceRGB[i][j][0]/255)*0.2126+(matriceRGB[i][j][1]/255)*0.7152+(matriceRGB[i][j][2]/255)*0.0722)
     return Matrice_gray
 
-
 def ajout_contour(matriceNG):
     # retourne la matrice de départ avec un contour formé de 2
-    (lig,col) = matriceNG.shape
+    (lig, col) = matriceNG.shape
     # matrice NG designe la matrice en niveau de gris de taille (lignes, colonnes)
-    mat_ajoutcontour = np.ones((lig+1,col+1), dtype=int)
+    mat_ajoutcontour = np.ones((lig+1, col+1), dtype=int)
     #initialise une matrice de taille (lig+1, col+1) avec des un
-    for i in range(1,lig):
+    for i in range(1, lig):
         for j in range(1, col):
             mat_ajoutcontour[i][j] = matriceNG[i][j]
     return mat_ajoutcontour
 
-def contour(matriceNG, pixel,seuil, pretendants):
-    contour = image_elements.Contour()
-    voisins = pixel.adjs.append(pretendants)
+def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter):
+    voisins = pixel.adjs.append(pretendants) #creer
     colorpixel = matriceNG[pixel.x][pixel.y]
-    for (index,vois) in enumerate(voisins):
+    for (index, vois) in enumerate(voisins):
         vois.unread = False
         x1 = vois.x
         y1 = vois.y
         colorvois = matriceNG[x1][y1]
         if abs(colorpixel-colorvois) > seuil :
-            contour.xys.append(vois)
+            contour_inter.xys.append(vois)
             voisins.pop(index)
     while len(voisins)>0:
         pretendant = voisins
-        contour(matriceNG, voisins[0], seuil, pretendant)
-    return contour
+        detection_contour(matriceNG, voisins[0], seuil, pretendant, contour_inter)
+    return contour_inter
 
+def contour_image(matriceNG, seuil):
+    # prend en argument une matrice en niveau de gris à laquelle on a rajouté un contour de 1
+    # et un seuil de couleurs pour classer les pixels
+    # renvoie la liste des contours de l'image
+    (line, column) = matriceNG.shape
+    liste_contours = []
+    contour_inter = image_elements.Contour()
+    pretendants = []
+    for i in range(line):
+        for j in range(column):
+            liste_contours.append(detection_contour(matriceNG, matriceNG[i][j], seuil, pretendants, contour_inter))
+    return liste_contours
+
+def visualisation_contour(matriceNG,liste_contours):
+    (lin, col) = matriceNG.shape
+    visu = np.zeros(lin, col)
+    for contour in liste_contours :
+        pixels = contour.xys
+        for pixel in pixels :
+            i = pixel.x
+            j = pixel.y
+            visu[i][j] = 1
+    return visu
 
 
 
@@ -61,6 +82,10 @@ if __name__ == "__main__":
 #Liste de liste pour les zones (liste de contours avec une couleur et les coordonees de chaque points du contour)
 #Class Pixel
 #Class Contour
+
+
+
+
 
 
 
@@ -91,7 +116,7 @@ MatriceRGB = smp.imread("essai.png")
 matrix = Matriceniveauxdegris(MatriceRGB)
 pixel = matrix[150][150]
 print(contour(matrix, pixel, 0.1))
-
+contour_inter = image_elements.Contour()
 
 
 
