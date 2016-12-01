@@ -53,7 +53,7 @@ def contour_image(matriceNG, seuil):
     # renvoie la liste des contours de l'image
     (line, column) = matriceNG.shape
     liste_contours = []
-    contour_inter = image_elements.Contour()
+    contour_inter = image_elements.Contour([])
     pretendants = []
     for i in range(line):
         for j in range(column):
@@ -115,10 +115,9 @@ def Detection_contours(matrice_gray,seuil=0.1):
 #MatriceRGB = smp.imread("essai.png")
 matrix = Matriceniveauxdegris(MatriceRGB)
 pixel = matrix[150][150]
-contour_inter = image_elements.Contour()
+contour_inter = image_elements.Contour([])
 
-print(contour(matrix, pixel, 0.1))
-contour_inter = image_elements.Contour()
+
 
 
 
