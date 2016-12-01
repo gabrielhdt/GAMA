@@ -75,7 +75,7 @@ def visualisation_contour(matriceNG,liste_contours):
 
 if __name__ == "__main__":
     MatriceRGB = smp.imread("essai.png")
-    matrix=Matriceniveauxdegris(MatriceRGB)
+    matrix = Matriceniveauxdegris(MatriceRGB)
     plt.imshow(matrix, cmap=plt.cm.gray)
     plt.show()
 
