@@ -112,9 +112,11 @@ def Detection_contours(matrice_gray,seuil=0.1):
 
 
 
-MatriceRGB = smp.imread("essai.png")
+#MatriceRGB = smp.imread("essai.png")
 matrix = Matriceniveauxdegris(MatriceRGB)
 pixel = matrix[150][150]
+contour_inter = image_elements.Contour()
+
 print(contour(matrix, pixel, 0.1))
 contour_inter = image_elements.Contour()
 
