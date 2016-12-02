@@ -59,6 +59,7 @@ class Pixel(object):
         self.x = x
         self.y = y
         self.unread = True
+        self.exist = False
 
     def __repr__(self):
         return "<Pixel at {}, {}>".format(self.x, self.y)
