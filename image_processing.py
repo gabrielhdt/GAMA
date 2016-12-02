@@ -11,7 +11,6 @@ import scipy.misc as smp
 import numpy as np
 import matplotlib.pyplot as plt
 import image_elements
-__author__ = "M.B., A.B."
 
 
 def Matriceniveauxdegris(matriceRGB):
@@ -74,6 +73,21 @@ def visualisation_contour(matriceNG,liste_contours):
             visu[i][j] = 1
     return visu
 
+
+def separate_contour(contour_raw):
+    """Sépare les contours présents dans contour_raw, qui
+    est susceptible d'en contenir 2. Au nouveau contour on ajoute les pixels
+    adjacents à celui étudié, qui sont dans le contour, et pas déjà dans le
+    lacet.
+    contour_raw -- contour pouvant en contenir en réalité 2 Contour() object
+    """
+    loop = image_elements.Contour([])
+    refpix = contour_raw.xys[0]
+    inspix = set(contour_raw.xys) & set(refpix.adjs())
+    while inspix != refpix:
+        loop.xys.append(inspix)
+        inspix = set(inspix.adjs()) & set(contour_raw.xys) - set(loop.xys)
+    return loop
 
 
 if __name__ == "__main__":
