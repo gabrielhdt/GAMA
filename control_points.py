@@ -19,7 +19,7 @@ def pente_moy(pixel, contour, precision=5):
             other_x = contour.xys[(index + i) % n].x
             other_y = contour.xys[(index + i) % n].y
         if pixel.x == other_x:
-            pente += 5
+            pente += 5  #donner du poids aux pente infini sans écraser l'influence des autres points
         else:
             pente += (pixel.y-other_y)/(pixel.x-other_x)
     return pente/precision
@@ -70,9 +70,10 @@ def list_curves(contours):
     for contour in contours:
         start = contour.xys[0]
         c_end = contour.xys[-1]
+        if len(contour) < 3:
+            curve = [0, 0, 0]
         while start != c_end:
             curve = control(contour, start)
-            start = curve.ctrl_pts[2]
+            start = curve[2]
         curves.append(curve)
     return curves
-
