@@ -72,3 +72,17 @@ class SvgFile:
             self.add_polybezier(ctrl_mat[i:i + 2, ])
         self.close_path(colours)
         self.close_svg()
+
+    def draw_pix(self, pix):
+        """Draws a pixel on svg, to see contour results
+        pix -- image_elemnts.Pixel() element
+        """
+        self.write("\t<circle")
+        self.write(" cx=\"{}\" cy=\"{}\" r=\"1\"/>\n".format(pix.x, pix.y))
+
+    def draw_contour_pix(self, contour):
+        """Draws pixels from contour
+        contour -- Contour object
+        """
+        for pix in contour.xys:
+            self.draw_pix(pix)
