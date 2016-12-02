@@ -29,8 +29,8 @@ def ajout_bord(matriceNG):
     for i in range(1, lig):
         for j in range(1, col):
             mat_ajoutbord[i][j] = matriceNG[i][j]
-             = mat_ajoutbord[i][j]
-            
+            pixel = image_elements.Pixel(i,j)
+            pixel.exist = True
     return mat_ajoutbord
 
 def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter):
@@ -45,6 +45,9 @@ def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter):
             if abs(colorpixel-colorvois) > seuil:
                 contour_inter.xys.append(vois)
                 voisins.pop(index)
+        else :
+            contour_inter.xys.append(vois)
+            voisins.pop(index)
     while len(voisins)>0:
         pretendant = voisins
         detection_contour(matriceNG, voisins[0], seuil, pretendant, contour_inter)
