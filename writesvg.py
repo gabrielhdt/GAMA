@@ -32,7 +32,7 @@ class SvgFile:
         ctrl_pts -- list of 3 points
         """
         self.write("M {} {}".format(ctrl_pts[0, 0], ctrl_pts[0, 1]))
-        self.write(" C {} {}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
+        self.write(" Q {} {}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
         self.write(", {} {}".format(ctrl_pts[2, 0], ctrl_pts[2, 1]))
 
     def close_path(self, colours):
