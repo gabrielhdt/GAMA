@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import image_elements
 import scipy as sp
 
