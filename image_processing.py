@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Matrice de niveaux de gris, "moyenne" pour chaque triplet RGB.
 Classement par seuils de niveaux de gris,detection des contours pour
@@ -79,7 +80,8 @@ def separate_contour(contour_raw):
     est susceptible d'en contenir 2. Au nouveau contour on ajoute les pixels
     adjacents à celui étudié, qui sont dans le contour, et pas déjà dans le
     lacet.
-    contour_raw -- contour pouvant en contenir en réalité 2 Contour() object
+    contour_raw -- contour pouvant en contenir en réalité 2;
+        image_elements.Contour() object
     """
     loop = image_elements.Contour([])
     refpix = contour_raw.xys[0]
