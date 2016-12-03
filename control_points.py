@@ -71,8 +71,7 @@ def list_curves(contours):
     for contour in contours:
         start = contour.xys[0]
         c_end = contour.xys[-1]
-        if len(contour.xys) < 3:
-            curve = [0, 0, 0]
+        curve = [0, 0, 0]
         while start != c_end:
             curve = control(contour, start)
             start = curve[2]
