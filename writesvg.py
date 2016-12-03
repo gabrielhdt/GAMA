@@ -65,13 +65,11 @@ class SvgFile:
         """
         assert ctrl_mat[3:, ].shape[0] % 2 == 0  # Pair of points except first
         n_bezier = ctrl_mat[3:, ].shape[0]//2  # Number of curves
-        print(n_bezier)
         self.open_path()
         self.begin_bezier(ctrl_mat[:4, ])
         for i in range(3, 3 + 2*n_bezier, 2):
             self.add_polybezier(ctrl_mat[i:i + 2, ])
         self.close_path(colours)
-        self.close_svg()
 
     def draw_pix(self, pix):
         """Draws a pixel on svg, to see contour results
