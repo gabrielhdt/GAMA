@@ -69,9 +69,8 @@ def list_curves(contours):
     for contour in contours:
         start = contour.xys[0]
         c_end = contour.xys[-1]
-        curve = sp.array([(0, 0), (0, 0), (0, 0)])
         while start != c_end:
             curve = control(contour, start)
             start = image_elements.Pixel(curve[2][0], curve[2][1])
-        curves.append(curve)
+            curves.append(curve)
     return curves
