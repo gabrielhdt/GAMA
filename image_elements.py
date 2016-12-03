@@ -46,8 +46,11 @@ class Pixel(object):
     def __repr__(self):
         return "<Pixel at {}, {}>".format(self.x, self.y)
 
-    def __eq__(self, pix):
-        return (self.x, self.y) == (pix.x, pix.y)
+    def __eq__(self, other):
+        return (self.x, self.y) == (other.x, other.y)
+
+    def __ne__(self, other):
+        return (self.x, self.y) != (other.x, other.y)
 
     def adjs(self):
         x = self.x
