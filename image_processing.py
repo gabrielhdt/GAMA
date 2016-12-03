@@ -33,12 +33,12 @@ def ajout_contour(matriceNG):
             mat_ajoutcontour[i][j] = matriceNG[i][j]
     return mat_ajoutcontour
 
-def AdrienContour(matriceNG):
-    # retourne la matrice de départ avec un contour d Adrien
+def AdrienContour(matriceNG):   #NotEgocentric
+    # retourne la matrice de départ avec un tres fameux contour d Adrien
     (lig, col) = matriceNG.shape
     # matrice NG designe la matrice en niveau de gris de taille (lignes, colonnes)
-    mat_ajoutcontour = 2 * np.ones((lig+2, col+2), dtype=int)
-    #initialise une matrice de taille (lig+1, col+1) avec des un
+    mat_ajoutcontour = 7 * np.ones((lig+2, col+2), dtype=int)
+    #initialise une matrice de taille (lig+2, col+2) avec des septs (pourquoi pas?)
     mat_ajoutcontour[1: lig+1, 1: col+1] = matriceNG
     return mat_ajoutcontour
 
