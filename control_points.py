@@ -37,9 +37,7 @@ def find_inflexion(contour, start):
      soit le premier point d'inflexion rencontre, soit le dernier point du contour"""
     start_index = contour.xys.index(start)
     n = len(contour.xys) - 1    # dernier indice disponible
-    if start_index + 1 > n:    # si dépassement on renvoie le dernier pixel
-        return contour.xys[-1]
-    if start_index + 2 > n:
+    if start_index + 2 > n:     # si dépassement on renvoie le dernier pixel
         return contour.xys[-1]
     sens = clockwise(start, contour.xys[start_index+1], contour.xys[start_index+2])
     while clockwise(start, contour.xys[start_index+1], contour.xys[start_index+2]) == sens:
