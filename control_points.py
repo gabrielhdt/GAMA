@@ -43,7 +43,7 @@ def find_inflexion(contour, start):
         return contour.xys[-1]
     sens = clockwise(start, contour.xys[start_index+1], contour.xys[start_index+2])
     while clockwise(start, contour.xys[start_index+1], contour.xys[start_index+2]) == sens:
-        if start_index + 2 > n:   # le dernier point de contour est atteint sans inflexion
+        if start_index + 3 > n:   # le dernier point de contour est atteint sans inflexion
             return contour.xys[-1]
         start_index += 1
     return contour.xys[start_index + 2]
