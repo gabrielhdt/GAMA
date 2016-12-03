@@ -67,16 +67,4 @@ class Contour(object):
         """
         self.xys = xys
         self.color = None
-
-    def inflexion(self,start):
-        start_index = self.xys.index(start)
-        if start_index > len(self.xys):
-            return self.xys[start_index + 1]
-        if start_index + 1 > len(self.xys):
-            return self.xys[start_index + 2]
-        sens = self(start, self.xys[start_index + 1], self.xys[start_index + 2])
-        while control_points.clockwise(start, self.xys[start_index + 1], self.xys[start_index + 2]) == sens:
-            if start_index + 2 > len(self.xys):
-                return self.xys[start_index + 2]
-            start_index += 1
-        return (self.xys[start_index + 1].x, self.xys[start_index + 1].y)
+        
