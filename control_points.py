@@ -65,12 +65,13 @@ def control(contour, start):
 
 def list_curves(contours):
     """Renvoie la liste de l ensemble des courbes a tracer,
-    a partir de la liste de l ensemble des contours"""
+    a partir de la liste de l ensemble des contours
+    contours -- liste de image_elements.Contour()"""
     curves = []
     for contour in contours:
         start = contour.xys[0]
         c_end = contour.xys[-1]
-        if len(contour) < 3:
+        if len(contour.xys) < 3:
             curve = [0, 0, 0]
         while start != c_end:
             curve = control(contour, start)
