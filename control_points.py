@@ -75,3 +75,16 @@ def list_curves(contours):
             start = image_elements.Pixel(curve[2][0], curve[2][1])
             curves.append(curve)
     return curves
+
+
+def curves2curvemat(curves):
+    """Converts a list of curves to a single array of control points. In
+    addition it removes redondant points, which are the first point of each
+    element of curves, except for curves[0].
+    curves -- list of curves, i.e. list of arrays
+    """
+    curvemat = sp.zeros((3 + 2*(len(curves) - 1), 2))
+    curvemat[:3, ] = curves[0].copy()
+    for i, curve in enumerate(curves[1:]):
+        curvemat[2*i + 3:2*i + 5, ] = curve[1:, ].copy()  # Not 1st point
+    return curvemat
