@@ -58,13 +58,13 @@ def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter):
                 contour_inter.xys.append(vois)
                 voisins.pop(index)
         else :
-        vois.unread = False
-        x1 = vois.x
-        y1 = vois.y
-        colorvois = matriceNG[x1][y1]
-        if abs(colorpixel-colorvois) > seuil:
-            contour_inter.xys.append(vois)
-            voisins.pop(index)
+            vois.unread = False
+            x1 = vois.x
+            y1 = vois.y
+            colorvois = matriceNG[x1][y1]
+            if abs(colorpixel-colorvois) > seuil:
+                contour_inter.xys.append(vois)
+                voisins.pop(index)
     while len(voisins)>0:
         pretendant = voisins
         detection_contour(matriceNG, voisins[0], seuil, pretendant, contour_inter)
