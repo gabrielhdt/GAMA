@@ -80,7 +80,7 @@ def contour_image(matriceNG, seuil):
     pretendants = []
     for i in range(line):
         for j in range(column):
-            liste_contours.append(detection_contour(matriceNG, image_elementsPixel(i,j), seuil, pretendants, contour_inter))
+            liste_contours.append(detection_contour(matriceNG, image_elements.Pixel(i,j), seuil, pretendants, contour_inter))
     return liste_contours
 
 def visualisation_contour(matriceNG,liste_contours):
@@ -103,8 +103,10 @@ def visualisation_contour(matriceNG,liste_contours):
 #contour_inter = image_element.Contour([])
 #print(detection_contour(Mo, pixel, seuil, pretendants, contour_inter))
 #print(M)
-M = np.zeros((4,7))
-print(ajout_bord(M))
+#M = np.zeros((4,7))
+#print(ajout_bord(M))
+
+
 def separate_contour(contour_raw):
     """Sépare les contours présents dans contour_raw, qui
     est susceptible d'en contenir 2. Au nouveau contour on ajoute les pixels
