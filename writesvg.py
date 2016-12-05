@@ -1,27 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-#    writesvg.py: creates SVG file from instructions
-#    Copyright (C) 2016  Gabriel Hondet
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-
-#    You should have received a copy of the GNU General Public License
+"""Defines a class for creating a svgfile"""
 
 
 class SvgFile:
     def __init__(self, name, dim):
         """Links a file to object
         name -- name of the file (string)
-        mode -- opening mode (usually 'w')
+        dim -- tuble of int, dimension of svg image
         """
         self.file = open(name, 'w')
         self.svgskel(dim)
@@ -33,7 +17,6 @@ class SvgFile:
     def svgskel(self, dim):
         """ Writes the skeleton of the svg file 'self'
         dim -- dimensions of image, tuple (width, height)
-        self -- file object, must be writable
         """
         self.write("<?xml version=\"1.0\" standalone=\"yes\"?>\n")
         self.write("<svg xmlns=\"http://www.w3.org/2000/svg\"\n")
@@ -46,10 +29,10 @@ class SvgFile:
 
     def begin_bezier(self, ctrl_pts):
         """Draws first Bezier of path
-        ctrl_pts -- list of at least 3 points
+        ctrl_pts -- list of 3 points
         """
         self.write("M {} {}".format(ctrl_pts[0, 0], ctrl_pts[0, 1]))
-        self.write(" C {} {}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
+        self.write(" Q {} {}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
         self.write(", {} {}".format(ctrl_pts[2, 0], ctrl_pts[2, 1]))
 
     def close_path(self, colours):
@@ -64,15 +47,12 @@ class SvgFile:
         polybezier
         ctrl_pts -- list of two points, control point and stop point, beginning
             being defined by previous point
-        self -- writable file
         """
         for i in range(2):
             self.write(", {} {}".format(ctrl_pts[i, 0], ctrl_pts[i, 1]))
 
     def close_svg(self):
-        """Closes svg file
-        self -- writable file object
-        """
+        """Closes svg file"""
         self.write("</svg>")
         self.file.close()
 
@@ -82,14 +62,25 @@ class SvgFile:
         point must match last point.
         ctrl_mat -- (n, 2) int array
         colours -- dictionnary containing stroke colour and fill colour
-        self -- writable file
         """
         assert ctrl_mat[3:, ].shape[0] % 2 == 0  # Pair of points except first
         n_bezier = ctrl_mat[3:, ].shape[0]//2  # Number of curves
-        print(n_bezier)
         self.open_path()
         self.begin_bezier(ctrl_mat[:4, ])
         for i in range(3, 3 + 2*n_bezier, 2):
             self.add_polybezier(ctrl_mat[i:i + 2, ])
         self.close_path(colours)
-        self.close_svg()
+
+    def draw_pix(self, pix):
+        """Draws a pixel on svg, to see contour results
+        pix -- image_elemnts.Pixel() element
+        """
+        self.write("\t<circle")
+        self.write(" cx=\"{}\" cy=\"{}\" r=\"1\"/>\n".format(pix.x, pix.y))
+
+    def draw_contour_pix(self, contour):
+        """Draws pixels from contour
+        contour -- Contour object
+        """
+        for pix in contour.xys:
+            self.draw_pix(pix)

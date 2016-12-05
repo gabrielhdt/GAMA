@@ -1,11 +1,13 @@
-# Author: Maelys
-
-#    Matrice de niveaux de gris, "moyenne" pour chaque triplet RGB.
-#    Classement par seuils de niveaux de gris,detection des contours pour chaque zone
-
-#    Notations:
-#    Matriceniveauxdegris: niveau de gris entre 0 et 1, avec coefficients (0.2126,0.7152,0.0722) pour (R,G,B)/ Wikipedia
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Matrice de niveaux de gris, "moyenne" pour chaque triplet RGB.
+Classement par seuils de niveaux de gris,detection des contours pour
+chaque zone.
+Notations:
+Matriceniveauxdegris: niveau de gris entre 0 et 1, avec coefficients
+(0.2126,0.7152,0.0722) pour (R,G,B)/ Wikipedia
+"""
 import scipy.misc as smp
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,7 +34,18 @@ def ajout_bord(matriceNG):
             mat_ajoutbord[i][j] = matriceNG[i][j]
     return mat_ajoutbord
 
+def AdrienContour(matriceNG):   #NotEgocentric
+    # retourne la matrice de départ avec un tres fameux contour d Adrien
+    (lig, col) = matriceNG.shape
+    # matrice NG designe la matrice en niveau de gris de taille (lignes, colonnes)
+    mat_ajoutcontour = 7 * np.ones((lig+2, col+2), dtype=int)
+    #initialise une matrice de taille (lig+2, col+2) avec des septs (pourquoi pas?)
+    mat_ajoutcontour[1: lig+1, 1: col+1] = matriceNG
+    return mat_ajoutcontour
+
+
 def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter):
+    voisins = pixel.adjs() + pretendants
     colorpixel = matriceNG[pixel.x][pixel.y]
     voisins = pixel.adjs.append(pretendants) #creer
     for (index, vois) in enumerate(voisins):
@@ -45,6 +58,11 @@ def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter):
                 contour_inter.xys.append(vois)
                 voisins.pop(index)
         else :
+        vois.unread = False
+        x1 = vois.x
+        y1 = vois.y
+        colorvois = matriceNG[x1][y1]
+        if abs(colorpixel-colorvois) > seuil:
             contour_inter.xys.append(vois)
             voisins.pop(index)
     while len(voisins)>0:
@@ -87,9 +105,32 @@ def visualisation_contour(matriceNG,liste_contours):
 #print(M)
 M = np.zeros((4,7))
 print(ajout_bord(M))
+def separate_contour(contour_raw):
+    """Sépare les contours présents dans contour_raw, qui
+    est susceptible d'en contenir 2. Au nouveau contour on ajoute les pixels
+    adjacents à celui étudié, qui sont dans le contour, et pas déjà dans le
+    lacet.
+    contour_raw -- contour pouvant en contenir en réalité 2;
+        image_elements.Contour() object
+    """
+    loop = image_elements.Contour([])
+    refpix = contour_raw.xys[0]
+    inspix = (set(contour_raw.xys) & set(refpix.adjs())).pop()
+    while inspix != refpix:
+        loop.xys.append(inspix)
+        inspix = (set(inspix.adjs()) & set(contour_raw.xys) -\
+                  set(loop.xys)).pop()
+    return loop
+
 
 if __name__ == "__main__":
     MatriceRGB = smp.imread("essai.png")
     matrix = Matriceniveauxdegris(MatriceRGB)
     plt.imshow(matrix, cmap=plt.cm.gray)
     plt.show()
+    pixel = matrix[150][150]
+    contour_inter = image_elements.Contour([])
+
+#Liste de liste pour les zones (liste de contours avec une couleur et les coordonees de chaque points du contour)
+#Class Pixel
+#Class Contour

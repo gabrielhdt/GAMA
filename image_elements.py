@@ -1,21 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-#    Defines elements which will be used in svg file (e.g. Bezier curves)
-#    Copyright (C) 2016  Gabriel Hondet
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""Defines graphical elements which will be used in the program"""
 import scipy.special
 import scipy as sp
 import control_points
@@ -63,13 +46,19 @@ class Pixel(object):
     def __repr__(self):
         return "<Pixel at {}, {}>".format(self.x, self.y)
 
+    def __eq__(self, other):
+        return (self.x, self.y) == (other.x, other.y)
+
+    def __ne__(self, other):
+        return (self.x, self.y) != (other.x, other.y)
+
     def adjs(self):
-        x=self.x
-        y=self.y
+        x = self.x
+        y = self.y
         pixel_voisins=[]
         for k in range(x-1,x+2):
             for j in range (y-1,y+2):
-                if (k!=x and j!=y) and Pixel(k,j).read:
+                if (k != x and j != y) and Pixel(k, j).unread:
                     pixel_voisins.append(Pixel(k,j))
         return pixel_voisins
 
@@ -81,16 +70,4 @@ class Contour(object):
         """
         self.xys = xys
         self.color = None
-
-    def inflexion(self,start):
-        start_index = self.xys.index(start)
-        if start_index > len(self.xys):
-            return self.xys[start_index + 1]
-        if start_index + 1 > len(self.xys):
-            return self.xys[start_index + 2]
-        sens = self(start, self.xys[start_index + 1], self.xys[start_index + 2])
-        while control_points.clockwise(start, self.xys[start_index + 1], self.xys[start_index + 2]) == sens:
-            if start_index + 2 > len(self.xys):
-                return self.xys[start_index + 2]
-            start_index += 1
-        return (self.xys[start_index + 1].x, self.xys[start_index + 1].y)
+        

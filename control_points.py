@@ -1,8 +1,31 @@
+# -*- coding: utf-8 -*-
 import image_elements
 import scipy as sp
 
 
-def pente_moy(pixel, contour, precision=5):
+def pente_moy(pixel, contour, sens=1, precision=5):
+    """pixel un objet de la classe Pixel
+    contour un objet de la classe Contour
+    sens orientation de la tangente
+     precision nombre de pixel pris en compte
+     renvoie la pente de la tangente au contour au point pixel """
+    index = contour.xys.index(pixel)
+    n = len(contour.xys)
+    pente = 0
+    for i in range(1, precision+1):
+        if index + i * sens < 0:
+            other_x = contour.xys[index + i * sens].x
+            other_y = contour.xys[index + i * sens].y
+        else:
+            other_x = contour.xys[(index + i * sens) % n].x
+            other_y = contour.xys[(index + i * sens) % n].y
+        if pixel.x == other_x:
+            pente += 5 * (pixel.y-other_y) #donner du poids aux pente infini sans écraser l'influence des autres points
+        else:
+            pente += (pixel.y-other_y)/(pixel.x-other_x)
+    return pente/precision
+
+def pente_moy2(pixel, contour, precision=5):
     """pixel un objet de la classe Pixel
     contour un objet de la classe Contour
     sens orientation de la tangente
@@ -19,7 +42,7 @@ def pente_moy(pixel, contour, precision=5):
             other_x = contour.xys[(index + i) % n].x
             other_y = contour.xys[(index + i) % n].y
         if pixel.x == other_x:
-            pente += 5
+            pente += 5 * (pixel.y-other_y) #donner du poids aux pente infini sans écraser l'influence des autres points
         else:
             pente += (pixel.y-other_y)/(pixel.x-other_x)
     return pente/precision
@@ -37,42 +60,55 @@ def find_inflexion(contour, start):
      soit le premier point d'inflexion rencontre, soit le dernier point du contour"""
     start_index = contour.xys.index(start)
     n = len(contour.xys) - 1    # dernier indice disponible
-    if start_index + 1 > n:    # si dépassement on renvoie le dernier pixel
+    if start_index + 1 > n:     # si dépassement on renvoie le dernier pixel
         return contour.xys[-1]
-    if start_index + 2 > n:
-        return contour.xys[-1]
-    sens = clockwise(start, contour.xys[start_index+1], contour.xys[start_index+2])
-    while clockwise(start, contour.xys[start_index+1], contour.xys[start_index+2]) == sens:
-        if start_index + 2 > n:   # le dernier point de contour est atteint sans inflexion
+    sens = clockwise(start, contour.xys[start_index + 1], contour.xys[start_index + 2])
+    while clockwise(start, contour.xys[start_index + 1], contour.xys[start_index + 2]) == sens:
+        if start_index + 3 > n:   # le dernier point de contour est atteint sans inflexion
             return contour.xys[-1]
+        if contour.xys[start_index + 2].x == start.x:
+            return contour.xys[start_index + 2]
         start_index += 1
     return contour.xys[start_index + 2]
     # on sort de la boucle while, donc ce pixel correspond au premier point d inflexion rencontre
 
 
 def control(contour, start):
-    """Renvoie le triple de points de controle pour tracer une courbe de Bezier quadratique
+    """Renvoie le triple de points de controle pour tracer une courbe de
+    Bezier quadratique sous forme d'un array scipy (concorde avec
+    writesvg.add_polybezier)
     correspondant a la portion du contour qui commence au pixel start"""
     pente_s = pente_moy(start, contour)
     end = find_inflexion(contour, start)
-    pente_e = pente_moy(end, contour)
+    pente_e = pente_moy(end, contour, -1)
     middle_x = (end.x - start.x) / (pente_s - pente_e)
     middle_y = start.y + pente_s * middle_x
-    return image_elements.BezierCurve((sp.array((start.x, start.y)),
-                                       sp.array((middle_x, middle_y)),
-                                       sp.array((end.x, end.y))))
+    return sp.array([[start.x, start.y], [middle_x, middle_y], [end.x, end.y]])
 
 
 def list_curves(contours):
     """Renvoie la liste de l ensemble des courbes a tracer,
-    a partir de la liste de l ensemble des contours"""
+    a partir de la liste de l ensemble des contours
+    contours -- liste de image_elements.Contour()"""
     curves = []
     for contour in contours:
         start = contour.xys[0]
         c_end = contour.xys[-1]
         while start != c_end:
             curve = control(contour, start)
-            start = curve.ctrl_pts[2]
-        curves.append(curve)
+            start = image_elements.Pixel(curve[2][0], curve[2][1])
+            curves.append(curve)
     return curves
 
+
+def curves2curvemat(curves):
+    """Converts a list of curves to a single array of control points. In
+    addition it removes redondant points, which are the first point of each
+    element of curves, except for curves[0].
+    curves -- list of curves, i.e. list of arrays
+    """
+    curvemat = sp.zeros((3 + 2*(len(curves) - 1), 2))
+    curvemat[:3, ] = curves[0].copy()
+    for i, curve in enumerate(curves[1:]):
+        curvemat[2*i + 3:2*i + 5, ] = curve[1:, ].copy()  # Not 1st point
+    return curvemat
