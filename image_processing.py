@@ -45,23 +45,36 @@ def AdrienContour(matriceNG):   #NotEgocentric
 
 
 def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter):
+    """
+    matriceNG -- grey level matrix
+    pixel -- inspected pixel
+    seuil -- minimum difference value between levels of grey to
+        differentiate colours
+    pretendants -- old neighbours that weren't in contour
+    contour_int -- contour built
+    """
     pixel.unread = False
     voisins = pixel.adjs() + pretendants
     colorpixel = matriceNG[pixel.x][pixel.y]
-    if colorpixel <= 1:
+    voisins_contourless = voisins[:]  # Slicing pour copie...
+    remove_counter = 0  # Pour compter les suppressions
+    if colorpixel <= 1:  # Si pas dans le bord ajouté artificiellement
         for (index, vois) in enumerate(voisins):
             vois.unread = False
             x1 = vois.x
             y1 = vois.y
             colorvois = matriceNG[x1][y1]
             if abs(colorpixel-colorvois) > seuil:
+                remove_counter += 1
                 contour_inter.xys.append(vois)
-                voisins.pop(index)
+                voisins_contourless.pop(index - remove_counter)
     else:
         contour_inter.xys.append(pixel)
-    while len(voisins) > 0:
-        pretendant = voisins[1:]
-        detection_contour(matriceNG, voisins[0], seuil, pretendant, contour_inter)
+    print(len(voisins_contourless))
+    while len(voisins_contourless) > 0:
+        pretendant = voisins_contourless[1:]
+        detection_contour(matriceNG, voisins_contourless[0],
+                          seuil, pretendant, contour_inter)
     return contour_inter
 
 def contour_image(matriceNG, seuil):
