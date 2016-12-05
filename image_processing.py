@@ -9,6 +9,7 @@
 import scipy.misc as smp
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 import image_elements
 
 
@@ -24,13 +25,11 @@ def ajout_bord(matriceNG):
     # retourne la matrice de départ avec un contour formé de 2
     (lig, col) = matriceNG.shape
     # matrice NG designe la matrice en niveau de gris de taille (lignes, colonnes)
-    mat_ajoutbord = np.ones((lig+1, col+1), dtype=int)
+    mat_ajoutbord = 2*np.ones((lig+2, col+2), dtype=int)
     #initialise une matrice de taille (lig+1, col+1) avec des un
     for i in range(1, lig):
         for j in range(1, col):
             mat_ajoutbord[i][j] = matriceNG[i][j]
-            pixel = image_elements.Pixel(i,j)
-            pixel.exist = True
     return mat_ajoutbord
 
 def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter):
@@ -63,7 +62,7 @@ def contour_image(matriceNG, seuil):
     pretendants = []
     for i in range(line):
         for j in range(column):
-            liste_contours.append(detection_contour(matriceNG, matriceNG[i][j], seuil, pretendants, contour_inter))
+            liste_contours.append(detection_contour(matriceNG, image_elementsPixel(i,j), seuil, pretendants, contour_inter))
     return liste_contours
 
 def visualisation_contour(matriceNG,liste_contours):
@@ -78,6 +77,16 @@ def visualisation_contour(matriceNG,liste_contours):
     return visu
 
 
+#M = np.arrange(0,1).reshape((100,100))
+#Mo = ajout_bord(M)
+#pixel = image_element.Pixel(50, 50)
+#seuil = 0.1
+#pretendants = []
+#contour_inter = image_element.Contour([])
+#print(detection_contour(Mo, pixel, seuil, pretendants, contour_inter))
+#print(M)
+M = np.zeros((4,7))
+print(ajout_bord(M))
 
 if __name__ == "__main__":
     MatriceRGB = smp.imread("essai.png")
