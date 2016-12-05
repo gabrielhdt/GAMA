@@ -58,7 +58,8 @@ class Pixel(object):
         pixel_voisins=[]
         for k in range(x-1,x+2):
             for j in range (y-1,y+2):
-                if (k != x and j != y) and Pixel(k, j).unread:
+                if (k != x and j != y) and Pixel(k, j).unread and k >= 0 and \
+                        j >= 0:
                     pixel_voisins.append(Pixel(k,j))
         return pixel_voisins
 
