@@ -45,18 +45,22 @@ def AdrienContour(matriceNG):   #NotEgocentric
 
 
 def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter):
+    pixel.unread = False
     voisins = pixel.adjs() + pretendants
     colorpixel = matriceNG[pixel.x][pixel.y]
-    for (index, vois) in enumerate(voisins):
-        vois.unread = False
-        x1 = vois.x
-        y1 = vois.y
-        colorvois = matriceNG[x1][y1]
-        if abs(colorpixel-colorvois) > seuil:
-            contour_inter.xys.append(vois)
-            voisins.pop(index)
-    while len(voisins)>0:
-        pretendant = voisins
+    if colorpixel <= 1:
+        for (index, vois) in enumerate(voisins):
+            vois.unread = False
+            x1 = vois.x
+            y1 = vois.y
+            colorvois = matriceNG[x1][y1]
+            if abs(colorpixel-colorvois) > seuil:
+                contour_inter.xys.append(vois)
+                voisins.pop(index)
+    else:
+        contour_inter.xys.append(pixel)
+    while len(voisins) > 0:
+        pretendant = voisins[1:]
         detection_contour(matriceNG, voisins[0], seuil, pretendant, contour_inter)
     return contour_inter
 
