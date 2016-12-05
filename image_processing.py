@@ -27,7 +27,7 @@ def ajout_bord(matriceNG):
     # retourne la matrice de départ avec un contour formé de 2
     (lig, col) = matriceNG.shape
     # matrice NG designe la matrice en niveau de gris de taille (lignes, colonnes)
-    mat_ajoutbord = 2*np.ones((lig+2, col+2), dtype=int)
+    mat_ajoutbord = 2*np.ones((lig+2, col+2), dtype=float)
     #initialise une matrice de taille (lig+1, col+1) avec des un
     for i in range(1, lig):
         for j in range(1, col):
@@ -70,7 +70,6 @@ def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter):
                 voisins_contourless.pop(index - remove_counter)
     else:
         contour_inter.xys.append(pixel)
-    print(len(voisins_contourless))
     while len(voisins_contourless) > 0:
         pretendant = voisins_contourless[1:]
         detection_contour(matriceNG, voisins_contourless[0],
