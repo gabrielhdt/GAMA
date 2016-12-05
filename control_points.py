@@ -20,7 +20,7 @@ def pente_moy(pixel, contour, sens=1, precision=5):
             other_x = contour.xys[(index + i * sens) % n].x
             other_y = contour.xys[(index + i * sens) % n].y
         if pixel.x == other_x:
-            pente += 5 * (pixel.y-other_y) #donner du poids aux pente infini sans écraser l'influence des autres points
+            pente += 10000 * (pixel.y-other_y) #infiniish
         else:
             pente += (pixel.y-other_y)/(pixel.x-other_x)
     return pente/precision
