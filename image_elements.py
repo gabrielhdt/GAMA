@@ -51,6 +51,9 @@ class Pixel(object):
     def __ne__(self, other):
         return (self.x, self.y) != (other.x, other.y)
 
+    def __hash__(self):
+        return 100*self.x + self.y
+
     def adjs(self, matread):
         x = self.x
         y = self.y
@@ -58,6 +61,20 @@ class Pixel(object):
         for k in range(x-1,x+2):
             for j in range (y-1,y+2):
                 if not(k == x and j == y) and not matread[k, j] and \
+                        k >= 0 and j >= 0:
+                    pixel_voisins.append(Pixel(k,j))
+        return pixel_voisins
+
+    def neighbours(self):
+        """
+        A supprimer: quick fix car j'ai besoin des adjacents sans la matread
+        """
+        x = self.x
+        y = self.y
+        pixel_voisins = []
+        for k in range(x-1, x+2):
+            for j in range(y-1, y+2):
+                if not(k == x and j == y) and \
                         k >= 0 and j >= 0:
                     pixel_voisins.append(Pixel(k,j))
         return pixel_voisins
