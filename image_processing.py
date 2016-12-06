@@ -120,11 +120,11 @@ def separate_contour(contour_raw):
     """
     loop = image_elements.Contour([])
     refpix = contour_raw.xys[0]
-    inspix = (set(contour_raw.xys) & set(refpix.adjs())).pop()
+    inspix = (set(contour_raw.xys) & set(refpix.neighbours())).pop()
     while inspix != refpix:
         loop.xys.append(inspix)
         contour_raw.xys.remove(inspix)
-        inspix = (set(inspix.adjs()) & set(contour_raw.xys) -
+        inspix = (set(inspix.neighbours()) & set(contour_raw.xys) -
                   set(loop.xys)).pop()
         raw_minusloop = image_elements.Contour(contour_raw.xys[:])  # Copie
     return loop, raw_minusloop
