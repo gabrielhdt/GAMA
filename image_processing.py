@@ -23,31 +23,24 @@ def Matriceniveauxdegris(matriceRGB):
             Matrice_gray[i][j]+=((matriceRGB[i][j][0]/255)*0.2126+(matriceRGB[i][j][1]/255)*0.7152+(matriceRGB[i][j][2]/255)*0.0722)
     return Matrice_gray
 
-def ajout_bord(matriceNG):
-    # retourne la matrice de départ avec un contour formé de 2
-    (lig, col) = matriceNG.shape
-    # matrice NG designe la matrice en niveau de gris de taille (lignes, colonnes)
-    mat_ajoutbord = 2*np.ones((lig+2, col+2), dtype=float)
-    #initialise une matrice de taille (lig+1, col+1) avec des un
-    for i in range(1, lig):
-        for j in range(1, col):
-            mat_ajoutbord[i][j] = matriceNG[i][j]
-    return mat_ajoutbord
 
-def AdrienContour(matriceNG):   #NotEgocentric
-    # retourne la matrice de départ avec un tres fameux contour d Adrien
-    (lig, col) = matriceNG.shape
-    # matrice NG designe la matrice en niveau de gris de taille (lignes, colonnes)
-    mat_ajoutcontour = 7 * np.ones((lig+2, col+2), dtype=int)
-    #initialise une matrice de taille (lig+2, col+2) avec des septs (pourquoi pas?)
-    mat_ajoutcontour[1: lig+1, 1: col+1] = matriceNG
-    return mat_ajoutcontour
+def add_border(matng):
+    """Adds a border of 7s (not a greyscale) to the matrix matng. Credits
+    goes to Aurélie and Adrien, for their remarkable work in the world
+    of borders.
+    matng -- greyscale matrix sp.array of floats between 0 and 1
+    returns -- a new matrix with borders on each side (lines and rows of 7s)
+    """
+    (row, col) = matng.shape
+    matng_border = 7*np.ones((row+2, col+2), dtype=float)
+    matng_border[1:row+1, 1:col+1] = matng.copy()
+    return matng_border
 
 
-def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter,
+def detection_contour(matng, pixel, seuil, pretendants, contour_inter,
                       matread):
     """
-    matriceNG -- grey level matrix
+    matng -- grey level matrix
     pixel -- inspected pixel
     seuil -- minimum difference value between levels of grey to
         differentiate colours
@@ -56,13 +49,13 @@ def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter,
     matread -- boolean matrix
     """
     matread[pixel.x, pixel.y] = True
-    colorpixel = matriceNG[pixel.x, pixel.y]
+    colorpixel = matng[pixel.x, pixel.y]
     voisins = pixel.adjs(matread) + pretendants
     voisins_contourless = voisins[:]  # Slicing pour copie...
     if colorpixel <= 1:  # Si pas dans le bord ajouté artificiellement
         for vois in voisins:
             matread[vois.x, vois.y] = True
-            colorvois = matriceNG[vois.x][vois.y]
+            colorvois = matng[vois.x][vois.y]
             if abs(colorpixel - colorvois) > seuil:
                 contour_inter.xys.append(vois)
                 voisins_contourless.remove(vois)
@@ -70,7 +63,7 @@ def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter,
         pass
     if len(voisins_contourless) > 0:
         pretendant = voisins_contourless[1:]
-        return detection_contour(matriceNG, voisins_contourless[0],
+        return detection_contour(matng, voisins_contourless[0],
                                  seuil, pretendant, contour_inter, matread)
     else:
         return contour_inter
