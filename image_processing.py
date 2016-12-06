@@ -74,11 +74,13 @@ def contour_image(matriceNG, seuil):
     # renvoie la liste des contours de l'image
     (line, column) = matriceNG.shape
     liste_contours = []
-    contour_inter = image_elements.Contour([])
+    matread = sp.ones_like(matriceNG, dtype=bool)
+    matread[1:-1, 1:-1] = sp.zeros_like(matng[1:-1, 1:-1], dtype=bool)
     pretendants = []
+    contour_inter = image_elements.Contour([])
     for i in range(line):
         for j in range(column):
-            liste_contours.append(detection_contour(matriceNG, image_elements.Pixel(i,j), seuil, pretendants, contour_inter))
+            liste_contours.append(detection_contour(matriceNG, image_elements.Pixel(i,j), seuil, pretendants, contour_inter, matread))
     return liste_contours
 
 def visualisation_contour(matriceNG,liste_contours):
