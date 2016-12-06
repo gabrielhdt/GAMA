@@ -5,7 +5,11 @@ class SvgFile:
     def __init__(self, name, dim):
         """Links a file to object
         name -- name of the file (string)
-        dim -- tuble of int, dimension of svg image
+        dim -- tuble of int, dimension of svg image. Be careful! An image
+            of dimension (16, 16) can contain up to 17 pixel object per line or
+            row (e.g. when using draw_pix), from 0 to 16, bounds included.
+            Someone who wants to draw the pixels of an sp.array of dim 16, 16
+            should have dim = (15, 15).
         """
         self.file = open(name, 'w')
         self.svgskel(dim)
