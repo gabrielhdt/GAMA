@@ -57,15 +57,13 @@ def detection_contour(matriceNG, pixel, seuil, pretendants, contour_inter,
     """
     matread[pixel.x, pixel.y] = True
     colorpixel = matriceNG[pixel.x, pixel.y]
-    remove_counter = 0  # Pour compter les suppressions
     voisins = pixel.adjs(matread) + pretendants
     voisins_contourless = voisins[:]  # Slicing pour copie...
     if colorpixel <= 1:  # Si pas dans le bord ajouté artificiellement
-        for (index, vois) in enumerate(voisins):
+        for vois in voisins:
             matread[vois.x, vois.y] = True
             colorvois = matriceNG[vois.x][vois.y]
             if abs(colorpixel - colorvois) > seuil:
-                remove_counter += 1
                 contour_inter.xys.append(vois)
                 voisins_contourless.remove(vois)
     else:
