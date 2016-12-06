@@ -54,11 +54,11 @@ class Pixel(object):
     def adjs(self, matread):
         x = self.x
         y = self.y
-        pixel_voisins=[]
+        pixel_voisins = []
         for k in range(x-1,x+2):
             for j in range (y-1,y+2):
-                if (k != x and j != y) and not matread[k, j] and k >= 0 and \
-                        j >= 0:
+                if not(k == x and j == y) and not matread[k, j] and \
+                        k >= 0 and j >= 0:
                     pixel_voisins.append(Pixel(k,j))
         return pixel_voisins
 
