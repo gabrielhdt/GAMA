@@ -114,15 +114,20 @@ def separate_contour(contour_raw):
     lacet.
     contour_raw -- contour pouvant en contenir en réalité 2;
         image_elements.Contour() object
+    returns -- loop, containing one loop, i.e. a contour object of contiguous
+        pixels, and raw_minusloop, the contour_raw without loop, i.e. the other
+        contour.
     """
     loop = image_elements.Contour([])
     refpix = contour_raw.xys[0]
     inspix = (set(contour_raw.xys) & set(refpix.adjs())).pop()
     while inspix != refpix:
         loop.xys.append(inspix)
-        inspix = (set(inspix.adjs()) & set(contour_raw.xys) -\
+        contour_raw.xys.remove(inspix)
+        inspix = (set(inspix.adjs()) & set(contour_raw.xys) -
                   set(loop.xys)).pop()
-    return loop
+        raw_minusloop = image_elements.Contour(contour_raw.xys[:])  # Copie
+    return loop, raw_minusloop
 
 
 if __name__ == "__main__":
