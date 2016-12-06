@@ -41,7 +41,6 @@ class Pixel(object):
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.unread = True
 
     def __repr__(self):
         return "<Pixel at {}, {}>".format(self.x, self.y)
@@ -52,13 +51,13 @@ class Pixel(object):
     def __ne__(self, other):
         return (self.x, self.y) != (other.x, other.y)
 
-    def adjs(self):
+    def adjs(self, matread):
         x = self.x
         y = self.y
         pixel_voisins=[]
         for k in range(x-1,x+2):
             for j in range (y-1,y+2):
-                if (k != x and j != y) and Pixel(k, j).unread and k >= 0 and \
+                if (k != x and j != y) and not matread[k, j] and k >= 0 and \
                         j >= 0:
                     pixel_voisins.append(Pixel(k,j))
         return pixel_voisins
