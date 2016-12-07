@@ -76,7 +76,20 @@ class Pixel(object):
             for j in range(y-1, y+2):
                 if not(k == x and j == y) and \
                         k >= 0 and j >= 0:
-                    pixel_voisins.append(Pixel(k,j))
+                    pixel_voisins.append(Pixel(k, j))
+        return pixel_voisins
+
+    def closest_neighbours(self):
+        """
+        Closest neighbours
+        """
+        x = self.x
+        y = self.y
+        pixel_voisins = []
+        for k in range(x-1, x+2):
+            for j in range(y-1, y+2):
+                if k == x or j == y and k >= 0 and j >= 0:
+                    pixel_voisins.append(Pixel(k, j))
         return pixel_voisins
 
 
@@ -87,4 +100,3 @@ class Contour(object):
         """
         self.xys = xys
         self.color = None
-        
