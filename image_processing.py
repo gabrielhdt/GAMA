@@ -120,13 +120,18 @@ def separate_contour(contour_raw):
     """
     loop = image_elements.Contour([])
     refpix = contour_raw.xys[0]
+    loop.xys.append(refpix)
     inspix = (set(contour_raw.xys) & set(refpix.neighbours())).pop()
     while inspix != refpix:
         loop.xys.append(inspix)
         contour_raw.xys.remove(inspix)
-        inspix = (set(inspix.neighbours()) & set(contour_raw.xys) -
-                  set(loop.xys)).pop()
-        raw_minusloop = image_elements.Contour(contour_raw.xys[:])  # Copie
+        neighbourhood = set(inspix.neighbours()) & set(contour_raw.xys)
+        if len(neighbourhood) > 1:
+            inspix = (neighbourhood & set(inspix.closest_neighbours())).pop()
+        else:
+            inspix = neighbourhood.pop()
+    raw_minusloop = image_elements.Contour(contour_raw.xys[:])  # Copie
+    raw_minusloop.xys.remove(refpix)
     return loop, raw_minusloop
 
 
@@ -137,7 +142,3 @@ if __name__ == "__main__":
     plt.show()
     pixel = matrix[150][150]
     contour_inter = image_elements.Contour([])
-
-#Liste de liste pour les zones (liste de contours avec une couleur et les coordonees de chaque points du contour)
-#Class Pixel
-#Class Contour
