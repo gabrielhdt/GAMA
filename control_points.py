@@ -20,7 +20,7 @@ def pente_moy(pixel, contour, sens=1, precision=5):
             other_x = contour.xys[(index + i * sens) % n].x
             other_y = contour.xys[(index + i * sens) % n].y
         if pixel.x == other_x:
-            pente += 10000 * (pixel.y-other_y) #infiniish
+            return 0
         else:
             pente += (pixel.y-other_y)/(pixel.x-other_x)
     return pente/precision
@@ -81,8 +81,18 @@ def control(contour, start):
     pente_s = pente_moy(start, contour)
     end = find_inflexion(contour, start)
     pente_e = pente_moy(end, contour, -1)
-    middle_x = (end.x - start.x) / (pente_s - pente_e)
-    middle_y = start.y + pente_s * middle_x
+    if pente_s == 0:
+        middle_x = start.x
+        middle_y = end.y + pente_e * middle_x
+    if pente_e == 0:
+        middle_x = end.x
+        middle_y = start.y + pente_s * middle_x
+    if pente_s == pente_e:
+        middle_x = (start.x + end.x)/2
+        middle_y = (start.y + end.y)/2 + middle_x
+    elif pente_s != 0 and pente_e != 0:
+        middle_x = (end.x - start.x) / (pente_s - pente_e)
+        middle_y = start.y + pente_s * middle_x
     return sp.array([[start.x, start.y], [middle_x, middle_y], [end.x, end.y]])
 
 
