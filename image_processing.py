@@ -68,6 +68,34 @@ def detection_contour(matng, pixel, seuil, pretendants, contour_inter,
     else:
         return contour_inter
 
+
+def detection_contour_subfct(matng, pixel):
+    """
+    Comme ci-dessus, mais en utilisant une sous fonction. Pourra aider pour
+    la méthode dynamique.
+    """
+    matread = np.zeros_like(matng, dtype=bool)
+    contour_inter = image_elements.Contour([])
+    seuil = 0.1
+
+    def detecont_rec(pretendants):
+        inspix = pretendants.pop(0)
+        colour = matng[inspix.x, inspix.y]
+        neighbourhood = inspix.adjs(matread) + pretendants
+        neighbourhood_contourless = neighbourhood[:]
+        if colour <= 1:
+            for neighbour in neighbourhood:
+                matread[neighbour.x, neighbour.y] = True
+                neighbour_colour = matng[neighbour.x, neighbour.y]
+                if abs(colour - neighbour_colour) > seuil:
+                    contour_inter.xys.append(neighbour)
+                    neighbourhood_contourless.remove(neighbour)
+        if len(neighbourhood_contourless) > 0:
+            return detecont_rec(pretendants)
+        else:
+            return contour_inter
+
+
 def contour_image(matriceNG, seuil):
     # prend en argument une matrice en niveau de gris à laquelle on a rajouté un contour de 1
     # et un seuil de couleurs pour classer les pixels
