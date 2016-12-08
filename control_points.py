@@ -56,28 +56,40 @@ def clockwise(p1, p2, p3):
 
 
 def find_inflexion(contour, start):
-    """Renvoie le pixel correspondant au point de controle d arrivee de la portion de contour partant du pixel start:
-     soit le premier point d'inflexion rencontre, soit le dernier point du contour"""
+    """Renvoie le pixel correspondant au point de controle d arrivee
+    de la portion de contour partant du pixel start:
+    soit le premier point d'inflexion rencontre, soit le dernier point
+    du contour
+    contour -- image_elements.Contour() object
+    start -- pixel de début, image_elements.Pixel() object
+    """
     start_index = contour.xys.index(start)
     n = len(contour.xys) - 1    # dernier indice disponible
     if start_index + 1 > n:     # si dépassement on renvoie le dernier pixel
         return contour.xys[-1]
-    sens = clockwise(start, contour.xys[start_index + 1], contour.xys[start_index + 2])
-    while clockwise(start, contour.xys[start_index + 1], contour.xys[start_index + 2]) == sens:
-        if start_index + 3 > n:   # le dernier point de contour est atteint sans inflexion
-            return contour.xys[-1]
-        if contour.xys[start_index + 2].x == start.x:
+    sens = clockwise(start, contour.xys[start_index + 1],
+                     contour.xys[start_index + 2])
+    new_sens = sens
+    while new_sens == sens:
+        if start_index + 3 > n:  # dernier point de contour atteint...
+            return contour.xys[-1]  # ...sans inflexion
+        elif contour.xys[start_index + 2].x == start.x:
             return contour.xys[start_index + 2]
         start_index += 1
-    return contour.xys[start_index + 2]
-    # on sort de la boucle while, donc ce pixel correspond au premier point d inflexion rencontre
+        new_sens = clockwise(start, contour.xys[start_index + 1],  # Sera plus
+                             contour.xys[start_index + 2])  # facile à modifier
+    return contour.xys[start_index + 1]
+    # on sort de la boucle while, donc ce pixel correspond au premier
+    # point d inflexion rencontre
 
 
 def control(contour, start):
     """Renvoie le triple de points de controle pour tracer une courbe de
     Bezier quadratique sous forme d'un array scipy (concorde avec
     writesvg.add_polybezier)
-    correspondant a la portion du contour qui commence au pixel start"""
+    correspondant a la portion du contour qui commence au pixel start
+    Est censée être lancée par list_curves.
+    """
     pente_s = pente_moy(start, contour)
     end = find_inflexion(contour, start)
     pente_e = pente_moy(end, contour, -1)
