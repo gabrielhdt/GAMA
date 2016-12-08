@@ -48,6 +48,28 @@ def pente_moy2(pixel, contour, precision=5):
     return pente/precision
 
 
+def tan_param(startpix, contour, precision=5, sens=1):
+    """Donne les coefficients de l'équation paramétrique de la tangente:
+    G(t) = (x(t), y(t)) = (a*t, b*t), i.e. a et b. S'inspire
+    grandement de pente_moy. Sens détermine si les points à moyenner sont en
+    amont (sens = -1) ou en aval (sens = 1) de startpix.
+    startpix -- image_elements.Pixel() object
+    contour -- image_elements.Contour() object
+    precision -- int, nombre de pixels sur lesquels sont fait la moyenne
+    sens -- \in {-1, 1}
+    """
+    index = contour.xys.index(startpix)
+    n = len(contour.xys)
+    delta_x_mean = 0
+    delta_y_mean = 0
+    for i in range(1, precision + 1):
+        other_x = contour.xys[(index + i*sens) % n].x
+        other_y = contour.xys[(index + i*sens) % n].y
+        delta_x_mean += other_x - startpix.x
+        delta_y_mean += other_y - startpix.y
+    return (delta_x_mean/precision, delta_y_mean/precision)
+
+
 def clockwise(p1, p2, p3):
     """test le sens des 3 points p1, p2, p3"""
     p1p2 = (p2.x - p1.x, p2.y - p1.y)
