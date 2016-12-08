@@ -55,6 +55,19 @@ def clockwise(p1, p2, p3):
     return p1p2[0] * p1p3[1] - p1p2[1] * p1p3[0] < 0
 
 
+def vertan(points):
+    """ Teste si la projection sur l'axe x des vecteurs {p2-p1, p3-p1, p4-p1}
+    présente un maximum, i.e. si la tangente à la courbe passe à la verticale.
+    points -- list of four image_elements.Pixel() objects
+    returns -- True s'il y a un maximum
+    """
+    assert len(points) == 4
+    projx = [None for _ in range(3)]
+    for i in range(3):
+        projx[i] = points[i + 1].x - points[0].x
+    return projx[1] > projx[0] and projx[1] > projx[2]  # Stricte ou large?
+
+
 def find_inflexion(contour, start):
     """Renvoie le pixel correspondant au point de controle d arrivee
     de la portion de contour partant du pixel start:
@@ -70,12 +83,16 @@ def find_inflexion(contour, start):
     sens = clockwise(start, contour.xys[start_index + 1],
                      contour.xys[start_index + 2])
     new_sens = sens
-    while new_sens == sens:
+    is_vert = False
+    while new_sens == sens and not is_vert:
         if start_index + 3 > n:  # dernier point de contour atteint...
             return contour.xys[-1]  # ...sans inflexion
         elif contour.xys[start_index + 2].x == start.x:
             return contour.xys[start_index + 2]
         start_index += 1
+        is_vert = vertan([start, contour.xys[start_index],
+                          contour.xys[start_index + 1],
+                          contour.xys[start_index + 2]])
         new_sens = clockwise(start, contour.xys[start_index + 1],  # Sera plus
                              contour.xys[start_index + 2])  # facile à modifier
     return contour.xys[start_index + 1]
