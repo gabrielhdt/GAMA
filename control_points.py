@@ -87,8 +87,6 @@ def find_inflexion(contour, start):
     while new_sens == sens and not is_vert:
         if start_index + 3 > n:  # dernier point de contour atteint...
             return contour.xys[-1]  # ...sans inflexion
-        elif contour.xys[start_index + 2].x == start.x:
-            return contour.xys[start_index + 2]
         start_index += 1
         is_vert = vertan([start, contour.xys[start_index],
                           contour.xys[start_index + 1],
