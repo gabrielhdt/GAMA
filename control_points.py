@@ -131,17 +131,30 @@ def control(contour, start):
     end = find_inflexion(contour, start)
     pente_e = pente_moy(end, contour, -1)
     if pente_s == 0:
+        """
         middle_x = start.x
         middle_y = end.y + pente_e * middle_x
+        """
+        middle_x = end.x + (start.y - end.y)/pente_e
+        middle_y = start.y
     if pente_e == 0:
+        """
         middle_x = end.x
         middle_y = start.y + pente_s * middle_x
-    if pente_s == pente_e:
+        """
+        middle_x = start.x + (end.y - start.y)/pente_s
+        middle_y = end.y
+    if pente_s == pente_e:  # A préciser
         middle_x = (start.x + end.x)/2
         middle_y = (start.y + end.y)/2 + middle_x
     elif pente_s != 0 and pente_e != 0:
+        """
         middle_x = (end.x - start.x) / (pente_s - pente_e)
         middle_y = start.y + pente_s * middle_x
+        """
+        coef = 1/(pente_s - pente_e)
+        middle_x = coef*(pente_s*start.x - pente_e*end.x + end.y - start.y)
+        middle_y = pente_s*(middle_x - start.x) + start.y
     return sp.array([[start.x, start.y], [middle_x, middle_y], [end.x, end.y]])
 
 
