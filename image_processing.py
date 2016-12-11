@@ -69,7 +69,7 @@ def detection_contour(matng, pixel, seuil, pretendants, contour_inter,
         return contour_inter
 
 
-def detection_contour_subfct(matng, pixel):
+def detection_contour_subfct(matng, pixel, seuil):
     """
     Comme ci-dessus, mais en utilisant une sous fonction. Pourra aider pour
     la méthode dynamique.
@@ -77,7 +77,6 @@ def detection_contour_subfct(matng, pixel):
     matread = np.ones_like(matng, dtype=bool)
     matread[1:-1, 1:-1] = np.zeros_like(matng[1:-1, 1:-1], dtype=bool)
     contour_inter = image_elements.Contour([])
-    seuil = 0.1
 
     def detecont_rec(inspix, neighbourhood):
         colour = matng[inspix.x, inspix.y]
