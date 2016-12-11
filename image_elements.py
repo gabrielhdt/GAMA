@@ -100,3 +100,12 @@ class Contour(object):
         """
         self.xys = xys
         self.color = None
+
+    def __eq__(self, other):
+        return self.xys == other.xys
+
+    def __hash__(self):
+        if len(self.xys) == 0:
+            return 0
+        else:
+            return self.xys[0].x + 100*self.xys[len(self.xys)//2].x
