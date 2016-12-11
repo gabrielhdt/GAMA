@@ -123,13 +123,13 @@ def contours_image(matngb, seuil=0.01):
     matread = np.ones_like(matngb, dtype=bool)
     matread[1:-1, 1:-1] = np.zeros_like(matngb[1:-1, 1:-1], dtype=bool)
     while False in matread:
-        notread = np.where(matread == False)
+        notread = np.where(matread == False)  # Finds False in matread
         notread = notread[0][0], notread[1][0]
         begpix = image_elements.Pixel(notread[0], notread[1])
         cont, matread = detection_contour_subfct(matngb, begpix,
                                                  seuil, matread)
         contset.add(cont)
-    contset = contset - set((image_elements.Contour([]), ))
+    contset = contset - set((image_elements.Contour([]), ))  # Removes empty
     return contset
 
 
@@ -172,14 +172,17 @@ def separate_contour(contour_raw):
     raw_minusloop.xys.remove(refpix)
     return loop, raw_minusloop
 
+
 def separate_all_contours(contour_raw):
     liste_contour = []
+
     def separate(contour_raw, liste_contour):
-        if len(contour_raw)<1:
+        if len(contour_raw.xys) < 1:
             return []
-        else :
+        else:
+            print(contour_raw.xys)
             loop, raw_minusloop = separate_contour(contour_raw)
-            liste_contour.apend(loop)
+            liste_contour.append(loop)
             separate(raw_minusloop,liste_contour)
         return liste_contour
     return separate(contour_raw, liste_contour)
