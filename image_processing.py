@@ -96,7 +96,7 @@ def detection_contour_subfct(matng, pixel, seuil):
         else:
             return contour_inter
 
-    return detecont_rec(pixel, pixel.adjs(matread))
+    return detecont_rec(pixel, pixel.adjs(matread)), matread
 
 
 def contour_image(matriceNG, seuil):
