@@ -35,8 +35,6 @@ def regroupement_couleur(matricenb, seuil):
     return matricenb
 
 
-
-
 def add_border(matng):
     """Adds a border of 7s (not a greyscale) to the matrix matng. Credits
     goes to Aurélie and Adrien, for their remarkable work in the world
@@ -128,6 +126,7 @@ def contour_image(matriceNG, seuil):
 
             liste_contours.append(detection_contour(matriceNG, image_elements.Pixel(i,j), seuil, pretendants, contour_inter, matread))
     return liste_contours
+
 def contours_image(matngb, seuil=0.01):
     """
     Donne l'ensemble des contours de la matrice en niveaux de gris avec
@@ -187,6 +186,18 @@ def separate_contour(contour_raw):
     raw_minusloop = image_elements.Contour(contour_raw.xys[:])  # Copie
     raw_minusloop.xys.remove(refpix)
     return loop, raw_minusloop
+
+def separate_all_contours(contour_raw):
+    liste_contour = []
+    def separate(contour_raw, liste_contour):
+        if len(contour_raw)<1:
+            return []
+        else :
+            loop, raw_minusloop = separate_contour(contour_raw)
+            liste_contour.apend(loop)
+            separate(raw_minusloop,liste_contour)
+        return liste_contour
+    return separate(contour_raw, liste_contour)
 
 
 if __name__ == "__main__":
