@@ -127,18 +127,6 @@ def visualisation_contour(matriceNG,liste_contours):
     return visu
 
 
-#M = np.arrange(0,1).reshape((100,100))
-#Mo = ajout_bord(M)
-#pixel = image_element.Pixel(50, 50)
-#seuil = 0.1
-#pretendants = []
-#contour_inter = image_element.Contour([])
-#print(detection_contour(Mo, pixel, seuil, pretendants, contour_inter))
-#print(M)
-#M = np.zeros((4,7))
-#print(ajout_bord(M))
-
-
 def separate_contour(contour_raw):
     """Sépare les contours présents dans contour_raw, qui
     est susceptible d'en contenir 2. Au nouveau contour on ajoute les pixels
