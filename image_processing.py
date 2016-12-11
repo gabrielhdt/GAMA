@@ -82,7 +82,7 @@ def detection_contour(matng, pixel, seuil, pretendants, contour_inter,
         return contour_inter
 
 
-def detection_contour_subfct(matng, pixel, seuil=0.1, matread=None):
+def detection_contour_subfct(matng, pixel, seuil=0.01, matread=None):
     """
     Comme ci-dessus, mais en utilisant une sous fonction. Pourra aider pour
     la méthode dynamique.
@@ -128,6 +128,26 @@ def contour_image(matriceNG, seuil):
 
             liste_contours.append(detection_contour(matriceNG, image_elements.Pixel(i,j), seuil, pretendants, contour_inter, matread))
     return liste_contours
+def contours_image(matngb, seuil=0.01):
+    """
+    Donne l'ensemble des contours de la matrice en niveaux de gris avec
+    bordure matngb.
+    matngb -- np.array, greyscale matrix, with added border
+    seuil -- float, min difference of colour between two pixels to create
+        a contour
+    """
+    contset = set()
+    matread = np.ones_like(matngb, dtype=bool)
+    matread[1:-1, 1:-1] = np.zeros_like(matngb[1:-1, 1:-1], dtype=bool)
+    while False in matread:
+        notread = np.where(matread == False)
+        notread = notread[0][0], notread[1][0]
+        begpix = image_elements.Pixel(notread[0], notread[1])
+        cont, matread = detection_contour_subfct(begpix, matngb,
+                                                 seuil, matread)
+        contset.add(cont)
+    return contset
+
 
 def visualisation_contour(matriceNG,liste_contours):
     (lin, col) = matriceNG.shape
