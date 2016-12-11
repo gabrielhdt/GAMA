@@ -118,6 +118,7 @@ def contours_image(matngb, seuil=0.01):
         cont, matread = detection_contour_subfct(matngb, begpix,
                                                  seuil, matread)
         contset.add(cont)
+    contset = contset - set(image_elements.Contour([]))
     return contset
 
 
