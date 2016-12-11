@@ -115,7 +115,7 @@ def contours_image(matngb, seuil=0.01):
         notread = np.where(matread == False)
         notread = notread[0][0], notread[1][0]
         begpix = image_elements.Pixel(notread[0], notread[1])
-        cont, matread = detection_contour_subfct(begpix, matngb,
+        cont, matread = detection_contour_subfct(matngb, begpix,
                                                  seuil, matread)
         contset.add(cont)
     return contset
