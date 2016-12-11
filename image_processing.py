@@ -113,21 +113,6 @@ def detection_contour_subfct(matng, pixel, seuil=0.01, matread=None):
     return detecont_rec(pixel, pixel.adjs(matread)), matread
 
 
-def contour_image(matriceNG, seuil):
-    # prend en argument une matrice en niveau de gris à laquelle on a rajouté un contour de 1
-    # et un seuil de couleurs pour classer les pixels
-    # renvoie la liste des contours de l'image
-    (line, column) = matriceNG.shape
-    liste_contours = []
-    matread = sp.ones_like(matriceNG, dtype=bool)
-    matread[1:-1, 1:-1] = sp.zeros_like(matng[1:-1, 1:-1], dtype=bool)
-    pretendants = []
-    contour_inter = image_elements.Contour([])
-    for i in range(line):
-        for j in range(column):
-
-            liste_contours.append(detection_contour(matriceNG, image_elements.Pixel(i,j), seuil, pretendants, contour_inter, matread))
-    return liste_contours
 def contours_image(matngb, seuil=0.01):
     """
     Donne l'ensemble des contours de la matrice en niveaux de gris avec
