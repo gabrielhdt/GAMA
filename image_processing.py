@@ -79,8 +79,7 @@ def detection_contour_subfct(matng, pixel):
     contour_inter = image_elements.Contour([])
     seuil = 0.1
 
-    def detecont_rec(pretendants):
-        inspix = pretendants.pop(0)
+    def detecont_rec(inspix, pretendants):
         colour = matng[inspix.x, inspix.y]
         neighbourhood = inspix.adjs(matread) + pretendants
         neighbourhood_contourless = neighbourhood[:]
@@ -92,11 +91,12 @@ def detection_contour_subfct(matng, pixel):
                     contour_inter.xys.append(neighbour)
                     neighbourhood_contourless.remove(neighbour)
         if len(neighbourhood_contourless) > 0:
-            return detecont_rec(neighbourhood_contourless)
+            return detecont_rec(neighbourhood_contourless[0],
+                                neighbourhood_contourless[1:])
         else:
             return contour_inter
 
-    return detecont_rec(pixel.adjs(matread))
+    return detecont_rec(pixel, [])
 
 
 def contour_image(matriceNG, seuil):
