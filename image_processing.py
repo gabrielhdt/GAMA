@@ -69,7 +69,7 @@ def detection_contour(matng, pixel, seuil, pretendants, contour_inter,
         return contour_inter
 
 
-def detection_contour_subfct(matng, pixel, seuil=0.1, matread=None):
+def detection_contour_subfct(matng, pixel, seuil=0.01, matread=None):
     """
     Comme ci-dessus, mais en utilisant une sous fonction. Pourra aider pour
     la méthode dynamique.
