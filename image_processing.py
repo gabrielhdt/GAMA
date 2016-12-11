@@ -11,7 +11,6 @@ Matriceniveauxdegris: niveau de gris entre 0 et 1, avec coefficients
 import scipy.misc as smp
 import numpy as np
 import matplotlib.pyplot as plt
-import random
 import image_elements
 
 
@@ -22,6 +21,20 @@ def Matriceniveauxdegris(matriceRGB):
         for j in range (b):
             Matrice_gray[i][j]+=((matriceRGB[i][j][0]/255)*0.2126+(matriceRGB[i][j][1]/255)*0.7152+(matriceRGB[i][j][2]/255)*0.0722)
     return Matrice_gray
+
+def regroupement_couleur(matricenb, seuil):
+    # regroupe sous formes d'intervalles les couleurs de la matrice
+    # en noir et blanc
+    couleur = np.arange(0,1,seuil)
+    n = len(couleur)
+    for i in range(n) :
+        mat_condition1 = np.where(i*seuil < matricenb, True, False)
+        mat_condition2 = np.where(matricenb <=(i+1)*seuil, True, False)
+        mat = np.logical_and(mat_condition1,mat_condition2)
+        matricenb[mat] = (2*i+1)*seuil/2 * np.ones_like(matricenb[mat])
+    return matricenb
+
+
 
 
 def add_border(matng):
@@ -112,6 +125,7 @@ def contour_image(matriceNG, seuil):
     contour_inter = image_elements.Contour([])
     for i in range(line):
         for j in range(column):
+
             liste_contours.append(detection_contour(matriceNG, image_elements.Pixel(i,j), seuil, pretendants, contour_inter, matread))
     return liste_contours
 
