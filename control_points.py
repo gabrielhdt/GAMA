@@ -136,10 +136,10 @@ def control(contour, start):
     elif "inf" in (pente_e, pente_s):
         if pente_s == "inf":
             middle_x = start.x
-            middle_y = end.y + pente_e * end.x
+            middle_y = end.y + pente_e * (end.x - start.x)
         elif pente_e == "inf":
             middle_x = end.x
-            middle_y = start.y + pente_s * start.x
+            middle_y = start.y + pente_s * (start.x - end.x)
     elif 0 in (pente_e, pente_s):
         if pente_s == 0:
             middle_x = end.x + (start.y - end.y)/pente_e
