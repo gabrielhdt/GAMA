@@ -89,7 +89,7 @@ class Pixel(object):
         pixel_voisins = set()
         for k in range(x-1, x+2):
             for j in range(y-1, y+2):
-                if k == x ^ j == y and k >= 0 and j >= 0:
+                if (k == x)^(j == y) and k >= 0 and j >= 0:
                     pixel_voisins.add(Pixel(k, j))
         return pixel_voisins
 
@@ -117,9 +117,7 @@ class Contour(object):
         """
         overcrowded = []
         for pix in self.xys:
-            print(pix.closest_neighbours())
             if len(pix.closest_neighbours() & set(self.xys)) > 2:
                 overcrowded.append(pix)
-        print(overcrowded)
         for choked in overcrowded:
             self.xys.remove(choked)
