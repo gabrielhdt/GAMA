@@ -81,15 +81,16 @@ class Pixel(object):
 
     def closest_neighbours(self):
         """
-        Closest neighbours
+        Neighbours directly contiguous, i.e. with only one different
+        coordinate
         """
         x = self.x
         y = self.y
-        pixel_voisins = []
+        pixel_voisins = set()
         for k in range(x-1, x+2):
             for j in range(y-1, y+2):
-                if k == x or j == y and k >= 0 and j >= 0:
-                    pixel_voisins.append(Pixel(k, j))
+                if k == x ^ j == y and k >= 0 and j >= 0:
+                    pixel_voisins.add(Pixel(k, j))
         return pixel_voisins
 
 
@@ -99,7 +100,7 @@ class Contour(object):
         xys -- list of pixels
         """
         self.xys = xys
-        self.color = None
+        self.colour = None
 
     def __eq__(self, other):
         return self.xys == other.xys
@@ -109,3 +110,16 @@ class Contour(object):
             return 0
         else:
             return self.xys[0].x + 100*self.xys[len(self.xys)//2].x
+
+    def thinner(self):
+        """Removes redundant pixel in contour, i.e. when it has too much
+        closest neighbours
+        """
+        overcrowded = []
+        for pix in self.xys:
+            print(pix.closest_neighbours())
+            if len(pix.closest_neighbours() & set(self.xys)) > 2:
+                overcrowded.append(pix)
+        print(overcrowded)
+        for choked in overcrowded:
+            self.xys.remove(choked)
