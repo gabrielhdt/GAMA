@@ -157,19 +157,17 @@ def separate_contour(contour_raw):
         contour.
     """
     loop = image_elements.Contour([])
-    refpix = contour_raw.xys[0]
-    loop.xys.append(refpix)
-    inspix = (set(contour_raw.xys) & set(refpix.neighbours())).pop()
-    while inspix != refpix:
-        loop.xys.append(inspix)
-        contour_raw.xys.remove(inspix)
-        neighbourhood = set(inspix.neighbours()) & set(contour_raw.xys)
+    inspix = set(contour_raw.xys).pop()
+    neighbourhood = set(inspix.neighbours()) & set(contour_raw.xys)
+    while len(neighbourhood) >= 1:
         if len(neighbourhood) > 1:
             inspix = (neighbourhood & set(inspix.closest_neighbours())).pop()
         else:
             inspix = neighbourhood.pop()
+        loop.xys.append(inspix)
+        contour_raw.xys.remove(inspix)
+        neighbourhood = set(inspix.neighbours()) & set(contour_raw.xys)
     raw_minusloop = image_elements.Contour(contour_raw.xys[:])  # Copie
-    raw_minusloop.xys.remove(refpix)
     return loop, raw_minusloop
 
 
@@ -177,14 +175,14 @@ def separate_all_contours(contour_raw):
     liste_contour = []
 
     def separate(contour_raw, liste_contour):
+        print(len(contour_raw.xys), len(liste_contour))
+        print(contour_raw.xys)
         if len(contour_raw.xys) < 1:
             return []
         else:
-            print(contour_raw.xys)
             loop, raw_minusloop = separate_contour(contour_raw)
             liste_contour.append(loop)
             separate(raw_minusloop,liste_contour)
-        return liste_contour
     return separate(contour_raw, liste_contour)
 
 
