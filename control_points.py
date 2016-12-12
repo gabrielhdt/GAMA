@@ -133,11 +133,18 @@ def control(contour, start):
     if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
         middle_x = (start.x + end.x)/2
         middle_y = (start.y + end.y)/2 + middle_x
-    elif 0 in (pente_e, pente_s):
+    elif "inf" in (pente_e, pente_s):
         if pente_s == "inf":
+            middle_x = start.x
+            middle_y = end.y + pente_e * (end.x - start.x)
+        elif pente_e == "inf":
+            middle_x = end.x
+            middle_y = start.y + pente_s * (start.x - end.x)
+    elif 0 in (pente_e, pente_s):
+        if pente_s == 0:
             middle_x = end.x + (start.y - end.y)/pente_e
             middle_y = start.y
-        elif pente_e == "inf":
+        elif pente_e == 0:
             middle_x = start.x + (end.y - start.y)/pente_s
             middle_y = end.y
     elif pente_s != 0 and pente_e != 0:
