@@ -89,7 +89,7 @@ class Pixel(object):
         pixel_voisins = set()
         for k in range(x-1, x+2):
             for j in range(y-1, y+2):
-                if (k == x)^(j == y) and k >= 0 and j >= 0:
+                if (k == x) ^ (j == y) and k >= 0 and j >= 0:
                     pixel_voisins.add(Pixel(k, j))
         return pixel_voisins
 
@@ -113,11 +113,10 @@ class Contour(object):
 
     def thinner(self):
         """Removes redundant pixel in contour, i.e. when it has too much
-        closest neighbours
+        closest neighbours. The method may not be the best, if two pixels
+        side to side have each 3 closest_neighbours, only one will be removed
+        as the other will lose the latter. It avoids bugs (holes in contour).
         """
-        overcrowded = []
         for pix in self.xys:
             if len(pix.closest_neighbours() & set(self.xys)) > 2:
-                overcrowded.append(pix)
-        for choked in overcrowded:
-            self.xys.remove(choked)
+                self.xys.remove(pix)
