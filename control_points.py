@@ -20,7 +20,7 @@ def pente_moy(pixel, contour, sens=1, precision=5):
             other_x = contour.xys[(index + i * sens) % n].x
             other_y = contour.xys[(index + i * sens) % n].y
         if pixel.x == other_x:
-            return 0
+            return "inf"
         else:
             pente += (pixel.y-other_y)/(pixel.x-other_x)
     return pente/precision
@@ -134,10 +134,10 @@ def control(contour, start):
         middle_x = (start.x + end.x)/2
         middle_y = (start.y + end.y)/2 + middle_x
     elif 0 in (pente_e, pente_s):
-        if pente_s == 0:
+        if pente_s == "inf":
             middle_x = end.x + (start.y - end.y)/pente_e
             middle_y = start.y
-        elif pente_e == 0:
+        elif pente_e == "inf":
             middle_x = start.x + (end.y - start.y)/pente_s
             middle_y = end.y
     elif pente_s != 0 and pente_e != 0:
