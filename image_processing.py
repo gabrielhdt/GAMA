@@ -172,18 +172,14 @@ def separate_contour(contour_raw):
 
 
 def separate_all_contours(contour_raw):
-    liste_contour = []
 
-    def separate(contour_raw, liste_contour):
-        print(len(contour_raw.xys), len(liste_contour))
-        print(contour_raw.xys)
+    def separate(contour_raw):
         if len(contour_raw.xys) < 1:
             return []
         else:
             loop, raw_minusloop = separate_contour(contour_raw)
-            liste_contour.append(loop)
-            separate(raw_minusloop,liste_contour)
-    return separate(contour_raw, liste_contour)
+            return [loop] + separate(raw_minusloop)
+    return separate(contour_raw)
 
 
 if __name__ == "__main__":
