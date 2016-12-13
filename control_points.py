@@ -25,6 +25,7 @@ def pente_moy(pixel, contour, sens=1, precision=5):
             pente += (pixel.y-other_y)/(pixel.x-other_x)
     return pente/precision
 
+
 def pente_moy2(pixel, contour, precision=5):
     """pixel un objet de la classe Pixel
     contour un objet de la classe Contour
@@ -42,7 +43,7 @@ def pente_moy2(pixel, contour, precision=5):
             other_x = contour.xys[(index + i) % n].x
             other_y = contour.xys[(index + i) % n].y
         if pixel.x == other_x:
-            pente += 5 * (pixel.y-other_y) #donner du poids aux pente infini sans écraser l'influence des autres points
+            return "inf"
         else:
             pente += (pixel.y-other_y)/(pixel.x-other_x)
     return pente/precision
@@ -67,7 +68,7 @@ def tan_param(startpix, contour, precision=5, sens=1):
         other_y = contour.xys[(index + i*sens) % n].y
         delta_x_mean += other_x - startpix.x
         delta_y_mean += other_y - startpix.y
-    return (delta_x_mean/precision, delta_y_mean/precision)
+    return delta_x_mean/precision, delta_y_mean/precision
 
 
 def clockwise(p1, p2, p3):
@@ -85,9 +86,14 @@ def vertan(points):
     """
     assert len(points) == 4
     projx = [None for _ in range(3)]
+    projy = [None for _ in range(3)]
     for i in range(3):
         projx[i] = points[i + 1].x - points[0].x
-    return projx[1] > projx[0] and projx[1] > projx[2]  # Stricte ou large?
+        projy[i] = points[i + 1].y - points[0].y
+    x = projx[1] > projx[0] and projx[1] > projx[2]
+    y = projy[1] > projy[0] and projy[1] > projy[2]
+    return x or y
+    # Stricte ou large?
 
 
 def find_inflexion(contour, start):
@@ -100,7 +106,37 @@ def find_inflexion(contour, start):
     """
     start_index = contour.xys.index(start)
     n = len(contour.xys) - 1    # dernier indice disponible
-    if start_index + 1 > n:     # si dépassement on renvoie le dernier pixel
+    if start_index + 1 > n or start_index + 2 > n:   # si dépassement on renvoie le dernier pixel
+        return contour.xys[-1]
+    sens = clockwise(start, contour.xys[start_index + 1],
+                     contour.xys[start_index + 2])
+    new_sens = sens
+    while new_sens == sens:
+        if start_index + 3 > n:  # dernier point de contour atteint...
+            return contour.xys[-1]  # ...sans inflexion
+        if start.y == contour.xys[start_index + 2].y:
+            return contour.xys[start_index + 2]
+        if start.x == contour.xys[start_index + 2].x:
+            return contour.xys[start_index + 2]
+        start_index += 1
+        new_sens = clockwise(start, contour.xys[start_index + 1],  # Sera plus
+                             contour.xys[start_index + 2])  # facile à modifier
+    return contour.xys[start_index + 1]
+    # on sort de la boucle while, donc ce pixel correspond au premier
+    # point d inflexion rencontre
+
+
+def find_inflexion2(contour, start):
+    """Renvoie le pixel correspondant au point de controle d arrivee
+    de la portion de contour partant du pixel start:
+    soit le premier point d'inflexion rencontre, soit le dernier point
+    du contour
+    contour -- image_elements.Contour() object
+    start -- pixel de début, image_elements.Pixel() object
+    """
+    start_index = contour.xys.index(start)
+    n = len(contour.xys) - 1    # dernier indice disponible
+    if start_index + 1 > n or start_index + 2 > n:   # si dépassement on renvoie le dernier pixel
         return contour.xys[-1]
     sens = clockwise(start, contour.xys[start_index + 1],
                      contour.xys[start_index + 2])
@@ -116,8 +152,6 @@ def find_inflexion(contour, start):
         new_sens = clockwise(start, contour.xys[start_index + 1],  # Sera plus
                              contour.xys[start_index + 2])  # facile à modifier
     return contour.xys[start_index + 1]
-    # on sort de la boucle while, donc ce pixel correspond au premier
-    # point d inflexion rencontre
 
 
 def control(contour, start):
@@ -147,7 +181,7 @@ def control(contour, start):
         elif pente_e == 0:
             middle_x = start.x + (end.y - start.y)/pente_s
             middle_y = end.y
-    elif pente_s != 0 and pente_e != 0:
+    else:   #pente_s != 0 and pente_e != 0:
         coef = 1/(pente_s - pente_e)
         middle_x = coef*(pente_s*start.x - pente_e*end.x + end.y - start.y)
         middle_y = pente_s*(middle_x - start.x) + start.y
