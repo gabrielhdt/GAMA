@@ -60,13 +60,15 @@ class SvgFile:
         self.write("</svg>")
         self.file.close()
 
-    def draw_contour(self, ctrl_mat, colours):
+    def draw_contour(self, ctrl_mat, colours=None):
         """Draws a contour with quadratic bezier curves whose control points are
         in ctrl_mat (a point is given by ctrl_mat[k,:]). To make a loop, first
         point must match last point.
         ctrl_mat -- (n, 2) int array
         colours -- dictionnary containing stroke colour and fill colour
         """
+        if colours is None:
+            colours = {"fill": "blue", "stroke": "blue"}
         assert ctrl_mat[3:, ].shape[0] % 2 == 0  # Pair of points except first
         n_bezier = ctrl_mat[3:, ].shape[0]//2  # Number of curves
         self.open_path()
