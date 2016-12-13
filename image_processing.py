@@ -93,13 +93,12 @@ def detection_contour_subfct(matng, pixel, seuil=0.01, matread=None):
     def detecont_rec(inspix, neighbourhood):
         colour = matng[inspix.x, inspix.y]
         neighbourhood_contourless = neighbourhood.copy()
-        if colour <= 1:  # If not in added border
-            for neighbour in neighbourhood:
-                matread[neighbour.x, neighbour.y] = True
-                neighbour_colour = matng[neighbour.x, neighbour.y]
-                if abs(colour - neighbour_colour) > seuil:
-                    contour_inter.xys.append(neighbour)
-                    neighbourhood_contourless.remove(neighbour)
+        for neighbour in neighbourhood:
+            matread[neighbour.x, neighbour.y] = True
+            neighbour_colour = matng[neighbour.x, neighbour.y]
+            if abs(colour - neighbour_colour) > seuil:
+                contour_inter.xys.append(neighbour)
+                neighbourhood_contourless.remove(neighbour)
         if len(neighbourhood_contourless) > 0:
             nextinspix = neighbourhood_contourless.pop()
             nextneighbourhood = nextinspix.adjs(matread) | \
