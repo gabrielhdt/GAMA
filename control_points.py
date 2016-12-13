@@ -100,7 +100,7 @@ def find_inflexion(contour, start):
     """
     start_index = contour.xys.index(start)
     n = len(contour.xys) - 1    # dernier indice disponible
-    if start_index + 2 > n:     # si dépassement on renvoie le dernier pixel
+    if start_index + 1 > n or start_index + 2 > n:   # si dépassement on renvoie le dernier pixel
         return contour.xys[-1]
     sens = clockwise(start, contour.xys[start_index + 1],
                      contour.xys[start_index + 2])
