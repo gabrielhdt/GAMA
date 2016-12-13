@@ -71,12 +71,12 @@ class Pixel(object):
         """
         x = self.x
         y = self.y
-        pixel_voisins = []
+        pixel_voisins = set()
         for k in range(x-1, x+2):
             for j in range(y-1, y+2):
                 if not(k == x and j == y) and \
                         k >= 0 and j >= 0:
-                    pixel_voisins.append(Pixel(k, j))
+                    pixel_voisins.add(Pixel(k, j))
         return pixel_voisins
 
     def closest_neighbours(self):
@@ -117,6 +117,18 @@ class Contour(object):
         side to side have each 3 closest_neighbours, only one will be removed
         as the other will lose the latter. It avoids bugs (holes in contour).
         """
+        overcrowding = []
         for pix in self.xys:
-            if len(pix.closest_neighbours() & set(self.xys)) > 2:
-                self.xys.remove(pix)
+            if len(pix.closest_neighbours() & set(self.xys)) >= 3:
+                overcrowding.append(pix)
+        will_die = [True for _ in overcrowding]
+        for i, choked in enumerate(overcrowding):
+            neighbours = set(choked.neighbours())
+            will_stay = neighbours - set(overcrowding)  # Pixels that won't go
+            for resistant in will_stay:
+                if len(resistant.neighbours() & neighbours) == 0:
+                    will_die[i] = False
+        exterminate = [doomed for (i, doomed) in enumerate(overcrowding) if
+                       will_die[i]]
+        for doomed in exterminate:
+            self.xys.remove(doomed)
