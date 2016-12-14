@@ -137,4 +137,12 @@ class Contour(object):
 
     def skinnier(self):
         """Thins more the contour, a pixel must have only 2 neighbours."""
-        pass
+        # First filter: remove if more than 3 closest_neighbours (easy)
+        for pix in self.xys:
+            if len(pix.closest_neighbours() & set(self.xys)) >= 3:
+                    self.xys.remove(pix)
+        # Second filter: removes angles
+        overcrowding = []
+        for pix in self.xys:
+            if len(pix.neighbours() & set(self.xys)) >= 3:
+                overcrowding.append(pix)
