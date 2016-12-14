@@ -93,6 +93,12 @@ class Pixel(object):
                     pixel_voisins.add(Pixel(k, j))
         return pixel_voisins
 
+    def neighbourscont(self, cont):
+        """Returns neighbours that are in contour cont
+        cont -- Contour() object
+        """
+        return self.neighbours() & set(cont.xys)
+
 
 class Contour(object):
     def __init__(self, xys):
@@ -136,13 +142,53 @@ class Contour(object):
             self.xys.remove(doomed)
 
     def skinnier(self):
-        """Thins more the contour, a pixel must have only 2 neighbours."""
+        """Thins more the contour, a pixel must have only 2 neighbours. To
+        process a pixel, the neighbours of the neighbours are inspected. If
+        first neighbour has only two neighbours, the pixel shouldn't be
+        removed"""
         # First filter: remove if more than 3 closest_neighbours (easy)
-        for pix in self.xys:
+        for pix in self.xys[:]:
             if len(pix.closest_neighbours() & set(self.xys)) >= 3:
                     self.xys.remove(pix)
         # Second filter: removes angles
-        overcrowding = []
+        """
+        overcrowding = set()
+        for pix in self.xys:
+            if len(pix.neighbours() & set(self.xys)) >= 3:
+                overcrowding.add(pix)
+        for choked in overcrowding:
+            doomed = True
+            crowd = choked.neighbours() & set(self.xys)
+            for choker in crowd:
+                crowdofchoker = choker.neighbourscont(self)
+                if len(crowdofchoker) == 2:
+                    doomed = False
+            if doomed:
+                self.xys.remove(choked)
+        """
+        overcrowding = set()
+        """
+        for pix in self.xys[:]:
+            choker = 0
+            for neighbour in pix.neighbourscont(self):
+                if len(neighbour.neighbourscont(self)) >= 3:
+                    choker += 1
+            if choker >= 2:
+                self.xys.remove(pix)
+        """
         for pix in self.xys:
             if len(pix.neighbours() & set(self.xys)) >= 3:
                 overcrowding.append(pix)
+        will_die = [True for _ in overcrowding]
+        for i, choked in enumerate(overcrowding):
+            for choker in choked.neighbours() & set(self.xys):
+                if len(choker.neighbours() & set(self.xys) - set([choked])) <= 2:
+                    will_die[i] = False
+                if will_die[i]:
+                    self.xys.remove(choker)
+        """
+        extermination = [doomed for (i, doomed) in enumerate(overcrowding) if
+                         will_die[i]]
+        for doomed in extermination:
+            self.xys.remove(doomed)
+        """
