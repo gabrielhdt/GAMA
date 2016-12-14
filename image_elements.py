@@ -134,9 +134,3 @@ class Contour(object):
                        will_die[i]]
         for doomed in exterminate:
             self.xys.remove(doomed)
-
-    def skinnier(self):
-        """
-        Thins more the contour, each pixel must have 2 neighbours max
-        """
-        pass
