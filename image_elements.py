@@ -150,45 +150,21 @@ class Contour(object):
         for pix in self.xys[:]:
             if len(pix.closest_neighbours() & set(self.xys)) >= 3:
                     self.xys.remove(pix)
-        # Second filter: removes angles
-        """
-        overcrowding = set()
-        for pix in self.xys:
-            if len(pix.neighbours() & set(self.xys)) >= 3:
-                overcrowding.add(pix)
-        for choked in overcrowding:
-            doomed = True
-            crowd = choked.neighbours() & set(self.xys)
-            for choker in crowd:
-                crowdofchoker = choker.neighbourscont(self)
-                if len(crowdofchoker) == 2:
-                    doomed = False
-            if doomed:
-                self.xys.remove(choked)
-        """
-        overcrowding = set()
-        """
+        # Second filter: removes angles inside contour
         for pix in self.xys[:]:
-            choker = 0
-            for neighbour in pix.neighbourscont(self):
-                if len(neighbour.neighbourscont(self)) >= 3:
-                    choker += 1
-            if choker >= 2:
-                self.xys.remove(pix)
-        """
-        for pix in self.xys:
-            if len(pix.neighbours() & set(self.xys)) >= 3:
-                overcrowding.append(pix)
-        will_die = [True for _ in overcrowding]
-        for i, choked in enumerate(overcrowding):
-            for choker in choked.neighbours() & set(self.xys):
-                if len(choker.neighbours() & set(self.xys) - set([choked])) <= 2:
-                    will_die[i] = False
-                if will_die[i]:
-                    self.xys.remove(choker)
-        """
-        extermination = [doomed for (i, doomed) in enumerate(overcrowding) if
-                         will_die[i]]
-        for doomed in extermination:
-            self.xys.remove(doomed)
-        """
+            cl_neighbourhood = pix.closest_neighbours() & set(self.xys)
+            neighbourhood = pix.neighbourscont(self)
+            if len(cl_neighbourhood) == 2 and len(neighbourhood) == 4:
+                rdneighbour = cl_neighbourhood.pop()  # Random neighbour
+                # If other neighbour in neighbourhood of random neighbour
+                if cl_neighbourhood.pop() in rdneighbour.neighbourscont(self):
+                    self.xys.remove(pix)
+        # Third filter: removes angles with two neighbours
+        for pix in self.xys[:]:
+            neighbourhood = pix.neighbourscont(self)
+            if len(neighbourhood) == 2:
+                neighbour1 = neighbourhood.pop()
+                neighbour2 = neighbourhood.pop()
+                if (len(neighbour1.neighbourscont(self)) ==
+                    len(neighbour2.neighbourscont(self)) == 3):
+                    self.xys.remove(pix)
