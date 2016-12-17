@@ -150,7 +150,7 @@ class Contour(object):
         for pix in self.xys[:]:
             if len(pix.closest_neighbours() & set(self.xys)) >= 3:
                     self.xys.remove(pix)
-        # Second filter: removes angles inside contour
+        # Second filter: removes angles inside contour (staircase like)
         for pix in self.xys[:]:
             cl_neighbourhood = pix.closest_neighbours() & set(self.xys)
             neighbourhood = pix.neighbourscont(self)
@@ -159,7 +159,17 @@ class Contour(object):
                 # If other neighbour in neighbourhood of random neighbour
                 if cl_neighbourhood.pop() in rdneighbour.neighbourscont(self):
                     self.xys.remove(pix)
-        # Third filter: removes angles with two neighbours
+        # Third filter: for lumps in diagonal
+        for pix in self.xys[:]:
+            cl_neighbourhood = pix.closest_neighbours() & set(self.xys)
+            if len(cl_neighbourhood) == 2:
+                doomed = True  # Will be removed, unless...
+                for neigh in cl_neighbourhood:
+                    if len(neigh.neighbourscont(self)) <= 2:
+                            doomed = False  # ... neighbourhood is sparse
+                if doomed:
+                    self.xys.remove(pix)
+        # Fourth filter: removes angles with two neighbours (right angle)
         for pix in self.xys[:]:
             neighbourhood = pix.neighbourscont(self)
             if len(neighbourhood) == 2:
