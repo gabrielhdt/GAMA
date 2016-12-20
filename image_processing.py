@@ -87,6 +87,7 @@ def detection_contour_subfct(matng, pixel, setallcont, seuil=0.01,
     la méthode dynamique. matng doit avoir une bordure de 7.
     matread_loc sert à arrêter la récursion pour la détection d'un unique
     contour quand matread sert à la détection de tous les contours
+    matread et setallcont sont modifiés inplace: pas de return
     """
     if matread is None:
         matread = np.zeros_like(matng, dtype=bool)  # Any pixel read
@@ -116,7 +117,7 @@ def detection_contour_subfct(matng, pixel, setallcont, seuil=0.01,
         else:
             return contour_inter
 
-    return detecont_rec(pixel, pixel.adjs(matread_loc)), matread
+    return detecont_rec(pixel, pixel.adjs(matread_loc))
 
 
 def contours_image(matngb, seuil=0.01):
@@ -135,8 +136,8 @@ def contours_image(matngb, seuil=0.01):
         notread = np.where(matread == False)  # Finds False in matread
         notread = notread[0][0], notread[1][0]
         begpix = image_elements.Pixel(notread[0], notread[1])
-        cont, matread = detection_contour_subfct(matngb, begpix, setallcont,
-                                                 seuil, matread)
+        cont = detection_contour_subfct(matngb, begpix, setallcont,
+                                        seuil, matread)
         contset.add(cont)
     contset = contset - set((image_elements.Contour([]), ))  # Removes empty
     return contset
