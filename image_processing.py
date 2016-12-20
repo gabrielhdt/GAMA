@@ -83,7 +83,7 @@ def detection_contour(matng, pixel, seuil, pretendants, contour_inter,
 def detection_contour_subfct(matng, pixel, seuil=0.01, matread=None):
     """
     Comme ci-dessus, mais en utilisant une sous fonction. Pourra aider pour
-    la méthode dynamique.
+    la méthode dynamique. matng doit avoir une bordure de 7.
     """
     if matread is None:
         matread = np.zeros_like(matng, dtype=bool)  # Any pixel read
