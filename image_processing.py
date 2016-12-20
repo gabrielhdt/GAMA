@@ -80,14 +80,18 @@ def detection_contour(matng, pixel, seuil, pretendants, contour_inter,
         return contour_inter
 
 
-def detection_contour_subfct(matng, pixel, seuil=0.01, matread=None):
+def detection_contour_subfct(matng, pixel, setallcont, seuil=0.01,
+                             matread=None):
     """
     Comme ci-dessus, mais en utilisant une sous fonction. Pourra aider pour
     la méthode dynamique. matng doit avoir une bordure de 7.
+    matread_loc sert à arrêter la récursion pour la détection d'un unique
+    contour quand matread sert à la détection de tous les contours
     """
     if matread is None:
         matread = np.zeros_like(matng, dtype=bool)  # Any pixel read
     contour_inter = image_elements.Contour([])
+    matread_loc = np.zeros_like(matng, dtype=bool)
 
     def detecont_rec(inspix, neighbourhood):
         colour = matng[inspix.x, inspix.y]
@@ -95,18 +99,24 @@ def detection_contour_subfct(matng, pixel, seuil=0.01, matread=None):
         for neighbour in neighbourhood:
             matread[neighbour.x, neighbour.y] = True
             neighbour_colour = matng[neighbour.x, neighbour.y]
-            if abs(colour - neighbour_colour) > seuil:
+            if neighbour in setallcont:  # If already in a contour
                 contour_inter.xys.append(neighbour)
                 neighbourhood_contourless.remove(neighbour)
+            elif abs(colour - neighbour_colour) > seuil:  # New contour
+                contour_inter.xys.append(neighbour)
+                setallcont.add(neighbour)
+                neighbourhood_contourless.remove(neighbour)
+            else:  # If not in contour
+                matread_loc[neighbour.x, neighbour.y] = True
         if len(neighbourhood_contourless) > 0:
             nextinspix = neighbourhood_contourless.pop()
-            nextneighbourhood = nextinspix.adjs(matread) | \
+            nextneighbourhood = nextinspix.adjs(matread_loc) | \
                 neighbourhood_contourless
             return detecont_rec(nextinspix, nextneighbourhood)
         else:
             return contour_inter
 
-    return detecont_rec(pixel, pixel.adjs(matread)), matread
+    return detecont_rec(pixel, pixel.adjs(matread_loc)), matread
 
 
 def contours_image(matngb, seuil=0.01):
@@ -118,13 +128,14 @@ def contours_image(matngb, seuil=0.01):
         a contour
     """
     contset = set()
+    setallcont = set()
     matread = np.ones_like(matngb, dtype=bool)
     matread[1:-1, 1:-1] = np.zeros_like(matngb[1:-1, 1:-1], dtype=bool)
     while False in matread:
         notread = np.where(matread == False)  # Finds False in matread
         notread = notread[0][0], notread[1][0]
         begpix = image_elements.Pixel(notread[0], notread[1])
-        cont, matread = detection_contour_subfct(matngb, begpix,
+        cont, matread = detection_contour_subfct(matngb, begpix, setallcont,
                                                  seuil, matread)
         contset.add(cont)
     contset = contset - set((image_elements.Contour([]), ))  # Removes empty
