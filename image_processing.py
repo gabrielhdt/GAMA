@@ -130,12 +130,12 @@ def contours_image(matngb, seuil=0.01):
     """
     contset = set()
     setallcont = set()
-    matread = np.ones_like(matngb, dtype=bool)
-    matread[1:-1, 1:-1] = np.zeros_like(matngb[1:-1, 1:-1], dtype=bool)
+    matread = np.zeros_like(matngb, dtype=bool)
     while False in matread:
-        notread = np.where(matread == False)  # Finds False in matread
+        notread = np.where(matread[1:-1, 1:-1] == False)  # Finds False in matread
         notread = notread[0][0], notread[1][0]
-        begpix = image_elements.Pixel(notread[0], notread[1])
+        # + 1's compensate border
+        begpix = image_elements.Pixel(notread[0] + 1, notread[1] + 1)
         cont = detection_contour_subfct(matngb, begpix, setallcont,
                                         seuil, matread)
         contset.add(cont)
