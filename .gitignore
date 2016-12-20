@@ -96,3 +96,6 @@ ENV/
 
 # Ignore test script
 test.py
+
+# Ignores temp files
+*.swp
