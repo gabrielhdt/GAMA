@@ -213,16 +213,15 @@ class Contour(object):
         loop = Contour([])
         inspix = set(self.xys).pop()
         inspix_beg = inspix  # For the sake of not going back
-        neighbourhood = inspix.neighbours() & set(self.xys)
-        if len(inspix.closest_neighbours() & set(self.xys)) >= 1:
+        neighbourhood = inspix.neighbours(cont=self)
+        if len(inspix.closest_neighbours(cont=self)) >= 1:
             pass  # Following loop will work
         else:
             inspix = neighbourhood.pop()
             loop.xys.append(inspix)
             self.xys.remove(inspix)
             # - set([inspix_beg]) to avoid going back
-            neighbourhood = (inspix.neighbours() & set(self.xys) -
-                             set([inspix_beg]))
+            neighbourhood = (inspix.neighbours(cont=self) - set([inspix_beg]))
         while len(neighbourhood) >= 1:
             if len(neighbourhood) > 1:
                 inspix = (neighbourhood & inspix.closest_neighbours()).pop()
@@ -230,6 +229,6 @@ class Contour(object):
                 inspix = neighbourhood.pop()
             loop.xys.append(inspix)
             self.xys.remove(inspix)
-            neighbourhood = inspix.neighbours() & set(self.xys)
+            neighbourhood = inspix.neighbours(cont=self)
         raw_minusloop = Contour(self.xys[:])  # Copie
         return loop, raw_minusloop
