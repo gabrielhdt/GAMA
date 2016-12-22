@@ -197,21 +197,23 @@ class Contour(object):
 
     def isloop(self):
         """Returns whether the contour is a loop"""
-        return len(self.separate_contour()[1].xys) == 0
+        copy = Contour(self.xys[:])  # To avoid modifying self
+        return len(copy.separate_contour()[1].xys) == 0
 
     def separate_contour(self):
         """Sépare les contours présents dans self, qui
-        est susceptible d'en contenir 2. Au nouveau contour on ajoute les pixels
-        adjacents à celui étudié, qui sont dans le contour, et pas déjà dans le
-        lacet.
+        est susceptible d'en contenir 2. Au nouveau contour on ajoute les
+        pixels adjacents à celui étudié, qui sont dans le contour, et pas
+        déjà dans le lacet.
         self -- contour pouvant en contenir en réalité 2;
             image_elements.Contour() object
-        returns -- loop, containing one loop, i.e. a contour object of contiguous
-            pixels, and raw_minusloop, the self without loop, i.e. the other
-            contour.
+        returns -- loop, containing one loop, i.e. a contour object of
+            contiguous pixels, and raw_minusloop, the self without loop, i.e.
+            the other contour.
         """
         loop = Contour([])
-        inspix = set(self.xys).pop()
+        self.xys = set(self.xys)
+        inspix = self.xys.pop()
         inspix_beg = inspix  # For the sake of not going back
         neighbourhood = inspix.neighbours(cont=self)
         if len(inspix.closest_neighbours(cont=self)) >= 1:
@@ -224,11 +226,11 @@ class Contour(object):
             neighbourhood = (inspix.neighbours(cont=self) - set([inspix_beg]))
         while len(neighbourhood) >= 1:
             if len(neighbourhood) > 1:
-                inspix = (neighbourhood & inspix.closest_neighbours()).pop()
+                inspix = inspix.closest_neighbours(cont=self).pop()
             else:
                 inspix = neighbourhood.pop()
             loop.xys.append(inspix)
             self.xys.remove(inspix)
             neighbourhood = inspix.neighbours(cont=self)
-        raw_minusloop = Contour(self.xys[:])  # Copie
+        raw_minusloop = Contour(self.xys.copy())  # Copie
         return loop, raw_minusloop
