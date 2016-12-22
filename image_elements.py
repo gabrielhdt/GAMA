@@ -69,9 +69,10 @@ class Pixel(object):
                     pixel_voisins.add(Pixel(k,j))
         return pixel_voisins
 
-    def neighbours(self):
+    def neighbours(self, cont=None):
         """
         A supprimer: quick fix car j'ai besoin des adjacents sans la matread
+        Si cont est spécifié, renvoit les voisins dans le contour cont.
         """
         x = self.x
         y = self.y
@@ -81,12 +82,16 @@ class Pixel(object):
                 if not(k == x and j == y) and \
                         k >= 0 and j >= 0:
                     pixel_voisins.add(Pixel(k, j))
-        return pixel_voisins
+        if cont is None:
+            return pixel_voisins
+        else:
+            return pixel_voisins & set(cont.xys)
 
-    def closest_neighbours(self):
+    def closest_neighbours(self, cont=None):
         """
         Neighbours directly contiguous, i.e. with only one different
-        coordinate
+        coordinate. If cont is specified, returns closest_neighbours which are
+        in cont.
         """
         x = self.x
         y = self.y
@@ -95,11 +100,15 @@ class Pixel(object):
             for j in range(y-1, y+2):
                 if (k == x) ^ (j == y) and k >= 0 and j >= 0:
                     pixel_voisins.add(Pixel(k, j))
-        return pixel_voisins
+        if cont is None:
+            return pixel_voisins
+        else:
+            return pixel_voisins & set(cont.xys)
 
     def neighbourscont(self, cont):
         """Returns neighbours that are in contour cont
         cont -- Contour() object
+        DEPRECATED
         """
         return self.neighbours() & set(cont.xys)
 
