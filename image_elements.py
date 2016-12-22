@@ -131,7 +131,10 @@ class Contour(object):
         if len(self.xys) == 0:
             return 0
         else:
-            return self.xys[0].x + 100*self.xys[len(self.xys)//2].x
+            if type(self.xys) is list:
+                return self.xys[0].x + 100*self.xys[len(self.xys)//2].x
+            elif type(self.xys) is set:
+                return self.xys.pop().x + 100*self.xys.pop().x
 
     def thinner(self):
         """Removes redundant pixel in contour, i.e. when it has too much
@@ -197,7 +200,7 @@ class Contour(object):
 
     def isloop(self):
         """Returns whether the contour is a loop"""
-        copy = Contour(self.xys[:])  # To avoid modifying self
+        copy = Contour(self.xys.copy())  # To avoid modifying self
         return len(copy.separate_contour()[1].xys) == 0
 
     def separate_contour(self):
@@ -211,8 +214,8 @@ class Contour(object):
             contiguous pixels, and raw_minusloop, the self without loop, i.e.
             the other contour.
         """
-        loop = Contour([])
-        self.xys = set(self.xys)
+        loop = Contour([])  # Ordonné donc liste
+        assert type(self.xys) is set
         inspix = self.xys.pop()
         inspix_beg = inspix  # For the sake of not going back
         neighbourhood = inspix.neighbours(cont=self)
@@ -232,5 +235,5 @@ class Contour(object):
             loop.xys.append(inspix)
             self.xys.remove(inspix)
             neighbourhood = inspix.neighbours(cont=self)
-        raw_minusloop = Contour(self.xys.copy())  # Copie
+        raw_minusloop = Contour(self.xys.copy())
         return loop, raw_minusloop
