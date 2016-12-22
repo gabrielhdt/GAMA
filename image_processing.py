@@ -140,6 +140,10 @@ def contours_image(matngb, seuil=0.01):
                                         seuil, matread)
         contset.add(cont)
     contset = contset - set((image_elements.Contour([]), ))  # Removes empty
+    # Passage en set() car pixels non ordonnés. Devrait se faire dans
+    # detection_contour, mais l'utilisation de set() entraîne des bugs
+    for cont in contset:
+        cont.xys = set(cont.xys)
     return contset
 
 
@@ -165,8 +169,9 @@ def separate_contour(contour_raw):
     returns -- loop, containing one loop, i.e. a contour object of contiguous
         pixels, and raw_minusloop, the contour_raw without loop, i.e. the other
         contour.
+    DEPRECATED
     """
-    loop = image_elements.Contour([])
+    loop = image_elements.Contour([])  # Ordonné, donc ici liste
     inspix = set(contour_raw.xys).pop()
     neighbourhood = set(inspix.neighbours()) & set(contour_raw.xys)
     while len(neighbourhood) >= 1:
@@ -177,7 +182,7 @@ def separate_contour(contour_raw):
         loop.xys.append(inspix)
         contour_raw.xys.remove(inspix)
         neighbourhood = set(inspix.neighbours()) & set(contour_raw.xys)
-    raw_minusloop = image_elements.Contour(contour_raw.xys[:])  # Copie
+    raw_minusloop = image_elements.Contour(contour_raw.xys.copy())
     return loop, raw_minusloop
 
 
