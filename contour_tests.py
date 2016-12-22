@@ -15,3 +15,6 @@ cardioid.xys += [ie.Pixel(30 + i, 20 - i) for i in range(10)]
 cardioid.xys += [ie.Pixel(40 + i, 10 + i) for i in range(10)]
 cardioid.xys += [ie.Pixel(50 - i, 20 + i) for i in range(20)]
 cardioid.xys += [ie.Pixel(30 - i, 40 - i) for i in range(20)]
+
+line = ie.Contour([])
+line.xys += [ie.Pixel(10 + i, 10 + i) for i in range(10)]
