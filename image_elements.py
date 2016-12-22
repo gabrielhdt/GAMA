@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Defines graphical elements which will be used in the program"""
 import scipy.special
 import scipy as sp
@@ -55,6 +56,9 @@ class Pixel(object):
         return 100*self.x + self.y
 
     def adjs(self, matread):
+        """ Returns neighbours that have not been read (according to matread)
+        returns a set() as we can't order the pixels
+        """
         x = self.x
         y = self.y
         pixel_voisins = set()
@@ -149,7 +153,7 @@ class Contour(object):
         # First filter: remove if more than 3 closest_neighbours (easy)
         for pix in self.xys[:]:
             if len(pix.closest_neighbours() & set(self.xys)) >= 3:
-                    self.xys.remove(pix)
+                self.xys.remove(pix)
         # Second filter: removes angles inside contour (staircase like)
         for pix in self.xys[:]:
             cl_neighbourhood = pix.closest_neighbours() & set(self.xys)
@@ -166,7 +170,7 @@ class Contour(object):
                 doomed = True  # Will be removed, unless...
                 for neigh in cl_neighbourhood:
                     if len(neigh.neighbourscont(self)) <= 2:
-                            doomed = False  # ... neighbourhood is sparse
+                        doomed = False  # ... neighbourhood is sparse
                 if doomed:
                     self.xys.remove(pix)
         # Fourth filter: removes angles with two neighbours (right angle)
@@ -178,3 +182,32 @@ class Contour(object):
                 if (len(neighbour1.neighbourscont(self)) ==
                     len(neighbour2.neighbourscont(self)) == 3):
                     self.xys.remove(pix)
+
+    def isloop(self):
+        """Returns whether the contour is a loop"""
+        return len(self.separate_contour()[1].xys) == 0
+
+    def separate_contour(self):
+        """Sépare les contours présents dans self, qui
+        est susceptible d'en contenir 2. Au nouveau contour on ajoute les pixels
+        adjacents à celui étudié, qui sont dans le contour, et pas déjà dans le
+        lacet.
+        self -- contour pouvant en contenir en réalité 2;
+            image_elements.Contour() object
+        returns -- loop, containing one loop, i.e. a contour object of contiguous
+            pixels, and raw_minusloop, the self without loop, i.e. the other
+            contour.
+        """
+        loop = Contour([])
+        inspix = set(self.xys).pop()
+        neighbourhood = set(inspix.neighbours()) & set(self.xys)
+        while len(neighbourhood) >= 1:
+            if len(neighbourhood) > 1:
+                inspix = (neighbourhood & set(inspix.closest_neighbours())).pop()
+            else:
+                inspix = neighbourhood.pop()
+            loop.xys.append(inspix)
+            self.xys.remove(inspix)
+            neighbourhood = set(inspix.neighbours()) & set(self.xys)
+        raw_minusloop = Contour(self.xys[:])  # Copie
+        return loop, raw_minusloop
