@@ -115,6 +115,9 @@ class Contour(object):
     def __eq__(self, other):
         return self.xys == other.xys
 
+    def __lt__(self, other):
+        return len(self.xys) < len(other.xys)
+
     def __hash__(self):
         if len(self.xys) == 0:
             return 0
@@ -200,14 +203,24 @@ class Contour(object):
         """
         loop = Contour([])
         inspix = set(self.xys).pop()
-        neighbourhood = set(inspix.neighbours()) & set(self.xys)
+        inspix_beg = inspix  # For the sake of not going back
+        neighbourhood = inspix.neighbours() & set(self.xys)
+        if len(inspix.closest_neighbours() & set(self.xys)) >= 1:
+            pass  # Following loop will work
+        else:
+            inspix = neighbourhood.pop()
+            loop.xys.append(inspix)
+            self.xys.remove(inspix)
+            # - set([inspix_beg]) to avoid going back
+            neighbourhood = (inspix.neighbours() & set(self.xys) -
+                             set([inspix_beg]))
         while len(neighbourhood) >= 1:
             if len(neighbourhood) > 1:
-                inspix = (neighbourhood & set(inspix.closest_neighbours())).pop()
+                inspix = (neighbourhood & inspix.closest_neighbours()).pop()
             else:
                 inspix = neighbourhood.pop()
             loop.xys.append(inspix)
             self.xys.remove(inspix)
-            neighbourhood = set(inspix.neighbours()) & set(self.xys)
+            neighbourhood = inspix.neighbours() & set(self.xys)
         raw_minusloop = Contour(self.xys[:])  # Copie
         return loop, raw_minusloop
