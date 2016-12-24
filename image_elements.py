@@ -237,3 +237,14 @@ class Contour(object):
             neighbourhood = inspix.neighbours(cont=self)
         raw_minusloop = Contour(self.xys.copy())
         return loop, raw_minusloop
+
+    def separate_all_contour(self):
+        """Separates every contour present in self"""
+
+        def separate(contour_raw):
+            if len(contour_raw.xys) < 1:
+                return []
+            else:
+                loop, raw_minusloop = self.separate_contour()
+                return [loop] + separate(raw_minusloop)
+        return separate(self)
