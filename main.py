@@ -20,7 +20,8 @@ def main(imagefile):
     separated_cont = []
     for cont in contset:
         separated_cont += image_processing.separate_all_contours(cont)
-    contset = separated_cont
+    contset = set(separated_cont)
+    image_processing.remove_double(contset)
     for cont in contset:
         cont.skinnier()
     svgnames = []
