@@ -161,8 +161,8 @@ def control(contour, start):
     correspondant a la portion du contour qui commence au pixel start
     Est censée être lancée par list_curves.
     """
-    pente_s = pente_moy(start, contour)
     end = find_inflexion(contour, start)
+    pente_s = pente_moy(start, contour)
     pente_e = pente_moy(end, contour, -1)
     if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
         middle_x = (start.x + end.x)/2
@@ -186,6 +186,18 @@ def control(contour, start):
         middle_x = coef*(pente_s*start.x - pente_e*end.x + end.y - start.y)
         middle_y = pente_s*(middle_x - start.x) + start.y
     return sp.array([[start.x, start.y], [middle_x, middle_y], [end.x, end.y]])
+
+
+def dist(cont, pix1, pix2):
+    """Returns the number of pixels between pix1 and pix2 in contour cont
+    cont -- image_elements.Contour(), with cont.xys a list, therefore ordered
+    pix{1,2} -- image_elements.Pixel()
+    """
+    assert isinstance(cont.xys, list)
+    lind = min(cont.xys.index(pix1), cont.xys.index(pix2))
+    gind = max(cont.xys.index(pix1), cont.xys.index(pix2))
+    length = len(cont.xys)
+    return min(gind - lind, (gind + lind)%length)
 
 
 def list_curves(contours):
