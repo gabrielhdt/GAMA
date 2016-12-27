@@ -119,7 +119,10 @@ def find_inflexion(contour, start):
     sens = clockwise(start, contour.xys[start_index + 1],
                      contour.xys[start_index + 2])
     new_sens = sens
-    is_vert = vertan(contour.xys[start_index:start_index + 4])
+    if start_index + 4 > n:
+        is_vert = False
+    else:
+        is_vert = vertan(contour.xys[start_index:start_index + 4])
     if is_vert:  # Si tangente directement verticale
         return cxys[start_index + 2]
     while new_sens == sens and not is_vert:
@@ -212,7 +215,7 @@ def dist(cont, pix1, pix2):
     lind = min(cont.xys.index(pix1), cont.xys.index(pix2))
     gind = max(cont.xys.index(pix1), cont.xys.index(pix2))
     length = len(cont.xys)
-    return min(gind - lind, (gind + lind)%length)
+    return min(gind - lind, length - gind + lind)
 
 
 def list_curves(contours):
