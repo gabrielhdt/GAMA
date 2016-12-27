@@ -104,6 +104,7 @@ def find_inflexion(contour, start):
     contour -- image_elements.Contour() object
     start -- pixel de début, image_elements.Pixel() object
     """
+    cxys = contour.xys  # Shortcut
     start_index = contour.xys.index(start)
     n = len(contour.xys) - 1    # dernier indice disponible
     if start_index + 1 > n or start_index + 2 > n:   # si dépassement on renvoie le dernier pixel
@@ -111,14 +112,20 @@ def find_inflexion(contour, start):
     sens = clockwise(start, contour.xys[start_index + 1],
                      contour.xys[start_index + 2])
     new_sens = sens
-    while new_sens == sens:
+    is_vert = vertan(contour.xys[start_index:start_index + 4])
+    if is_vert:  # Si tangente directement verticale
+        return cxys[start_index + 2]
+    while new_sens == sens and not is_vert:
         if start_index + 3 > n:  # dernier point de contour atteint...
             return contour.xys[-1]  # ...sans inflexion
-        if start.y == contour.xys[start_index + 2].y:
-            return contour.xys[start_index + 2]
-        if start.x == contour.xys[start_index + 2].x:
-            return contour.xys[start_index + 2]
-        start_index += 1
+#        if start.y == contour.xys[start_index + 2].y:
+#            return contour.xys[start_index + 2]
+#        if start.x == contour.xys[start_index + 2].x:
+#            return contour.xys[start_index + 2]
+        start_index += 1  # Préparation de la prochaine boucle
+        is_vert = vertan([start] + \
+            contour.xys[start_index:start_index + 3])
+        print(is_vert)
         new_sens = clockwise(start, contour.xys[start_index + 1],  # Sera plus
                              contour.xys[start_index + 2])  # facile à modifier
     return contour.xys[start_index + 1]
@@ -162,11 +169,13 @@ def control(contour, start):
     Est censée être lancée par list_curves.
     """
     end = find_inflexion(contour, start)
-    pente_s = pente_moy(start, contour)
-    pente_e = pente_moy(end, contour, -1)
+    distance = dist(contour, start, end)
+    precision = min(distance, 5)  # S'il n'y a pas assez de pixels
+    pente_s = pente_moy(start, contour, precision=precision)
+    pente_e = pente_moy(end, contour, -1, precision=precision)
     if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
         middle_x = (start.x + end.x)/2
-        middle_y = (start.y + end.y)/2 + middle_x
+        middle_y = (start.y + end.y)/2
     elif "inf" in (pente_e, pente_s):
         if pente_s == "inf":
             middle_x = start.x
