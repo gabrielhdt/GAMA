@@ -95,8 +95,8 @@ def vertan(points):
     projx = [None for _ in range(3)]
     projy = [None for _ in range(3)]
     for i in range(3):
-        projx[i] = points[i + 1].x - points[0].x
-        projy[i] = points[i + 1].y - points[0].y
+        projx[i] = abs(points[i + 1].x - points[0].x)
+        projy[i] = abs(points[i + 1].y - points[0].y)
     x = projx[1] > projx[0] and projx[1] > projx[2]
     y = projy[1] > projy[0] and projy[1] > projy[2]
     return x or y
