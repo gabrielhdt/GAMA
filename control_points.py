@@ -57,7 +57,7 @@ def tan_param(startpix, contour, precision=5, sens=1):
     startpix -- image_elements.Pixel() object
     contour -- image_elements.Contour() object
     precision -- int, nombre de pixels sur lesquels sont fait la moyenne
-    sens -- \in {-1, 1}
+    sens -- dans {-1, 1}
     """
     index = contour.xys.index(startpix)
     n = len(contour.xys)
@@ -69,6 +69,13 @@ def tan_param(startpix, contour, precision=5, sens=1):
         delta_x_mean += other_x - startpix.x
         delta_y_mean += other_y - startpix.y
     return delta_x_mean/precision, delta_y_mean/precision
+
+
+def paratan2slope(delta_xy):
+    """Pente associée à la tangente paramétrée par delta_x, delta_y
+    delta_xy -- itérable à deux éléments, delta_x en 0 et delta_y en 1"""
+    assert len(delta_xy) == 2
+    return "inf" if delta_xy[0] == 0 else delta_xy[1]/delta_xy[0]
 
 
 def clockwise(p1, p2, p3):
@@ -125,7 +132,6 @@ def find_inflexion(contour, start):
         start_index += 1  # Préparation de la prochaine boucle
         is_vert = vertan([start] + \
             contour.xys[start_index:start_index + 3])
-        print(is_vert)
         new_sens = clockwise(start, contour.xys[start_index + 1],  # Sera plus
                              contour.xys[start_index + 2])  # facile à modifier
     return contour.xys[start_index + 1]
@@ -171,8 +177,8 @@ def control(contour, start):
     end = find_inflexion(contour, start)
     distance = dist(contour, start, end)
     precision = min(distance, 5)  # S'il n'y a pas assez de pixels
-    pente_s = pente_moy(start, contour, precision=precision)
-    pente_e = pente_moy(end, contour, -1, precision=precision)
+    pente_s = paratan2slope(tan_param(start, contour, precision, sens=1))
+    pente_e = paratan2slope(tan_param(start, contour, precision, sens=-1))
     if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
         middle_x = (start.x + end.x)/2
         middle_y = (start.y + end.y)/2
