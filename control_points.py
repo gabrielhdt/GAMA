@@ -79,7 +79,8 @@ def paratan2slope(delta_xy):
 
 
 def clockwise(p1, p2, p3):
-    """test le sens des 3 points p1, p2, p3"""
+    """Renvoie True si la rotation pour aller du vecteur p2p1 p3p1 se fait en
+    sens horaire (par calcul du déterminant)"""
     p1p2 = (p2.x - p1.x, p2.y - p1.y)
     p1p3 = (p3.x - p1.x, p3.y - p1.y)
     return p1p2[0] * p1p3[1] - p1p2[1] * p1p3[0] < 0
@@ -89,7 +90,7 @@ def vertan(points):
     """ Teste si la projection sur l'axe x des vecteurs {p2-p1, p3-p1, p4-p1}
     présente un maximum, i.e. si la tangente à la courbe passe à la verticale.
     points -- list of four image_elements.Pixel() objects
-    returns -- True s'il y a un maximum
+    returns -- True s'il y a un extremum
     """
     assert len(points) == 4
     projx = [None for _ in range(3)]
@@ -135,8 +136,8 @@ def find_inflexion(contour, start):
         start_index += 1  # Préparation de la prochaine boucle
         is_vert = vertan([start] + \
             contour.xys[start_index:start_index + 3])
-        new_sens = clockwise(start, contour.xys[start_index + 1],  # Sera plus
-                             contour.xys[start_index + 2])  # facile à modifier
+        new_sens = clockwise(start, contour.xys[start_index],  # Sera plus
+                             contour.xys[start_index + 1])  # facile à modifier
     return contour.xys[start_index + 1]
     # on sort de la boucle while, donc ce pixel correspond au premier
     # point d inflexion rencontre
