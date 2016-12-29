@@ -115,31 +115,6 @@ def contloop(cont, start, stop):
         return cont.xys[start:stop] + cont.xys[0:stop - length]
 
 
-def scanlines(cont):
-    """Looks for straight lines with length greater than 3 pixels.
-    Fortunately for first condition, right angles don't exist in our world"""
-    cxys = cont.xys[1:]  # Shortcut
-    linedges = set()  # Don't care about order
-    aligned = 0
-    for i, pix in enumerate(cxys):
-        # choordinate stands for change of coordinate...
-        choordinate = not(pix.x == cxys[i - 1].x or pix.y == cxys[i - 1].y)
-        if not choordinate:
-            aligned += 1
-            if aligned == 2:  # If 3 points are aligned
-                for k in range(3):
-                    linedges.add(cxys[i - k])
-            elif aligned >= 3:
-                linedges.add(pix)
-        elif aligned >= 2 and choordinate:  # Coordinate change after
-            for inlinepix in cxys[i - aligned:i - 1]:  # aligned sequence
-                linedges.remove(inlinepix)  # Removes line content
-            aligned = 0
-        else:  # Coordinate change without any alignement
-            aligned = 0
-    return linedges
-
-
 def find_inflexion(contour, start):
     """Renvoie le pixel correspondant au point de controle d arrivee
     de la portion de contour partant du pixel start:
