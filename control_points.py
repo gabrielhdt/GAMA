@@ -148,34 +148,6 @@ def find_inflexion(contour, start):
     return cxys[start_index + 2] if is_vert else cxys[start_index + 1]
 
 
-def find_inflexion2(contour, start):
-    """Renvoie le pixel correspondant au point de controle d arrivee
-    de la portion de contour partant du pixel start:
-    soit le premier point d'inflexion rencontre, soit le dernier point
-    du contour
-    contour -- image_elements.Contour() object
-    start -- pixel de début, image_elements.Pixel() object
-    """
-    start_index = contour.xys.index(start)
-    n = len(contour.xys) - 1    # dernier indice disponible
-    if start_index + 1 > n or start_index + 2 > n:   # si dépassement on renvoie le dernier pixel
-        return contour.xys[-1]
-    sens = clockwise(start, contour.xys[start_index + 1],
-                     contour.xys[start_index + 2])
-    new_sens = sens
-    is_vert = False
-    while new_sens == sens and not is_vert:
-        if start_index + 3 > n:  # dernier point de contour atteint...
-            return contour.xys[-1]  # ...sans inflexion
-        start_index += 1
-        is_vert = vertan([start, contour.xys[start_index],
-                          contour.xys[start_index + 1],
-                          contour.xys[start_index + 2]])
-        new_sens = clockwise(start, contour.xys[start_index + 1],  # Sera plus
-                             contour.xys[start_index + 2])  # facile à modifier
-    return contour.xys[start_index + 1]
-
-
 def control(contour, start):
     """Renvoie le triple de points de controle pour tracer une courbe de
     Bezier quadratique sous forme d'un array scipy (concorde avec
