@@ -131,10 +131,11 @@ def find_inflexion(contour, start):
     sens = clockwise(start, contour.xys[start_index + 1],
                      contour.xys[start_index + 2])
     new_sens = sens
-    if start_index + 4 > n:  # Si moins de 4 points, pas de tangente vert
-        is_vert = False
-    else:
-        is_vert = vertan(contour.xys[start_index:start_index + 4])
+    is_vert = vertan(contloop(contour, start_index, start_index + 4))
+#    if start_index + 4 > n:  # Si moins de 4 points, pas de tangente vert
+#        is_vert = False
+#    else:
+#        is_vert = vertan(contour.xys[start_index:start_index + 4])
     if is_vert:  # Si tangente directement verticale
         return cxys[start_index + 2]
     while new_sens == sens and not is_vert:
