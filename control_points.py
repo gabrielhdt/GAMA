@@ -115,7 +115,7 @@ def contloop(cont, start, stop):
         return cont.xys[start:stop] + cont.xys[0:stop - length]
 
 
-def find_inflexion(contour, start):
+def find_inflexion(contour, start, linedges=set()):
     """Renvoie le pixel correspondant au point de controle d arrivee
     de la portion de contour partant du pixel start:
     soit le premier point d'inflexion rencontre, soit le dernier point
@@ -139,7 +139,9 @@ def find_inflexion(contour, start):
     if is_vert:  # Si tangente directement verticale
         return cxys[start_index + 2]
     while new_sens == sens and not is_vert:
-        if start_index + 3 > n:  # dernier point de contour atteint...
+        if cxys[start_index] in linedges:
+            return cxys[start_index]
+        elif start_index + 3 > n:  # dernier point de contour atteint...
             return contour.xys[-1]  # ...sans inflexion
         start_index += 1  # Préparation de la prochaine boucle
         is_vert = vertan([start] + \
@@ -149,14 +151,16 @@ def find_inflexion(contour, start):
     return cxys[start_index + 2] if is_vert else cxys[start_index + 1]
 
 
-def control(contour, start):
+def control(contour, start, linedges=set()):
     """Renvoie le triple de points de controle pour tracer une courbe de
     Bezier quadratique sous forme d'un array scipy (concorde avec
     writesvg.add_polybezier)
     correspondant a la portion du contour qui commence au pixel start
     Est censée être lancée par list_curves.
     """
-    end = find_inflexion(contour, start)
+    if start in linedges:
+        linedges.remove(start)
+    end = find_inflexion(contour, start, linedges)
     distance = dist(contour, start, end)
     precision = min(distance, 5)  # S'il n'y a pas assez de pixels
     pente_s = paratan2slope(tan_param(start, contour, precision, sens=1))
@@ -203,10 +207,11 @@ def list_curves(contours):
     contours -- liste de image_elements.Contour()"""
     curves = []
     for contour in contours:
+        linedges = contour.scanlines()
         start = contour.xys[0]
         c_end = contour.xys[-1]
         while start != c_end:
-            curve = control(contour, start)
+            curve = control(contour, start, linedges=linedges)
             start = image_elements.Pixel(curve[2][0], curve[2][1])
             curves.append(curve)
     return curves
