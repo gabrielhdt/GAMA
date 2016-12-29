@@ -104,6 +104,16 @@ def vertan(points):
     # Stricte ou large?
 
 
+def contloop(cont, start, stop):
+    """Returns a slice of the contour cont. If stop > len(cont), the slice
+    goes back to the beginning."""
+    length = len(cont.xys)
+    if stop <= length:
+        return cont.xys[start:stop]
+    else:
+        return cont.xys[start:stop] + cont.xys[0:stop - length]
+
+
 def find_inflexion(contour, start):
     """Renvoie le pixel correspondant au point de controle d arrivee
     de la portion de contour partant du pixel start:
@@ -117,10 +127,11 @@ def find_inflexion(contour, start):
     n = len(contour.xys) - 1    # dernier indice disponible
     if start_index + 1 > n or start_index + 2 > n:   # si dépassement on renvoie le dernier pixel
         return contour.xys[-1]
+    # Initialisation
     sens = clockwise(start, contour.xys[start_index + 1],
                      contour.xys[start_index + 2])
     new_sens = sens
-    if start_index + 4 > n:
+    if start_index + 4 > n:  # Si moins de 4 points, pas de tangente vert
         is_vert = False
     else:
         is_vert = vertan(contour.xys[start_index:start_index + 4])
@@ -129,15 +140,11 @@ def find_inflexion(contour, start):
     while new_sens == sens and not is_vert:
         if start_index + 3 > n:  # dernier point de contour atteint...
             return contour.xys[-1]  # ...sans inflexion
-#        if start.y == contour.xys[start_index + 2].y:
-#            return contour.xys[start_index + 2]
-#        if start.x == contour.xys[start_index + 2].x:
-#            return contour.xys[start_index + 2]
         start_index += 1  # Préparation de la prochaine boucle
         is_vert = vertan([start] + \
-            contour.xys[start_index:start_index + 3])
-        new_sens = clockwise(start, contour.xys[start_index],  # Sera plus
-                             contour.xys[start_index + 1])  # facile à modifier
+            contloop(contour, start_index + 1, start_index + 4))
+        new_sens = clockwise(start, contour.xys[start_index + 1],
+                             contour.xys[start_index + 2])
     return contour.xys[start_index + 1]
     # on sort de la boucle while, donc ce pixel correspond au premier
     # point d inflexion rencontre
