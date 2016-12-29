@@ -53,7 +53,7 @@ class Pixel(object):
         return (self.x, self.y) != (other.x, other.y)
 
     def __hash__(self):
-        return 100*self.x + self.y
+        return 100*int(self.x) + int(self.y)  # Should be int anyway
 
     def adjs(self, matread):
         """ Returns neighbours that have not been read (according to matread)
@@ -132,9 +132,9 @@ class Contour(object):
             return 0
         else:
             if type(self.xys) is list:
-                return self.xys[0].x + 100*self.xys[len(self.xys)//2].x
+                return self.xys[0].x + 1000*self.xys[len(self.xys)//2].x
             elif type(self.xys) is set:
-                return self.xys.pop().x + 100*self.xys.pop().x
+                return self.xys.copy().pop().x + 1000*self.xys.copy().pop().x
 
     def thinner(self):
         """Removes redundant pixel in contour, i.e. when it has too much
