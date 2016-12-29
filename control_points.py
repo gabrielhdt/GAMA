@@ -98,10 +98,11 @@ def vertan(points):
     for i in range(3):
         projx[i] = abs(points[i + 1].x - points[0].x)
         projy[i] = abs(points[i + 1].y - points[0].y)
-    x = projx[1] > projx[0] and projx[1] >= projx[2]
-    y = projy[1] > projy[0] and projy[1] >= projy[2]
+    x = projx[1] > projx[0] and projx[1] > projx[2]
+    y = projy[1] > projy[0] and projy[1] > projy[2]
+    # Stricte ou large? Stricte: passage ponctuel, large direction constante
+    # sur un intervalle.
     return x or y
-    # Stricte ou large?
 
 
 def contloop(cont, start, stop):
@@ -112,6 +113,31 @@ def contloop(cont, start, stop):
         return cont.xys[start:stop]
     else:
         return cont.xys[start:stop] + cont.xys[0:stop - length]
+
+
+def scanlines(cont):
+    """Looks for straight lines with length greater than 3 pixels.
+    Fortunately for first condition, right angles don't exist in our world"""
+    cxys = cont.xys[1:]  # Shortcut
+    linedges = set()  # Don't care about order
+    aligned = 0
+    for i, pix in enumerate(cxys):
+        # choordinate stands for change of coordinate...
+        choordinate = not(pix.x == cxys[i - 1].x or pix.y == cxys[i - 1].y)
+        if not choordinate:
+            aligned += 1
+            if aligned == 2:  # If 3 points are aligned
+                for k in range(3):
+                    linedges.add(cxys[i - k])
+            elif aligned >= 3:
+                linedges.add(pix)
+        elif aligned >= 2 and choordinate:  # Coordinate change after
+            for inlinepix in cxys[i - aligned:i - 1]:  # aligned sequence
+                linedges.remove(inlinepix)  # Removes line content
+            aligned = 0
+        else:  # Coordinate change without any alignement
+            aligned = 0
+    return linedges
 
 
 def find_inflexion(contour, start):
