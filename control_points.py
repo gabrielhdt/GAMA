@@ -118,7 +118,10 @@ def find_inflexion(contour, start):
     """Renvoie le pixel correspondant au point de controle d arrivee
     de la portion de contour partant du pixel start:
     soit le premier point d'inflexion rencontre, soit le dernier point
-    du contour
+    du contour.
+    NB (+2, +1 dernière ligne): le pixel à renvoyer est celui sur lequel a
+        été fait le dernier test, d'où les ajouts. +2 pour la tangente car
+        test sur 4 pixels, on prend celui du milieu.
     contour -- image_elements.Contour() object
     start -- pixel de début, image_elements.Pixel() object
     """
@@ -132,10 +135,6 @@ def find_inflexion(contour, start):
                      contour.xys[start_index + 2])
     new_sens = sens
     is_vert = vertan(contloop(contour, start_index, start_index + 4))
-#    if start_index + 4 > n:  # Si moins de 4 points, pas de tangente vert
-#        is_vert = False
-#    else:
-#        is_vert = vertan(contour.xys[start_index:start_index + 4])
     if is_vert:  # Si tangente directement verticale
         return cxys[start_index + 2]
     while new_sens == sens and not is_vert:
@@ -146,9 +145,7 @@ def find_inflexion(contour, start):
             contloop(contour, start_index + 1, start_index + 4))
         new_sens = clockwise(start, contour.xys[start_index + 1],
                              contour.xys[start_index + 2])
-    return contour.xys[start_index + 1]
-    # on sort de la boucle while, donc ce pixel correspond au premier
-    # point d inflexion rencontre
+    return cxys[start_index + 2] if is_vert else cxys[start_index + 1]
 
 
 def find_inflexion2(contour, start):
