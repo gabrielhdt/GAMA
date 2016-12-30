@@ -129,7 +129,8 @@ def find_inflexion(contour, start, linedges=set()):
     cxys = contour.xys  # Shortcut
     start_index = contour.xys.index(start)
     n = len(contour.xys) - 1    # dernier indice disponible
-    if start_index + 1 > n or start_index + 2 > n:   # si dépassement on renvoie le dernier pixel
+    # Si dépassement, on renvoie le dernier pixel
+    if start_index + 1 > n or start_index + 2 > n:
         return contour.xys[-1]
     # Initialisation
     sens = clockwise(start, contour.xys[start_index + 1],
@@ -148,7 +149,12 @@ def find_inflexion(contour, start, linedges=set()):
             contloop(contour, start_index + 1, start_index + 4))
         new_sens = clockwise(start, contour.xys[start_index + 1],
                              contour.xys[start_index + 2])
-    return cxys[start_index + 2] if is_vert else cxys[start_index + 1]
+    if is_vert:  # Vérifie s'il y a une fin de ligne avant
+        contemp = set(cxys[start_index - 1:start_index + 2]) & linedges
+        if len(contemp) > 0:
+            return contemp.pop()
+    else:
+        return cxys[start_index + 2] if is_vert else cxys[start_index + 1]
 
 
 def control(contour, start, linedges=set()):
