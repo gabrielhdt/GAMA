@@ -257,9 +257,8 @@ class Contour(object):
         linedges = set()  # Don't care about order
         aligned = 0
         for i, pix in enumerate(cxys):
-            # choordinate stands for change of coordinate...
-            choordinate = not(pix.x == cxys[i - 1].x or pix.y == cxys[i - 1].y)
-            print(choordinate)
+            # choordinate stands for change of coordinate (we mean both)...
+            choordinate = not(pix.x == self.xys[i].x or pix.y == self.xys[i].y)
             if not choordinate:
                 aligned += 1
                 # If last pixel of contour in a line
@@ -277,5 +276,4 @@ class Contour(object):
                 aligned = 0
             else:  # Coordinate change without any alignement
                 aligned = 0
-            print(pix, aligned)
         return linedges
