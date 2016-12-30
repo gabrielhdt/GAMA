@@ -251,7 +251,7 @@ class Contour(object):
 
     def scanlines(self):
         """Looks for straight lines with length greater than 3 pixels.
-        Fortunately for first condition, right angles don't exist in our
+        Fortunately for choordinate, right angles don't exist in our
         world"""
         cxys = self.xys[1:]  # Shortcut
         linedges = set()  # Don't care about order
@@ -259,9 +259,14 @@ class Contour(object):
         for i, pix in enumerate(cxys):
             # choordinate stands for change of coordinate...
             choordinate = not(pix.x == cxys[i - 1].x or pix.y == cxys[i - 1].y)
+            print(choordinate)
             if not choordinate:
                 aligned += 1
-                if aligned == 2:  # If 3 points are aligned
+                # If last pixel of contour in a line
+                if pix == cxys[-1] and aligned >= 2:
+                    for inlinepix in cxys[i - aligned + 1:i]:
+                        linedges.remove(inlinepix)
+                elif aligned == 2:  # If 3 points are aligned
                     for k in range(3):
                         linedges.add(cxys[i - k])
                 elif aligned >= 3:
@@ -272,4 +277,5 @@ class Contour(object):
                 aligned = 0
             else:  # Coordinate change without any alignement
                 aligned = 0
+            print(pix, aligned)
         return linedges
