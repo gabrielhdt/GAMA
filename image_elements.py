@@ -69,6 +69,11 @@ class Pixel(object):
                     pixel_voisins.add(Pixel(k,j))
         return pixel_voisins
 
+    def aligned(self, other):
+        """Returns a boolena indicating whether self is aligned with other
+        pixel"""
+        return self.x == other.x or self.y == other.y
+
     def neighbours(self, cont=None):
         """
         A supprimer: quick fix car j'ai besoin des adjacents sans la matread
@@ -178,6 +183,28 @@ class Contour(object):
                 # If other neighbour in neighbourhood of random neighbour
                 if cl_neighbourhood.pop() in rdneighbour.neighbourscont(self):
                     self.xys.remove(pix)
+        """
+        # Fourth filter: removes angles with two neighbours (right angle)
+        # identifies angles thanks to number of neighbours
+        for pix in self.xys[:]:
+            neighbourhood = pix.neighbours(cont=self)
+            if len(neighbourhood) == 2:
+                neighbour1 = neighbourhood.pop()
+                neighbour2 = neighbourhood.pop()
+                if (len(neighbour1.neighbours(cont=self)) ==
+                    len(neighbour2.neighbours(cont=self)) == 3):
+                    self.xys.remove(pix)
+                    print("Fourth filter", pix)
+        """
+        # Fourth and a half filter...
+        # identifies angle thanks to neighbours coords
+        for pix in self.xys.copy():
+            neighbourhood = pix.closest_neighbours(cont=self)
+            if len(neighbourhood) == 2:
+                neighbour1 = neighbourhood.pop()
+                neighbour2 = neighbourhood.pop()
+                if not neighbour1.aligned(neighbour2):
+                    self.xys.remove(pix)
         # Third filter: for lumps in diagonal
         for pix in self.xys[:]:
             cl_neighbourhood = pix.closest_neighbours() & set(self.xys)
@@ -187,15 +214,6 @@ class Contour(object):
                     if len(neigh.neighbourscont(self)) <= 2:
                         doomed = False  # ... neighbourhood is sparse
                 if doomed:
-                    self.xys.remove(pix)
-        # Fourth filter: removes angles with two neighbours (right angle)
-        for pix in self.xys[:]:
-            neighbourhood = pix.neighbourscont(self)
-            if len(neighbourhood) == 2:
-                neighbour1 = neighbourhood.pop()
-                neighbour2 = neighbourhood.pop()
-                if (len(neighbour1.neighbourscont(self)) ==
-                    len(neighbour2.neighbourscont(self)) == 3):
                     self.xys.remove(pix)
 
     def isloop(self):
