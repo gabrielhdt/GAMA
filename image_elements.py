@@ -280,9 +280,11 @@ class Contour(object):
             if not choordinate:
                 aligned += 1
                 # If last pixel of contour in a line
-                if pix == cxys[-1] and aligned >= 2:
+                if pix == cxys[-1] and aligned >= 3:
                     for inlinepix in cxys[i - aligned + 1:i]:
                         linedges.remove(inlinepix)
+                elif pix == cxys[-1] and aligned == 2:  # Particular case
+                    linedges.add(pix)
                 elif aligned == 2:  # If 3 points are aligned
                     for k in range(3):
                         linedges.add(cxys[i - k])
