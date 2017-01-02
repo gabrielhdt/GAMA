@@ -168,8 +168,9 @@ def control(contour, start, linedges=set()):
         linedges.remove(start)
     end = find_inflexion(contour, start, linedges)
     distance = dist(contour, start, end)
-    # On ne calcule pas la tangentes avec le pixel d'arrivée si possible
-    precision = min(distance - 1, 5) if distance >= 2 else 1
+    # On ne calcule pas la tangentes avec le pixel d'arrivée si possible, mais
+    # la précision doit être supérieure à 2 pour mener les calculs (iss14)
+    precision = min(distance - 1, 5) if distance - 1 >= 2 else 2
     pente_s = paratan2slope(tan_param(start, contour, precision, sens=1))
     pente_e = paratan2slope(tan_param(end, contour, precision, sens=-1))
     if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
