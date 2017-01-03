@@ -104,6 +104,7 @@ def detection_contour_subfct(matng, pixel, setallcont, seuil=0.01,
                 contour_inter.xys.append(neighbour)
                 neighbourhood_contourless.remove(neighbour)
             elif abs(colour - neighbour_colour) > seuil:  # New contour
+                matread_loc[neighbour.x, neighbour.y] = True
                 contour_inter.xys.append(neighbour)
                 setallcont.add(neighbour)
                 neighbourhood_contourless.remove(neighbour)
