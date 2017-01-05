@@ -48,77 +48,50 @@ def add_border(matng):
     return matng_border
 
 
-def detection_contour(matng, pixel, seuil, pretendants, contour_inter,
-                      matread):
-    """
-    matng -- grey level matrix
-    pixel -- inspected pixel
-    seuil -- minimum difference value between levels of grey to
-        differentiate colours
-    pretendants -- old neighbours that weren't in contour
-    contour_int -- contour built
-    matread -- boolean matrix
-    """
-    matread[pixel.x, pixel.y] = True
-    colorpixel = matng[pixel.x, pixel.y]
-    voisins = pixel.adjs(matread) + pretendants
-    voisins_contourless = voisins[:]  # Slicing pour copie...
-    if colorpixel <= 1:  # Si pas dans le bord ajouté artificiellement
-        for vois in voisins:
-            matread[vois.x, vois.y] = True
-            colorvois = matng[vois.x][vois.y]
-            if abs(colorpixel - colorvois) > seuil:
-                contour_inter.xys.append(vois)
-                voisins_contourless.remove(vois)
-    else:
-        pass
-    if len(voisins_contourless) > 0:
-        pretendant = voisins_contourless[1:]
-        return detection_contour(matng, voisins_contourless[0],
-                                 seuil, pretendant, contour_inter, matread)
-    else:
-        return contour_inter
-
-
-def detection_contour_subfct(matng, pixel, setallcont, seuil=0.01,
-                             matread=None):
-    """
-    Comme ci-dessus, mais en utilisant une sous fonction. Pourra aider pour
-    la méthode dynamique. matng doit avoir une bordure de 7.
-    matread_loc sert à arrêter la récursion pour la détection d'un unique
-    contour quand matread sert à la détection de tous les contours
-    matread et setallcont sont modifiés inplace: pas de return
-    """
-    if matread is None:
-        matread = np.zeros_like(matng, dtype=bool)  # Any pixel read
-    contour_inter = image_elements.Contour([])
+def detection_contour(matng, begpix, matread, seuil=0.01):
+    upper = 300
     matread_loc = np.zeros_like(matng, dtype=bool)
+    notreadneighbours = begpix.adjs(matread_loc) - set((begpix, ))
+    contour = image_elements.Contour(set())
 
-    def detecont_rec(inspix, neighbourhood):
-        colour = matng[inspix.x, inspix.y]
-        neighbourhood_contourless = neighbourhood.copy()
+    def contourec(inspix, notreadneighbours, k=0):
+        """
+        notreadneighbours -- list of pixels which haven't been inspix yet, i.e.
+            a pixel in notreadneighbours may have been compared with an inspix
+            while its neighbours haven't been
+        inspix -- Pixel() inspected, each neighbour's colour is compared with
+            the former's to determine whether inspix is the last pixel of the
+            colour. If so, it will be added to contpart, and then to contour.
+            It is removed from the notreadneighbours when acquired via pop()
+        k -- counter, to avoid MaxRecursionDepth
+        """
+        matread_loc[inspix.x, inspix.y] = True
+        neighbourhood = inspix.adjs(matread_loc)
+        notreadneighbours |= neighbourhood
+        contpart = set()  # Part of contour
+        contour_found = False
+        inscolour = matng[inspix.x, inspix.y]
         for neighbour in neighbourhood:
-            matread[neighbour.x, neighbour.y] = True
-            neighbour_colour = matng[neighbour.x, neighbour.y]
-            if neighbour in setallcont:  # If already in a contour
-                contour_inter.xys.append(neighbour)
-                neighbourhood_contourless.remove(neighbour)
-            elif abs(colour - neighbour_colour) > seuil:  # New contour
+            neighcolour = matng[neighbour.x, neighbour.y]
+            if abs(neighcolour - inscolour) > seuil:
+                contour_found = True
+                notreadneighbours.remove(neighbour)
                 matread_loc[neighbour.x, neighbour.y] = True
-                contour_inter.xys.append(neighbour)
-                setallcont.add(neighbour)
-                neighbourhood_contourless.remove(neighbour)
-            else:  # If not in contour
-                matread_loc[neighbour.x, neighbour.y] = True
-        if len(neighbourhood_contourless) > 0:
-            nextinspix = neighbourhood_contourless.pop()
-            nextneighbourhood = nextinspix.adjs(matread_loc) | \
-                neighbourhood_contourless
-            return detecont_rec(nextinspix, nextneighbourhood)
+                contpart.add(neighbour)
+        if contour_found:
+            return contpart
+        elif k == upper or len(notreadneighbours) == 0:
+            return set((None, ))
         else:
-            return contour_inter
+            nextinspix = notreadneighbours.pop()
+            return contourec(nextinspix, notreadneighbours, k + 1)
 
-    return detecont_rec(pixel, pixel.adjs(matread_loc))
+    while len(notreadneighbours) > 0:
+        begpix = notreadneighbours.pop()
+        contour.xys |= contourec(begpix, notreadneighbours)
+    contour.xys.remove(None)
+    matread += matread_loc  # Updates matread
+    return contour
 
 
 def contours_image(matngb, seuil=0.01):
@@ -137,8 +110,8 @@ def contours_image(matngb, seuil=0.01):
         notread = notread[0][0], notread[1][0]
         # + 1's compensate border
         begpix = image_elements.Pixel(notread[0] + 1, notread[1] + 1)
-        cont = detection_contour_subfct(matngb, begpix, setallcont,
-                                        seuil, matread)
+        cont = detection_contour(matngb, begpix, matread,
+                                 seuil)
         contset.add(cont)
     contset = contset - set((image_elements.Contour([]), ))  # Removes empty
     # Passage en set() car pixels non ordonnés. Devrait se faire dans
