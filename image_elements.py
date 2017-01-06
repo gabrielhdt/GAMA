@@ -238,7 +238,6 @@ class Contour(object):
         inspix = self.xys.pop()
         inspix_beg = inspix  # For the sake of not going back
         neighbourhood = inspix.neighbours(cont=self)
-        print(inspix)
         # Initial step
         if len(inspix.closest_neighbours(cont=self)) >= 1:
             inspix = inspix.closest_neighbours(cont=self).pop()
@@ -262,6 +261,8 @@ class Contour(object):
                 self.xys.remove(inspix)
             neighbourhood = inspix.neighbours(cont=self)
             is_empty = len(neighbourhood) == 0
+        if inspix_beg not in loop.xys:  # To prevent holes
+            loop.xys.append(inspix_beg)
         raw_minusloop = Contour(self.xys.copy())
         return loop, raw_minusloop
 
