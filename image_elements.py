@@ -232,27 +232,36 @@ class Contour(object):
             contiguous pixels, and raw_minusloop, the self without loop, i.e.
             the other contour.
         """
+        is_empty = False
         loop = Contour([])  # Ordonné donc liste
         assert type(self.xys) is set
         inspix = self.xys.pop()
         inspix_beg = inspix  # For the sake of not going back
         neighbourhood = inspix.neighbours(cont=self)
+        print(inspix)
+        # Initial step
         if len(inspix.closest_neighbours(cont=self)) >= 1:
-            pass  # Following loop will work
-        else:
+            inspix = inspix.closest_neighbours(cont=self).pop()
+            loop.xys.append(inspix)
+            self.xys.remove(inspix)
+        elif len(neighbourhood) >= 1:
             inspix = neighbourhood.pop()
             loop.xys.append(inspix)
             self.xys.remove(inspix)
             # - set([inspix_beg]) to avoid going back
-            neighbourhood = (inspix.neighbours(cont=self) - set([inspix_beg]))
-        while len(neighbourhood) >= 1:
-            if len(neighbourhood) > 1:
-                inspix = inspix.closest_neighbours(cont=self).pop()
-            else:
+        neighbourhood = (inspix.neighbours(cont=self) - set([inspix_beg]))
+        while not is_empty:
+            clneighbourhood = inspix.closest_neighbours(cont=self)
+            neighbourhood = inspix.neighbours(cont=self)
+            if len(clneighbourhood) >= 1:
+                inspix = clneighbourhood.pop()
+            elif len(neighbourhood) >= 1:  # Could be else
                 inspix = neighbourhood.pop()
             loop.xys.append(inspix)
-            self.xys.remove(inspix)
+            if inspix in self.xys:  # For first loop only...
+                self.xys.remove(inspix)
             neighbourhood = inspix.neighbours(cont=self)
+            is_empty = len(neighbourhood) == 0
         raw_minusloop = Contour(self.xys.copy())
         return loop, raw_minusloop
 
