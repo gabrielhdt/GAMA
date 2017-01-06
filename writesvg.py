@@ -82,7 +82,7 @@ class SvgFile:
         pix -- image_elemnts.Pixel() element
         """
         self.write("\t<circle")
-        self.write(" cx=\"{}\" cy=\"{}\" r=\"0.1\"/>\n".format(pix.x, pix.y))
+        self.write(" cx=\"{}\" cy=\"{}\" r=\"1\"/>\n".format(pix.x, pix.y))
 
     def draw_contour_pix(self, contour):
         """Draws pixels from contour
