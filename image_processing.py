@@ -48,7 +48,7 @@ def add_border(matng):
     return matng_border
 
 
-def detection_contour(matng, begpix, matread, seuil=0.01):
+def detection_contour(matng, begpix, matread=None, seuil=0.01):
     upper = 300
     matread_loc = np.zeros_like(matng, dtype=bool)
     notreadneighbours = begpix.adjs(matread_loc) - set((begpix, ))
@@ -68,7 +68,6 @@ def detection_contour(matng, begpix, matread, seuil=0.01):
         matread_loc[inspix.x, inspix.y] = True
         neighbourhood = inspix.adjs(matread_loc)
         notreadneighbours |= neighbourhood
-        contpart = set()  # Part of contour
         contour_found = False
         inscolour = matng[inspix.x, inspix.y]
         for neighbour in neighbourhood:
@@ -76,21 +75,21 @@ def detection_contour(matng, begpix, matread, seuil=0.01):
             if abs(neighcolour - inscolour) > seuil:
                 contour_found = True
                 notreadneighbours.remove(neighbour)
-                matread_loc[neighbour.x, neighbour.y] = True
-                contpart.add(neighbour)
         if contour_found:
-            return contpart
+            return inspix
         elif k == upper or len(notreadneighbours) == 0:
-            return set((None, ))
+            return None
         else:
             nextinspix = notreadneighbours.pop()
             return contourec(nextinspix, notreadneighbours, k + 1)
 
     while len(notreadneighbours) > 0:
         begpix = notreadneighbours.pop()
-        contour.xys |= contourec(begpix, notreadneighbours)
-    contour.xys.remove(None)
-    matread += matread_loc  # Updates matread
+        contour.xys.add(contourec(begpix, notreadneighbours))
+    if None in contour.xys:
+        contour.xys.remove(None)
+    if matread is not None:
+        matread += matread_loc  # Updates matread
     return contour
 
 
