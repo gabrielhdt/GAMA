@@ -75,6 +75,8 @@ def detection_contour(matng, begpix, matread=None, seuil=0.01):
             if abs(neighcolour - inscolour) > seuil:
                 contour_found = True
                 notreadneighbours.remove(neighbour)
+            else:  # If not other colour, don't read it again
+                matread_loc[neighbour.x, neighbour.y] = True
         if contour_found:
             return inspix
         elif k == upper or len(notreadneighbours) == 0:
@@ -104,13 +106,16 @@ def contours_image(matngb, seuil=0.01):
     contset = set()
     setallcont = set()
     matread = np.zeros_like(matngb, dtype=bool)
-    while False in matread:
-        notread = np.where(matread[1:-1, 1:-1] == False)  # Finds False in matread
+    while False in matread[1:-1, 1:-1]:
+        # Finds false in matread without border
+        notread = np.where(matread[1:-1, 1:-1] == False)
         notread = notread[0][0], notread[1][0]
-        # + 1's compensate border
+        # + 1's compensate border, avoid falling in the border
         begpix = image_elements.Pixel(notread[0] + 1, notread[1] + 1)
         cont = detection_contour(matngb, begpix, matread,
                                  seuil)
+        for pix in cont.xys:
+            matread[pix.x, pix.y] = True
         contset.add(cont)
     contset = contset - set((image_elements.Contour([]), ))  # Removes empty
     # Passage en set() car pixels non ordonnés. Devrait se faire dans
