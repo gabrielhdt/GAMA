@@ -48,10 +48,15 @@ def add_border(matng):
     return matng_border
 
 
-def detection_contour(matng, begpix, matread=None, seuil=0.01):
+def detection_contour(matng, begpix, seuil=0.01):
     upper = 300
     matread_loc = np.zeros_like(matng, dtype=bool)
     notreadneighbours = begpix.adjs(matread_loc) - set((begpix, ))
+    begcolour = matng[begpix.x, begpix.y]
+    for neighbour in notreadneighbours.copy():
+        neighcolour = matng[neighbour.x, neighbour.y]
+        if abs(neighcolour - begcolour) > seuil:
+            notreadneighbours.remove(neighbour)
     contour = image_elements.Contour(set())
 
     def contourec(inspix, notreadneighbours, k=0):
@@ -66,7 +71,7 @@ def detection_contour(matng, begpix, matread=None, seuil=0.01):
         k -- counter, to avoid MaxRecursionDepth
         """
         matread_loc[inspix.x, inspix.y] = True
-        neighbourhood = inspix.adjs(matread_loc)
+        neighbourhood = inspix.closest_adjs(matread_loc)
         notreadneighbours |= neighbourhood
         contour_found = False
         inscolour = matng[inspix.x, inspix.y]
@@ -75,7 +80,10 @@ def detection_contour(matng, begpix, matread=None, seuil=0.01):
             if abs(neighcolour - inscolour) > seuil:
                 contour_found = True
                 notreadneighbours.remove(neighbour)
-            else:  # If not other colour, don't read it again
+            # If not other colour, don't read it again. However, its
+            # neighbours will be inspected, as it has been added to
+            # notreadneighbours
+            else:
                 matread_loc[neighbour.x, neighbour.y] = True
         if contour_found:
             return inspix
@@ -90,9 +98,7 @@ def detection_contour(matng, begpix, matread=None, seuil=0.01):
         contour.xys.add(contourec(begpix, notreadneighbours))
     if None in contour.xys:
         contour.xys.remove(None)
-    if matread is not None:
-        matread += matread_loc  # Updates matread
-    return contour
+    return contour, matread_loc
 
 
 def contours_image(matngb, seuil=0.01):
@@ -112,16 +118,12 @@ def contours_image(matngb, seuil=0.01):
         notread = notread[0][0], notread[1][0]
         # + 1's compensate border, avoid falling in the border
         begpix = image_elements.Pixel(notread[0] + 1, notread[1] + 1)
-        cont = detection_contour(matngb, begpix, matread,
-                                 seuil)
-        for pix in cont.xys:
-            matread[pix.x, pix.y] = True
+        cont, upmatread = detection_contour(matngb, begpix, seuil)
+        matread += upmatread
         contset.add(cont)
     contset = contset - set((image_elements.Contour([]), ))  # Removes empty
     # Passage en set() car pixels non ordonnés. Devrait se faire dans
     # detection_contour, mais l'utilisation de set() entraîne des bugs
-    for cont in contset:
-        cont.xys = set(cont.xys)
     return contset
 
 
