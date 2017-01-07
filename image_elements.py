@@ -57,17 +57,33 @@ class Pixel(object):
 
     def adjs(self, matread):
         """ Returns neighbours that have not been read (according to matread)
-        returns a set() as we can't order the pixels
+        returns a set() as we can't order the pixels. Matrix is considered as
+        a torus, i.e. adjs of a pixel on a border are pixels on the other
+        border (done automatically on border with index 0).
         """
+        dim = matread.shape
         x = self.x
         y = self.y
         pixel_voisins = set()
-        for k in range(x-1,x+2):
-            for j in range (y-1,y+2):
+        if x == dim[1] - 1:  # If on right border
+            rangex = (x - 1, x, 0)  # Loop on the other side of matrix
+        else:
+            rangex = (x - 1, x, x + 1)
+        if y == dim[0] - 1:  # If on lower border
+            rangey = (y - 1, y, 0)
+        else:
+            rangey = (y - 1, y, y + 1)
+        for k in rangex:
+            for j in rangey:
                 if not(k == x and j == y) and not matread[k, j] and \
                         k >= 0 and j >= 0:
-                    pixel_voisins.add(Pixel(k,j))
+                    pixel_voisins.add(Pixel(k, j))
         return pixel_voisins
+
+    def closest_adjs(self, matread):
+        """Returns closest neighbours which haven't been read according to
+        matread"""
+        return self.adjs(matread) & self.closest_neighbours()
 
     def aligned(self, other):
         """Returns a boolena indicating whether self is aligned with other
@@ -137,9 +153,11 @@ class Contour(object):
             return 0
         else:
             if type(self.xys) is list:
-                return self.xys[0].x + 1000*self.xys[len(self.xys)//2].x
+                return (int(self.xys[0].x) +
+                        int(1000*self.xys[len(self.xys)//2].x))
             elif type(self.xys) is set:
-                return self.xys.copy().pop().x + 1000*self.xys.copy().pop().x
+                return (int(self.xys.copy().pop().x) +
+                        int(1000*self.xys.copy().pop().x))
 
     def thinner(self):
         """Removes redundant pixel in contour, i.e. when it has too much
