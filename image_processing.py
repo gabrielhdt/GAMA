@@ -23,16 +23,22 @@ def Matriceniveauxdegris(matriceRGB):
     return Matrice_gray
 
 def regroupement_couleur(matricenb, seuil):
-    # regroupe sous formes d'intervalles les couleurs de la matrice
-    # en noir et blanc
-    couleur = np.arange(0,1,seuil)
-    n = len(couleur)
-    for i in range(n) :
-        mat_condition1 = np.where(i*seuil < matricenb, True, False)
-        mat_condition2 = np.where(matricenb <=(i+1)*seuil, True, False)
-        mat = np.logical_and(mat_condition1,mat_condition2)
-        matricenb[mat] = (2*i+1)*seuil/2 * np.ones_like(matricenb[mat])
-    return matricenb
+    """
+    regroupe sous formes d'intervalles les couleurs de la matrice
+    en noir et blanc. Traitement spécial pour le 0 à cause de la condition
+    mat_condidion1
+    """
+    matfilt = np.ones_like(matricenb)
+    couleur = np.arange(0, 1 + seuil, seuil)
+    # Special treatment for 0s...
+    cond = np.where(matricenb == 0, True, False)
+    matfilt[cond] = (couleur[0] + couleur[1])/2*np.ones_like(matricenb[cond])
+    for i in range(len(couleur[:-1])):
+        mat_condition1 = np.where(matricenb > couleur[i], True, False)
+        mat_condition2 = np.where(matricenb <= couleur[i + 1], True, False)
+        mat = np.logical_and(mat_condition1, mat_condition2)
+        matfilt[mat] = min((2*i+1)*seuil/2, 1) * np.ones_like(matricenb[mat])
+    return matfilt
 
 
 def add_border(matng):
