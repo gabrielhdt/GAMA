@@ -27,6 +27,7 @@ def regroupement_couleur(matricenb, seuil):
     regroupe sous formes d'intervalles les couleurs de la matrice
     en noir et blanc. Traitement spécial pour le 0 à cause de la condition
     mat_condidion1
+    A appliquer AVANT l'ajout de bordure
     """
     matfilt = np.ones_like(matricenb)
     couleur = np.arange(0, 1 + seuil, seuil)
@@ -42,9 +43,8 @@ def regroupement_couleur(matricenb, seuil):
 
 
 def add_border(matng):
-    """Adds a border of 7s (not a greyscale) to the matrix matng. Credits
-    goes to Aurélie and Adrien, for their remarkable work in the world
-    of borders.
+    """Adds a border of 7s (not a greyscale) to the matrix matng. Apply
+    AFTER regroupement_couleur.
     matng -- greyscale matrix sp.array of floats between 0 and 1
     returns -- a new matrix with borders on each side (lines and rows of 7s)
     """
@@ -60,6 +60,7 @@ def detection_contour(matng, begpix, seuil=0.01):
     # Adding begpix to be sure to launche function (if begpix is alone)
     notreadneighbours = begpix.closest_neighbours() | set((begpix, ))
     begcolour = matng[begpix.x, begpix.y]
+    # Removing pixels from another zone from notreadneighbours
     for neighbour in notreadneighbours.copy():
         neighcolour = matng[neighbour.x, neighbour.y]
         if abs(neighcolour - begcolour) > seuil:
@@ -117,20 +118,17 @@ def contours_image(matngb, seuil=0.01):
         a contour
     """
     contset = set()
-    setallcont = set()
     matread = np.zeros_like(matngb, dtype=bool)
-    while False in matread[1:-1, 1:-1]:
+    while False in matread:
         # Finds false in matread without border
-        notread = np.where(matread[1:-1, 1:-1] == False)
+        notread = np.where(matread == False)
         notread = notread[0][0], notread[1][0]
         # + 1's compensate border, avoid falling in the border
-        begpix = image_elements.Pixel(notread[0] + 1, notread[1] + 1)
+        begpix = image_elements.Pixel(notread[0], notread[1])
         cont, upmatread = detection_contour(matngb, begpix, seuil)
         matread += upmatread
         contset.add(cont)
     contset = contset - set((image_elements.Contour([]), ))  # Removes empty
-    # Passage en set() car pixels non ordonnés. Devrait se faire dans
-    # detection_contour, mais l'utilisation de set() entraîne des bugs
     return contset
 
 
