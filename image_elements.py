@@ -159,6 +159,11 @@ class Contour(object):
                 return (int(self.xys.copy().pop().x) +
                         int(1000*self.xys.copy().pop().x))
 
+    def pixincommon(self, other):
+        """Returns whether self has a pixel in common with other contour
+        other -- Contour"""
+        return not len(self.xys | other.xys) == len(self.xys) + len(other.xys)
+
     def thinner(self):
         """Removes redundant pixel in contour, i.e. when it has too much
         closest neighbours. The method may not be the best, if two pixels
