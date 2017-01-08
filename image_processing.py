@@ -16,7 +16,7 @@ import image_elements
 
 def Matriceniveauxdegris(matriceRGB):
     (a,b,c)=matriceRGB.shape #ici matriceRGB est la matrice RGB de l'image choisie
-    Matrice_gray=np.zeros(shape=(a,b)) #Matrice_gray pour Matriceniveauxdegris
+    Matrice_gray = np.zeros(shape=(a,b)) #Matrice_gray pour Matriceniveauxdegris
     for i in range (a):
         for j in range (b):
             Matrice_gray[i][j]+=((matriceRGB[i][j][0]/255)*0.2126+(matriceRGB[i][j][1]/255)*0.7152+(matriceRGB[i][j][2]/255)*0.0722)
@@ -48,7 +48,7 @@ def add_border(matng):
     return matng_border
 
 
-def detection_contour(matng, begpix, matread=None, seuil=0.01):
+def detection_contour(matricervb, matng, begpix, matread=None, seuil=0.01):
     upper = 300
     matread_loc = np.zeros_like(matng, dtype=bool)
     notreadneighbours = begpix.adjs(matread_loc) - set((begpix, ))
@@ -86,14 +86,17 @@ def detection_contour(matng, begpix, matread=None, seuil=0.01):
     while len(notreadneighbours) > 0:
         begpix = notreadneighbours.pop()
         contour.xys.add(contourec(begpix, notreadneighbours))
+
     if None in contour.xys:
         contour.xys.remove(None)
     if matread is not None:
         matread += matread_loc  # Updates matread
+    pix = contour.xys.copy().pop()
+    contour.colour = matricervb[pix.x -1, pix.y-1, :]
     return contour
 
 
-def contours_image(matngb, seuil=0.01):
+def contours_image(matrvb,seuil=0.01):
     """
     Donne l'ensemble des contours de la matrice en niveaux de gris avec
     bordure matngb.
@@ -101,6 +104,9 @@ def contours_image(matngb, seuil=0.01):
     seuil -- float, min difference of colour between two pixels to create
         a contour
     """
+    matng = Matriceniveauxdegris(matrvb)
+    matngb = add_border(matng)
+    matngb = regroupement_couleur(matngb,seuil)
     contset = set()
     setallcont = set()
     matread = np.zeros_like(matngb, dtype=bool)
@@ -109,7 +115,7 @@ def contours_image(matngb, seuil=0.01):
         notread = notread[0][0], notread[1][0]
         # + 1's compensate border
         begpix = image_elements.Pixel(notread[0] + 1, notread[1] + 1)
-        cont = detection_contour(matngb, begpix, matread,
+        cont = detection_contour(matrvb, matngb, begpix, matread,
                                  seuil)
         contset.add(cont)
     contset = contset - set((image_elements.Contour([]), ))  # Removes empty
