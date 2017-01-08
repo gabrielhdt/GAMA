@@ -205,10 +205,31 @@ def remove_double(contset):
                 contset.remove(bcont)
 
 
-if __name__ == "__main__":
-    MatriceRGB = smp.imread("essai.png")
-    matrix = Matriceniveauxdegris(MatriceRGB)
-    plt.imshow(matrix, cmap=plt.cm.gray)
-    plt.show()
-    pixel = matrix[150][150]
-    contour_inter = image_elements.Contour([])
+def disinclude(contset):
+    """If a contour is included in an other, the smaller will be removed
+    from the bigger"""
+    contlist = list(contset)  # For comparisons
+    compareduet = set()
+    sepcontset = set()
+    for i1, cont1 in enumerate(contlist):
+        for i2, cont2 in enumerate(contlist):
+            if (i1, i2) in compareduet or (i2, i1) in compareduet or i1 == i2:
+                # Avoid comparing twice same duet
+                pass
+            else:
+                compareduet.add((i1, i2))
+                cont1, cont2 = min(cont1, cont2), max(cont1, cont2)
+                incommon = cont2.pixincommon(cont1)
+                print(incommon)
+                if cont1 == cont2:
+                    pass
+                elif cont1.xys.issubset(cont2.xys) and not incommon:
+                    cont2.xys = cont2.xys - cont1.xys
+                    sepcontset |= set((cont1, cont2))
+                elif cont1.xys.issubset(cont2.xys) and incommon:
+                    common_part = cont1.xys & cont2.xys
+                    cont2.xys = (cont2.xys - cont1.xys) | common_part
+                    sepcontset |= set((cont1, cont2))
+                else:
+                    sepcontset |= set((cont1, cont2))
+    return sepcontset
