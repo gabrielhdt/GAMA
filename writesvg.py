@@ -11,6 +11,7 @@ class SvgFile:
             Someone who wants to draw the pixels of an sp.array of dim 16, 16
             should have dim = (15, 15).
         """
+        self.dim = dim
         self.file = open(name, 'w')
         self.svgskel(dim)
 
@@ -82,7 +83,8 @@ class SvgFile:
         pix -- image_elemnts.Pixel() element
         """
         self.write("\t<circle")
-        self.write(" cx=\"{}\" cy=\"{}\" r=\"1\"/>\n".format(pix.x, pix.y))
+        r = (self.dim[0] + self.dim[1])*1e-3/2
+        self.write(" cx=\"{}\" cy=\"{}\" r=\"{}\"/>\n".format(pix.x, pix.y, r))
 
     def draw_contour_pix(self, contour):
         """Draws pixels from contour
