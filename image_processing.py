@@ -52,7 +52,7 @@ def detection_contour(matng, begpix, seuil=0.01):
     upper = 300
     matread_loc = np.zeros_like(matng, dtype=bool)
     # Adding begpix to be sure to launche function (if begpix is alone)
-    notreadneighbours = begpix.neighbours() | set((begpix, ))
+    notreadneighbours = begpix.closest_neighbours() | set((begpix, ))
     begcolour = matng[begpix.x, begpix.y]
     for neighbour in notreadneighbours.copy():
         neighcolour = matng[neighbour.x, neighbour.y]
@@ -119,8 +119,6 @@ def contours_image(matngb, seuil=0.01):
         notread = notread[0][0], notread[1][0]
         # + 1's compensate border, avoid falling in the border
         begpix = image_elements.Pixel(notread[0] + 1, notread[1] + 1)
-        print(begpix)
-        print(matread[begpix.x, begpix.y])
         cont, upmatread = detection_contour(matngb, begpix, seuil)
         matread += upmatread
         contset.add(cont)
