@@ -106,7 +106,13 @@ def detection_contour(matng, begpix, seuil=0.01):
         contour.xys.add(contourec(begpix, notreadneighbours))
     if None in contour.xys:
         contour.xys.remove(None)
-    contour.surface = matread_loc.sum()
+    # Contour attributes
+    if image_elements.Pixel(0, 1) in contour.xys:  # For border
+        contour.surface = matng.shape[0]*matng.shape[1]
+        contour.zone = np.ones_like(matng, dtype=bool)
+    else:
+        contour.zone = matread_loc
+        contour.surface = matread_loc.sum()
     return contour, matread_loc
 
 
@@ -204,59 +210,17 @@ def remove_double(contset):
                 contset.remove(bcont)
 
 
-def disinclude(contset):
-    """If a contour is included in an other, the smaller will be removed
-    from the bigger"""
-    contlist = list(contset)  # For comparisons
-    compareduet = set()
-    sepcontset = set()
-    for i1, cont1 in enumerate(contlist):
-        for i2, cont2 in enumerate(contlist):
-            if (i1, i2) in compareduet or (i2, i1) in compareduet or i1 == i2:
-                # Avoid comparing twice same duet
-                pass
-            else:
-                compareduet.add((i1, i2))
-                cont1, cont2 = min(cont1, cont2), max(cont1, cont2)
-                incommon = cont2.pixincommon(cont1)
-                print(incommon)
-                if cont1 == cont2:
-                    pass
-                elif cont1.xys.issubset(cont2.xys) and not incommon:
-                    cont2.xys = cont2.xys - cont1.xys
-                    sepcontset |= set((cont1, cont2))
-                elif cont1.xys.issubset(cont2.xys) and incommon:
-                    common_part = cont1.xys & cont2.xys
-                    cont2.xys = (cont2.xys - cont1.xys) | common_part
-                    sepcontset |= set((cont1, cont2))
-                else:
-                    sepcontset |= set((cont1, cont2))
-    return sepcontset
-
-
-def disincludetrue(continf, contsup):
-    """Removes the smaller contour from the bigger. Handles the case where
-    continf has an equivalent in contsup which has pixels in common with the
-    bigger contour"""
-    intercont = set()
-    for pix in continf:
-        for neighbour in pix.closest_neighbours(contsup):  # Getting equiv pixs
-            intercont.add(neighbour)
-    commonpart = contsup.xys & intercont
-    contsup.xys = (contsup.xys - intercont) | commonpart
-
-
-def build_inclusion_list(contlist):
-    """Returns a list indicating which contour is included in which.
-    inclusionlist[k] = {i|contlist[i] included in contlist[k]}.
-    contlist must be ordered by length of contours.
+def directremove(contlist):
+    """Removes smaller contours from bigger ones
     contlist -- list of Contour()
     """
-    inclusionlist = [set() for _ in contlist]
-    for i1, cont1 in enumerate(contlist):  # No need of last contour
-        for i2, cont2 in enumerate(contlist):
-            if i1 == i2:
+    i = 0  # Counter
+    imax = len(contlist)
+    while i < imax:
+        for j, cont in enumerate(contlist.copy()):
+            if i >= j:  # Don't try to remove bigger from smaller...
                 pass
-            elif cont2.hasequivin(cont1):  # If cont2 in cont1
-                inclusionlist[i1].add(i2)
-    return inclusionlist
+            else:
+                if contlist[i].hasequivin(cont):
+                    contlist[j].disinclude(contlist[i])
+        i += 1
