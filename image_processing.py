@@ -106,6 +106,7 @@ def detection_contour(matng, begpix, seuil=0.01):
         contour.xys.add(contourec(begpix, notreadneighbours))
     if None in contour.xys:
         contour.xys.remove(None)
+    contour.surface = matread_loc.sum()
     return contour, matread_loc
 
 
@@ -231,3 +232,31 @@ def disinclude(contset):
                 else:
                     sepcontset |= set((cont1, cont2))
     return sepcontset
+
+
+def disincludetrue(continf, contsup):
+    """Removes the smaller contour from the bigger. Handles the case where
+    continf has an equivalent in contsup which has pixels in common with the
+    bigger contour"""
+    intercont = set()
+    for pix in continf:
+        for neighbour in pix.closest_neighbours(contsup):  # Getting equiv pixs
+            intercont.add(neighbour)
+    commonpart = contsup.xys & intercont
+    contsup.xys = (contsup.xys - intercont) | commonpart
+
+
+def build_inclusion_list(contlist):
+    """Returns a list indicating which contour is included in which.
+    inclusionlist[k] = {i|contlist[i] included in contlist[k]}.
+    contlist must be ordered by length of contours.
+    contlist -- list of Contour()
+    """
+    inclusionlist = [set() for _ in contlist]
+    for i1, cont1 in enumerate(contlist):  # No need of last contour
+        for i2, cont2 in enumerate(contlist):
+            if i1 == i2:
+                pass
+            elif cont2.hasequivin(cont1):  # If cont2 in cont1
+                inclusionlist[i1].add(i2)
+    return inclusionlist
