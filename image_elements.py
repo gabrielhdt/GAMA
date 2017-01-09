@@ -59,17 +59,17 @@ class Pixel(object):
         """ Returns neighbours that have not been read (according to matread)
         returns a set() as we can't order the pixels. Matrix is considered as
         a torus, i.e. adjs of a pixel on a border are pixels on the other
-        border (done automatically on border with index 0).
+        border (done automatically on border with index 0). (x, y) or (y, x)?
         """
         dim = matread.shape
         x = self.x
         y = self.y
         pixel_voisins = set()
-        if x == dim[1] - 1:  # If on right border
+        if x == dim[0] - 1:  # If on right border
             rangex = (x - 1, x, 0)  # Loop on the other side of matrix
         else:
             rangex = (x - 1, x, x + 1)
-        if y == dim[0] - 1:  # If on lower border
+        if y == dim[1] - 1:  # If on lower border
             rangey = (y - 1, y, 0)
         else:
             rangey = (y - 1, y, y + 1)
