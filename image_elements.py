@@ -142,12 +142,17 @@ class Contour(object):
         self.xys = xys
         self.colour = None
         self.surface = 0
+        self.zone = None
 
     def __eq__(self, other):
         return self.xys == other.xys
 
     def __lt__(self, other):
         return len(self.xys) < len(other.xys)
+
+    def lowersurface(self, other):
+        """Will be used mainly to separate contours"""
+        return self.surface < other.surface
 
     def __hash__(self):
         if len(self.xys) == 0:
@@ -165,23 +170,23 @@ class Contour(object):
         other -- Contour"""
         return not len(self.xys | other.xys) == len(self.xys) + len(other.xys)
 
-    def removesmaller(self, smaller):
+    def disinclude(self, smaller):
         """Removes in place the smaller contour from self. smaller must have
         an equivalent in self, which is included in self
         smaller -- Contour()"""
         intercont = set()
-        for pix in smaller:
+        for pix in smaller.xys:
             # Getting equivalent pixels
             for neighbour in pix.closest_neighbours(self):
                 intercont.add(neighbour)
-        commonpart = self.xys & intercont
-        self.xys = (self.xys - intercont) | commonpart
+        self.xys -= intercont
 
     def hasequivin(self, other):
         """Returns whether self has an equivalent in the other contour.
         We say equivalent as they won't be exactly the same, but one longer,
-        circling the smaller (due to detection_contour). If each pixel of smaller
-        has a closest_neighbour in bigger, the former has an equivalent in bigger.
+        circling the smaller (due to detection_contour). If each pixel of
+        smaller has a closest_neighbour in bigger, the former has an
+        equivalent in bigger.
         other -- Contour()
         """
         smallen = len(self.xys)
