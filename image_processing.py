@@ -107,12 +107,6 @@ def detection_contour(matng, begpix, seuil=0.01):
     if None in contour.xys:
         contour.xys.remove(None)
     # Contour attributes
-    if image_elements.Pixel(0, 1) in contour.xys:  # For border
-        contour.surface = matng.shape[0]*matng.shape[1]
-        contour.zone = np.ones_like(matng, dtype=bool)
-    else:
-        contour.zone = matread_loc
-        contour.surface = matread_loc.sum()
     return contour, matread_loc
 
 
