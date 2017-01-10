@@ -173,18 +173,6 @@ def separate_contour(contour_raw):
     return loop, raw_minusloop
 
 
-def separate_all_contours(contour_raw):
-    """DEPRECATED, use method"""
-
-    def separate(contour_raw):
-        if len(contour_raw.xys) < 1:
-            return []
-        else:
-            loop, raw_minusloop = separate_contour(contour_raw)
-            return [loop] + separate(raw_minusloop)
-    return separate(contour_raw)
-
-
 def compare_cont(cont1, cont2):
     """Compares contours returning a float between 0 and 1, corresponding
     to the resemblance of the two contours (1: a contour is a subset of the
