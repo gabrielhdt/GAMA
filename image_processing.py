@@ -55,9 +55,15 @@ def add_border(matng):
 
 
 def detection_contour(matng, begpix, seuil=0.01):
+    """Detects a contour circling a zone of a colour, contour is outside the
+    zone of same colour (avoids issues of contours sharing pixels)
+    matng -- greylevel matrix
+    begpix -- pixel on which the recursion is to begin
+    seuil -- could be removed, because of regroupement_couleur
+    """
     upper = 300
     matread_loc = np.zeros_like(matng, dtype=bool)
-    # Adding begpix to be sure to launche function (if begpix is alone)
+    # Adding begpix to be sure to launch function (if begpix is alone)
     notreadneighbours = begpix.closest_neighbours() | set((begpix, ))
     begcolour = matng[begpix.x, begpix.y]
     # Removing pixels from another zone from notreadneighbours
