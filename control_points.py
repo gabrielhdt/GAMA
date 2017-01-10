@@ -156,6 +156,49 @@ def find_inflexion(contour, start, linedges=set()):
     else:
         return cxys[start_index + 2] if is_vert else cxys[start_index + 1]
 
+def list_waypoints(contour):
+    start = contour[0]
+    waypoints = [start]
+    while start != contour[-1]:
+        start = find_inflexion(contour,start, linedges=set())
+        waypoints.append(start)
+    waypoints[-1] = contour[-1]
+    return waypoints
+
+def curves(contours):
+    curves = []
+    for contour in contours:
+        waypoints = list_waypoints(contour)
+        n = len(waypoints)
+        for i in range (n-1):
+            start, end = waypoints[i], waypoints[i + 1]
+            distance = dist(contour, start, end)
+            precision = min(distance - 1, 5) if distance - 1 >= 2 else 2
+            pente_s = paratan2slope(tan_param(start, contour, precision, sens=1))
+            pente_e = paratan2slope(tan_param(end, contour, precision, sens=-1))
+            if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
+                middle_x = (start.x + end.x) / 2
+                middle_y = (start.y + end.y) / 2
+            elif "inf" in (pente_e, pente_s):
+                if pente_s == "inf":
+                    middle_x = start.x
+                    middle_y = end.y + pente_e * (end.x - start.x)
+                elif pente_e == "inf":
+                    middle_x = end.x
+                    middle_y = start.y + pente_s * (start.x - end.x)
+            elif 0 in (pente_e, pente_s):
+                if pente_s == 0:
+                    middle_x = end.x + (start.y - end.y) / pente_e
+                    middle_y = start.y
+                elif pente_e == 0:
+                    middle_x = start.x + (end.y - start.y) / pente_s
+                    middle_y = end.y
+            else:  # pente_s != 0 and pente_e != 0:
+                coef = 1 / (pente_s - pente_e)
+                middle_x = coef * (pente_s * start.x - pente_e * end.x + end.y - start.y)
+                middle_y = pente_s * (middle_x - start.x) + start.y
+            curves.append(sp.array([[start.x, start.y], [middle_x, middle_y], [end.x, end.y]]))
+    return curves
 
 def control(contour, start, linedges=set()):
     """Renvoie le triple de points de controle pour tracer une courbe de
