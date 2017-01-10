@@ -101,7 +101,7 @@ def clamp(x):
 
 def vec_to_hex(colour_contour):
     """
-    Converts to RGB colour to a 6 digit code
+    Converts RGB colour to a 6 digit code
     corresponding to the hexadecimal form
     """
     r = colour_contour[0]
