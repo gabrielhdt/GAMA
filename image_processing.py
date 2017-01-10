@@ -140,18 +140,6 @@ def contours_image(matngb, seuil=0.01):
     return contset
 
 
-def visualisation_contour(matriceNG,liste_contours):
-    (lin, col) = matriceNG.shape
-    visu = np.zeros((lin, col))
-    for contour in liste_contours :
-        pixels = contour.xys
-        for pixel in pixels :
-            i = pixel.x
-            j = pixel.y
-            visu[i][j] = 1
-    return visu
-
-
 def compare_cont(cont1, cont2):
     """Compares contours returning a float between 0 and 1, corresponding
     to the resemblance of the two contours (1: a contour is a subset of the
