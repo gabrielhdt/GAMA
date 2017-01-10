@@ -83,29 +83,30 @@ def detection_contour(matng, begpix, seuil=0.01):
         notreadneighbours |= neighbourhood
         contour_found = False
         inscolour = matng[inspix.x, inspix.y]
+        contour_part = set()
         for neighbour in neighbourhood:
             neighcolour = matng[neighbour.x, neighbour.y]
             if abs(neighcolour - inscolour) > seuil:
                 contour_found = True
                 notreadneighbours.remove(neighbour)
+                contour_part.add(neighbour)
             # If not other colour, don't read it again. However, its
             # neighbours will be inspected, as it has been added to
             # notreadneighbours
             else:
                 matread_loc[neighbour.x, neighbour.y] = True
         if contour_found:
-            return inspix
+            return contour_part
         elif k == upper or len(notreadneighbours) == 0:
-            return None
+            return set((None, ))
         else:
             nextinspix = notreadneighbours.pop()
             return contourec(nextinspix, notreadneighbours, k + 1)
 
     while len(notreadneighbours) > 0:
         begpix = notreadneighbours.pop()
-        contour.xys.add(contourec(begpix, notreadneighbours))
-    if None in contour.xys:
-        contour.xys.remove(None)
+        contour.xys |= contourec(begpix, notreadneighbours)
+    contour.xys.discard(None)
     # Contour attributes
     return contour, matread_loc
 
