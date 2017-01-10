@@ -326,10 +326,10 @@ class Contour(object):
 
         def separate(contour_raw):
             if len(contour_raw.xys) < 1:
-                return []
+                return set()
             else:
                 loop, raw_minusloop = self.separate_contour()
-                return [loop] + separate(raw_minusloop)
+                return set([loop]) | separate(raw_minusloop)
         return separate(self)
 
     def scanlines(self):
