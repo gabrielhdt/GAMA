@@ -218,3 +218,18 @@ def directremove(contlist):
                 if contlist[i].hasequivin(cont):
                     contlist[j].disinclude(contlist[i])
         i += 1
+
+
+def buildisinlist(contlist):
+    """Returns a list indicated in which contour is included contlist[i], i.e.
+    isinlist[k] = {j|contlist[k] has equivalent in j}
+    contlist -- list of Contour()
+    """
+    isinlist = [None for _ in contlist]
+    for i1, cont1 in enumerate(contlist):
+        for i2, cont2 in enumerate(contlist[i1:]):  # Mind the shift
+            if i1 == i2:
+                pass
+            elif cont1.hasequivin(cont2):
+                isinlist[i1] = i2 + i1  # Shift
+    return isinlist
