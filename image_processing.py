@@ -146,33 +146,6 @@ def visualisation_contour(matriceNG,liste_contours):
     return visu
 
 
-def separate_contour(contour_raw):
-    """Sépare les contours présents dans contour_raw, qui
-    est susceptible d'en contenir 2. Au nouveau contour on ajoute les pixels
-    adjacents à celui étudié, qui sont dans le contour, et pas déjà dans le
-    lacet.
-    contour_raw -- contour pouvant en contenir en réalité 2;
-        image_elements.Contour() object
-    returns -- loop, containing one loop, i.e. a contour object of contiguous
-        pixels, and raw_minusloop, the contour_raw without loop, i.e. the other
-        contour.
-    DEPRECATED
-    """
-    loop = image_elements.Contour([])  # Ordonné, donc ici liste
-    inspix = set(contour_raw.xys).pop()
-    neighbourhood = set(inspix.neighbours()) & set(contour_raw.xys)
-    while len(neighbourhood) >= 1:
-        if len(neighbourhood) > 1:
-            inspix = (neighbourhood & set(inspix.closest_neighbours())).pop()
-        else:
-            inspix = neighbourhood.pop()
-        loop.xys.append(inspix)
-        contour_raw.xys.remove(inspix)
-        neighbourhood = set(inspix.neighbours()) & set(contour_raw.xys)
-    raw_minusloop = image_elements.Contour(contour_raw.xys.copy())
-    return loop, raw_minusloop
-
-
 def compare_cont(cont1, cont2):
     """Compares contours returning a float between 0 and 1, corresponding
     to the resemblance of the two contours (1: a contour is a subset of the
