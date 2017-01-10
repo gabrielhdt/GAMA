@@ -96,6 +96,21 @@ def detection_contour(matricervb, matng, begpix, matread=None, seuil=0.01):
     return contour
 
 
+def clamp(x):
+        return max(0, min(x, 255))
+
+def vec_to_hex(colour_contour):
+    """
+    Converts to RGB colour to a 6 digit code
+    corresponding to the hexadecimal form
+    """
+    r = colour_contour[0]
+    g = colour_contour[1]
+    b = colour_contour[2]
+    "#{0:02x}{1:02x}{2:02x}".format(clamp(r), clamp(g), clamp(b))
+
+
+
 def contours_image(matrvb,seuil=0.01):
     """
     Donne l'ensemble des contours de la matrice en niveaux de gris avec
