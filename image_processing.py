@@ -233,3 +233,18 @@ def buildisinlist(contlist):
             elif cont1.hasequivin(cont2):
                 isinlist[i1] = i2 + i1  # Shift
     return isinlist
+
+
+def buildhasinlist(contlist):
+    """Returns a list indicating which contour is included in contlist[k], i.e.
+    hasinlist[k] = {j|contlist[j] has equivalent in k}
+    cntlist -- list of Contour()
+    """
+    inclusionlist = [set() for _ in contlist]
+    for i1, cont1 in enumerate(contlist):  # No need of last contour
+        for i2, cont2 in enumerate(contlist[:i1]):  # As cont2 smaller
+            if i1 == i2:
+                pass
+            elif cont2.hasequivin(cont1):  # If cont2 in cont1
+                inclusionlist[i1].add(i2)
+    return inclusionlist
