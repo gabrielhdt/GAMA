@@ -186,7 +186,7 @@ class Contour(object):
         We say equivalent as they won't be exactly the same, but one longer,
         circling the smaller (due to detection_contour). If each pixel of
         smaller has a closest_neighbour in bigger, the former has an
-        equivalent in bigger.
+        equivalent in bigger. Will work only if self is circled by other.
         other -- Contour()
         """
         smallen = len(self.xys)
