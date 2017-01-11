@@ -262,31 +262,32 @@ class Contour(object):
         copy = Contour(self.xys.copy())  # To avoid modifying self
         return len(copy.separate_contour()[1].xys) == 0
 
-    def separate_contour(self):
+    def separate_contour(self, begpix):
         """Sépare les contours présents dans self, qui
         est susceptible d'en contenir 2. Au nouveau contour on ajoute les
         pixels adjacents à celui étudié, qui sont dans le contour, et pas
         déjà dans le lacet.
         self -- contour pouvant en contenir en réalité 2;
             image_elements.Contour() object
+        begpix -- pixel in contour which is closest to border
         returns -- loop, containing one loop, i.e. a contour object of
             contiguous pixels, and raw_minusloop, the self without loop, i.e.
-            the other contour.
+            the other contour. (a list)
         """
         is_empty = False
-        loop = Contour([])  # Ordonné donc liste
+        loop = []  # Ordonné donc liste
         assert type(self.xys) is set
-        inspix = self.xys.pop()
+        inspix = begpix
         inspix_beg = inspix  # For the sake of not going back
         neighbourhood = inspix.neighbours(cont=self)
         # Initial step
         if len(inspix.closest_neighbours(cont=self)) >= 1:
             inspix = inspix.closest_neighbours(cont=self).pop()
-            loop.xys.append(inspix)
+            loop.append(inspix)
             self.xys.remove(inspix)
         elif len(neighbourhood) >= 1:
             inspix = neighbourhood.pop()
-            loop.xys.append(inspix)
+            loop.append(inspix)
             self.xys.remove(inspix)
             # - set([inspix_beg]) to avoid going back
         neighbourhood = (inspix.neighbours(cont=self) - set([inspix_beg]))
@@ -297,26 +298,20 @@ class Contour(object):
                 inspix = clneighbourhood.pop()
             elif len(neighbourhood) >= 1:  # Could be else
                 inspix = neighbourhood.pop()
-            loop.xys.append(inspix)
+            loop.append(inspix)
             if inspix in self.xys:  # For first loop only...
                 self.xys.remove(inspix)
             neighbourhood = inspix.neighbours(cont=self)
             is_empty = len(neighbourhood) == 0
-        if inspix_beg not in loop.xys:  # To prevent holes
-            loop.xys.append(inspix_beg)
-        raw_minusloop = Contour(self.xys.copy())
-        return loop, raw_minusloop
+        if inspix_beg not in loop:  # To prevent holes
+            loop.append(inspix_beg)
+        return loop
 
-    def separate_all_contour(self):
-        """Separates every contour present in self"""
-
-        def separate(contour_raw):
-            if len(contour_raw.xys) < 1:
-                return set()
-            else:
-                loop, raw_minusloop = self.separate_contour()
-                return set([loop]) | separate(raw_minusloop)
-        return separate(self)
+    def optimseparate(self):
+        """ If several contours are in self (not declared), returns the closest
+        from border"""
+        pix = min(self.xys, key=lambda p: abs(p.x))
+        self.xys = self.separate_contour(pix)
 
     def scanlines(self):
         """Looks for straight lines with length greater than 3 pixels.
