@@ -257,54 +257,50 @@ class Contour(object):
                 if doomed:
                     self.xys.remove(pix)
 
-    def isloop(self):
-        """Returns whether the contour is a loop"""
-        copy = Contour(self.xys.copy())  # To avoid modifying self
-        return len(copy.separate_contour()[1].xys) == 0
-
     def separate_contour(self, begpix):
-        """Sépare les contours présents dans self, qui
-        est susceptible d'en contenir 2. Au nouveau contour on ajoute les
-        pixels adjacents à celui étudié, qui sont dans le contour, et pas
-        déjà dans le lacet.
-        self -- contour pouvant en contenir en réalité 2;
-            image_elements.Contour() object
-        begpix -- pixel in contour which is closest to border
-        returns -- loop, containing one loop, i.e. a contour object of
-            contiguous pixels, and raw_minusloop, the self without loop, i.e.
-            the other contour. (a list)
+        """Extracts and replaces self.xys by the greater contour in self,
+        ordering and filtering pixels. Filter is made by favouring
+        Xneighbours over close neighbours. loopcount is used to manage inital
+        steps, which is the hardest part of the program.
+        begpix -- Pixel() on which the inspection will start
         """
-        is_empty = False
-        loop = []  # Ordonné donc liste
+        loop = []  # Ordered, therefore list
         assert type(self.xys) is set
-        inspix = begpix
-        inspix_beg = inspix  # For the sake of not going back
-        neighbourhood = inspix.neighbours(cont=self)
-        # Initial step
-        if len(inspix.closest_neighbours(cont=self)) >= 1:
-            inspix = inspix.closest_neighbours(cont=self).pop()
-            loop.append(inspix)
-            self.xys.remove(inspix)
-        elif len(neighbourhood) >= 1:
+        loopcount = 0
+        clneighbourhood = begpix.closest_neighbours(cont=self)
+        neighbourhood = begpix.neighbours(cont=self)
+        xneighbourhood = neighbourhood - clneighbourhood
+        if len(xneighbourhood) == 0:
             inspix = neighbourhood.pop()
-            loop.append(inspix)
+            # -set([begpix]) for not going back
+            neighbourhood = inspix.neighbours(cont=self) - set([begpix])
             self.xys.remove(inspix)
-            # - set([inspix_beg]) to avoid going back
-        neighbourhood = (inspix.neighbours(cont=self) - set([inspix_beg]))
-        while not is_empty:
-            clneighbourhood = inspix.closest_neighbours(cont=self)
-            neighbourhood = inspix.neighbours(cont=self)
-            if len(clneighbourhood) >= 1:
-                inspix = clneighbourhood.pop()
-            elif len(neighbourhood) >= 1:  # Could be else
-                inspix = neighbourhood.pop()
+        else:
+            inspix = xneighbourhood.pop()
+            neighbourhood = (inspix.neighbours(cont=self) - clneighbourhood -
+                             set([begpix]))
+            self.xys.remove(inspix)
+        tramp = inspix.neighbours(cont=self)  # For loop stop
+        # loopcount to let inspix avoid tramp
+        while inspix not in tramp or loopcount <= 1:
+            loopcount += 1
             loop.append(inspix)
-            if inspix in self.xys:  # For first loop only...
+            clneighbourhood = neighbourhood & inspix.closest_neighbours()
+            xneighbourhood = neighbourhood - clneighbourhood
+            if len(xneighbourhood) >= 1:
+                inspix = xneighbourhood.pop()
                 self.xys.remove(inspix)
-            neighbourhood = inspix.neighbours(cont=self)
-            is_empty = len(neighbourhood) == 0
-        if inspix_beg not in loop:  # To prevent holes
-            loop.append(inspix_beg)
+                # loopcount as pixel will go under corner in early stage
+                if len(clneighbourhood) >= 1 and loopcount >= 2:
+                    self.xys.remove(clneighbourhood.pop())
+            else:
+                inspix = neighbourhood.pop()
+                self.xys.remove(inspix)
+            if loopcount <= 2:  # Not goind back on begpix at early stage
+                neighbourhood = inspix.neighbours(cont=self) - set([begpix])
+            else:
+                neighbourhood = inspix.neighbours(cont=self)
+        loop.append(inspix)
         return loop
 
     def optimseparate(self):
