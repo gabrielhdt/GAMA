@@ -197,28 +197,14 @@ class Contour(object):
         return samecount == smallen
 
     def thinner(self):
-        """Removes redundant pixel in contour, i.e. when it has too much
-        closest neighbours. The method may not be the best, if two pixels
-        side to side have each 3 closest_neighbours, only one will be removed
-        as the other will lose the latter. It avoids bugs (holes in contour).
-        """
-        overcrowding = []  # Pixels which have more than 2 close neighbours
-        for pix in self.xys:
-            if len(pix.closest_neighbours() & set(self.xys)) >= 3:
-                overcrowding.append(pix)
-        will_die = [True for _ in overcrowding]  # Each pixel can die
-        for i, choked in enumerate(overcrowding):
-            crowd = choked.closest_neighbours() & set(self.xys)
-            safe = crowd - set(overcrowding)  # Not overcrowded crowd
-            assert len(safe) >= 2
-            if len(safe) >= 2:
-                choker1, choker2 = safe.pop(), safe.pop()
-                if choker1 not in choker2.neighbours():  # Is there a hole?
-                    will_die[i] = False
-        exterminate = [doomed for (i, doomed) in enumerate(overcrowding) if
-                       will_die[i]]
-        for doomed in exterminate:
-            self.xys.remove(doomed)
+        """Removes pixels in right angle"""
+        for pix in self.xys.copy():
+            neighbourhood = pix.closest_neighbours(cont=self)
+            if len(neighbourhood) == 2:
+                neighbour1 = neighbourhood.pop()
+                neighbour2 = neighbourhood.pop()
+                if not neighbour1.aligned(neighbour2):
+                    self.xys.remove(pix)
 
     def skinnier(self):
         """Thins more the contour, a pixel must have only 2 neighbours. To
