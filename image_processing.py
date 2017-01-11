@@ -91,7 +91,11 @@ def detection_contour(matricervb, matng, begpix, matread=None, seuil=0.01):
         contour.xys.remove(None)
     if matread is not None:
         matread += matread_loc  # Updates matread
-    pix = contour.xys.copy().pop()
+    liste_zone = []             # liste_zone is the list of read pixels surrounded by the contour
+    for pixel in matng :
+        if matread_loc[pixel.x,pixel.y] == True :
+            liste_zone.append(pixel)
+    pix = liste_zone.pop()
     contour.colour = matricervb[pix.x -1, pix.y-1, :]
     return contour
 
