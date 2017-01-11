@@ -158,3 +158,19 @@ def remove_double(contset):
             bcont = max(cont1, cont2)  # Bigger contour
             if resemblance >= 0.75 and bcont in contset:
                 contset.remove(bcont)
+
+
+def unifycont(contlist):
+    """From a contset with each contour twice in it (contour and equivalent),
+    removes the bigger one. Works only if contlist sorted.
+    contlist[k].hasequivin(cont) works only if contlist[k] < cont"""
+    k = 0
+    while k < len(contlist):
+        equifound = False
+        i = k + 1
+        while i < len(contlist) and not equifound:
+            if contlist[k].hasequivin(contlist[i]):
+                equifound = True
+                contlist.remove(max(contlist[k], contlist[i]))
+            i += 1
+        k += 1
