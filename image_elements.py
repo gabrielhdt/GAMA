@@ -192,6 +192,9 @@ class Contour(object):
         if len(xneighbourhood) >= 1:
             self.xys.remove(begpix)
             inspix = xneighbourhood.pop()
+            # Remove pixel in angle
+            anglepix = clneighbourhood & inspix.neighbours(cont=self)
+            self.xys.discard(anglepix)
         else:
             self.xys.remove(begpix)
             inspix = clneighbourhood.pop()
@@ -203,6 +206,9 @@ class Contour(object):
         if len(xneighbourhood) >= 1:
             self.xys.remove(inspix)
             inspix = xneighbourhood.pop()
+            # Remove pixel in angle
+            anglepix = clneighbourhood & inspix.neighbours(cont=self)
+            self.xys.discard(anglepix)
         else:
             self.xys.remove(inspix)
             inspix = clneighbourhood.pop()
