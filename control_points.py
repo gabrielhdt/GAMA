@@ -127,8 +127,8 @@ def find_inflexion(contour, start, linedges=set()):
     start -- pixel de début, image_elements.Pixel() object
     """
     cxys = contour.xys  # Shortcut
-    start_index = contour.xys.index(start)
-    n = len(contour.xys) - 1    # dernier indice disponible
+    start_index = cxys.index(start)
+    n = len(cxys) - 1  # dernier indice disponible
     # Si dépassement, on renvoie le dernier pixel
     if start_index + 1 > n or start_index + 2 > n:
         return contour.xys[-1]
@@ -153,17 +153,23 @@ def find_inflexion(contour, start, linedges=set()):
         contemp = set(cxys[start_index - 1:start_index + 2]) & linedges
         if len(contemp) > 0:
             return contemp.pop()
+        else:
+            return cxys[start_index + 2] if is_vert else cxys[start_index + 1]
     else:
         return cxys[start_index + 2] if is_vert else cxys[start_index + 1]
 
+
 def list_waypoints(contour):
-    start = contour[0]
+    start = contour.xys[0]
     waypoints = [start]
-    while start != contour[-1]:
-        start = find_inflexion(contour,start, linedges=set())
+    linedges = contour.scanlines()
+    while start != contour.xys[-1]:
+        start = find_inflexion(contour, start, linedges=linedges)
+        linedges.discard(start)  # Avoids looping infinitely
         waypoints.append(start)
-    waypoints[-1] = contour[-1]
+    waypoints[-1] = contour.xys[-1]
     return waypoints
+
 
 def curves(contours):
     curves = []
