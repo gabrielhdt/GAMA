@@ -90,6 +90,20 @@ class Pixel(object):
         pixel"""
         return self.x == other.x or self.y == other.y
 
+    def iscorner(self, cont):
+        """Returns whether self is a corner of contour cont
+        cont -- Contour()
+        """
+        clneighbourhood = self.closest_neighbours(cont=cont)
+        if len(clneighbourhood) < 2:
+            return False
+        else:  # At least two closest neighbours
+            neighbour1 = clneighbourhood.pop()
+            neighbour2 = clneighbourhood.pop()
+            cond1 = neighbour1.x == self.x and neighbour2.y == self.y
+            cond2 = neighbour1.y == self.y and neighbour2.x == self.x
+            return cond1 or cond2
+
     def neighbours(self, cont=None):
         """
         A supprimer: quick fix car j'ai besoin des adjacents sans la matread
@@ -266,40 +280,47 @@ class Contour(object):
         """
         loop = []  # Ordered, therefore list
         assert type(self.xys) is set
-        loopcount = 0
+        # Remove if corner
+        if begpix.iscorner(cont=self):
+            self.xys.remove(begpix)
+        begpix = self.xys.copy().pop()
+        loop.append(begpix)
+        # First step
+        tramp = begpix.neighbours(cont=self)
         clneighbourhood = begpix.closest_neighbours(cont=self)
-        neighbourhood = begpix.neighbours(cont=self)
-        xneighbourhood = neighbourhood - clneighbourhood
-        if len(xneighbourhood) == 0:
-            inspix = neighbourhood.pop()
-            # -set([begpix]) for not going back
-            neighbourhood = inspix.neighbours(cont=self) - set([begpix])
-            self.xys.remove(inspix)
-        else:
+        xneighbourhood = tramp - clneighbourhood
+        if len(xneighbourhood) >= 1:
+            self.xys.remove(begpix)
             inspix = xneighbourhood.pop()
-            neighbourhood = (inspix.neighbours(cont=self) - clneighbourhood -
-                             set([begpix]))
+        else:
+            self.xys.remove(begpix)
+            inspix = clneighbourhood.pop()
+        loop.append(inspix)
+        # 2nd step
+        neighbourhood = inspix.neighbours(cont=self)
+        clneighbourhood = inspix.closest_neighbours(cont=self)
+        xneighbourhood = neighbourhood - clneighbourhood
+        if len(xneighbourhood) >= 1:
             self.xys.remove(inspix)
-        tramp = inspix.neighbours(cont=self)  # For loop stop
-        # loopcount to let inspix avoid tramp
-        while inspix not in tramp or loopcount <= 1:
-            loopcount += 1
+            inspix = xneighbourhood.pop()
+        else:
+            self.xys.remove(inspix)
+            inspix = clneighbourhood.pop()
+        neighbourhood = inspix.neighbours(cont=self)
+        self.xys.remove(inspix)
+        while inspix not in tramp:
             loop.append(inspix)
             clneighbourhood = neighbourhood & inspix.closest_neighbours()
             xneighbourhood = neighbourhood - clneighbourhood
             if len(xneighbourhood) >= 1:
                 inspix = xneighbourhood.pop()
                 self.xys.remove(inspix)
-                # loopcount as pixel will go under corner in early stage
-                if len(clneighbourhood) >= 1 and loopcount >= 2:
+                if len(clneighbourhood) >= 1:
                     self.xys.remove(clneighbourhood.pop())
             else:
                 inspix = neighbourhood.pop()
                 self.xys.remove(inspix)
-            if loopcount <= 2:  # Not goind back on begpix at early stage
-                neighbourhood = inspix.neighbours(cont=self) - set([begpix])
-            else:
-                neighbourhood = inspix.neighbours(cont=self)
+            neighbourhood = inspix.neighbours(cont=self)
         loop.append(inspix)
         return loop
 
