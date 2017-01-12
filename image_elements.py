@@ -5,39 +5,6 @@ import scipy as sp
 import control_points
 
 
-class BernsteinBasisPoly(sp.poly1d):
-    def __init__(self, nu, n):
-        """Defines nu-nth Bernstein basis polynomial
-        nu -- int, number of the polynomial;
-        n -- int, degree
-        """
-        assert nu <= n
-        pol = sp.poly1d((1, 0))**nu  # P(X) = X^\nu
-        pol *= sp.poly1d((-1, 1))**(n - nu)  # P(X) = (1 - X)^(n-\nu)
-        pol *= scipy.special.binom(n, nu)
-        super().__init__(pol)
-
-
-class BezierCurve:
-    def __init__(self, ctrl_pts):
-        """Defines a Bezier curve from control points
-        ctrl_pts -- tuple of vectors containing at least three
-            points: start point, control point and end point
-        """
-        self.deg = len(ctrl_pts)
-        self.ctrl_pts = ctrl_pts
-
-        def coef_bezier(k):
-            ctrl_pts_col = []  # Column vectors for polynomial
-            for i, vec in enumerate(ctrl_pts):
-                ctrl_pts_col.append(sp.array([[vec[0]], [vec[1]]]))
-            return ctrl_pts_col[k]*BernsteinBasisPoly(k, self.deg)
-        pol_coeffs = sum((coef_bezier(i) for i in range(self.deg)))
-        self.polytuple = (sp.poly1d(pol_coeffs[0]), sp.poly1d(pol_coeffs[1]))
-        self.fct = lambda t: sp.array([[self.polytuple[0](t)],
-                                       [self.polytuple[1](t)]])
-
-
 class Pixel(object):
     def __init__(self, x, y):
         self.x = x
@@ -155,18 +122,12 @@ class Contour(object):
         """
         self.xys = xys
         self.colour = None
-        self.surface = 0
-        self.zone = None
 
     def __eq__(self, other):
         return self.xys == other.xys
 
     def __lt__(self, other):
         return len(self.xys) < len(other.xys)
-
-    def lowersurface(self, other):
-        """Will be used mainly to separate contours"""
-        return self.surface < other.surface
 
     def __hash__(self):
         if len(self.xys) == 0:
@@ -209,67 +170,6 @@ class Contour(object):
             if len(pix.closest_neighbours(cont=other)):
                 samecount += 1
         return samecount == smallen
-
-    def thinner(self):
-        """Removes pixels in right angle"""
-        for pix in self.xys.copy():
-            neighbourhood = pix.closest_neighbours(cont=self)
-            if len(neighbourhood) == 2:
-                neighbour1 = neighbourhood.pop()
-                neighbour2 = neighbourhood.pop()
-                if not neighbour1.aligned(neighbour2):
-                    self.xys.remove(pix)
-
-    def skinnier(self):
-        """Thins more the contour, a pixel must have only 2 neighbours. To
-        process a pixel, the neighbours of the neighbours are inspected. If
-        first neighbour has only two neighbours, the pixel shouldn't be
-        removed"""
-        # First filter: remove if more than 3 closest_neighbours (easy)
-        for pix in self.xys[:]:
-            if len(pix.closest_neighbours() & set(self.xys)) >= 3:
-                self.xys.remove(pix)
-        # Second filter: removes angles inside contour (staircase like)
-        for pix in self.xys[:]:
-            cl_neighbourhood = pix.closest_neighbours() & set(self.xys)
-            neighbourhood = pix.neighbourscont(self)
-            if len(cl_neighbourhood) == 2 and len(neighbourhood) == 4:
-                rdneighbour = cl_neighbourhood.pop()  # Random neighbour
-                # If other neighbour in neighbourhood of random neighbour
-                if cl_neighbourhood.pop() in rdneighbour.neighbourscont(self):
-                    self.xys.remove(pix)
-        """
-        # Fourth filter: removes angles with two neighbours (right angle)
-        # identifies angles thanks to number of neighbours
-        for pix in self.xys[:]:
-            neighbourhood = pix.neighbours(cont=self)
-            if len(neighbourhood) == 2:
-                neighbour1 = neighbourhood.pop()
-                neighbour2 = neighbourhood.pop()
-                if (len(neighbour1.neighbours(cont=self)) ==
-                    len(neighbour2.neighbours(cont=self)) == 3):
-                    self.xys.remove(pix)
-                    print("Fourth filter", pix)
-        """
-        # Fourth and a half filter...
-        # identifies angle thanks to neighbours coords
-        for pix in self.xys.copy():
-            neighbourhood = pix.closest_neighbours(cont=self)
-            if len(neighbourhood) == 2:
-                neighbour1 = neighbourhood.pop()
-                neighbour2 = neighbourhood.pop()
-                if not neighbour1.aligned(neighbour2):
-                    self.xys.remove(pix)
-        # Third filter: for lumps in diagonal
-        for pix in self.xys[:]:
-            cl_neighbourhood = pix.closest_neighbours() & set(self.xys)
-            if len(cl_neighbourhood) == 2:
-                doomed = True  # Will be removed, unless...
-                for neigh in cl_neighbourhood:
-                    if len(neigh.neighbourscont(self)) <= 2:
-                        doomed = False  # ... neighbourhood is sparse
-                if doomed:
-                    self.xys.remove(pix)
 
     def separate_contour(self, begpix):
         """Extracts and replaces self.xys by the greater contour in self,
