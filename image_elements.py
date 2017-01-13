@@ -20,7 +20,7 @@ class Pixel(object):
         return (self.x, self.y) != (other.x, other.y)
 
     def __hash__(self):
-        return 100*int(self.x) + int(self.y)  # Should be int anyway
+        return 1000000000*int(self.x) + int(self.y)  # Should be int anyway
 
     def adjs(self, matread):
         """ Returns neighbours that have not been read (according to matread)
@@ -134,11 +134,9 @@ class Contour(object):
             return 0
         else:
             if type(self.xys) is list:
-                return (int(self.xys[0].x) +
-                        int(1000*self.xys[len(self.xys)//2].x))
+                return int(self.xys[0].x)
             elif type(self.xys) is set:
-                return (int(self.xys.copy().pop().x) +
-                        int(1000*self.xys.copy().pop().x))
+                return (int(self.xys.copy().pop().x))
 
     def pixincommon(self, other):
         """Returns whether self has a pixel in common with other contour
@@ -178,6 +176,7 @@ class Contour(object):
         steps, which is the hardest part of the program.
         begpix -- Pixel() on which the inspection will start
         """
+        print("Début boucle")
         loop = []  # Ordered, therefore list
         assert type(self.xys) is set
         # Remove if corner
@@ -218,13 +217,25 @@ class Contour(object):
             loop.append(inspix)
             clneighbourhood = neighbourhood & inspix.closest_neighbours()
             xneighbourhood = neighbourhood - clneighbourhood
+            # For triangles
+            annoying = set([None])
+            if len(neighbourhood) == 2:
+                for xneighbour in xneighbourhood:
+                    if len(xneighbour.neighbours(cont=self) -
+                           set([inspix])) == 0:
+                        annoying = set([xneighbour])
+            if len(neighbourhood) >= 3:
+                for neighbour in neighbourhood:
+                    if len(neighbour.neighbours(cont=self)) == 2:
+                        self.xys.remove(neighbour)
+            # For right angles
             if len(xneighbourhood) >= 1:
-                inspix = xneighbourhood.pop()
+                inspix = (xneighbourhood - annoying).pop()
                 self.xys.remove(inspix)
                 if len(clneighbourhood) >= 1:
                     self.xys.remove(clneighbourhood.pop())
             else:
-                inspix = neighbourhood.pop()
+                inspix = (neighbourhood - annoying).pop()
                 self.xys.remove(inspix)
             neighbourhood = inspix.neighbours(cont=self)
         loop.append(inspix)
