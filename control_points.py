@@ -48,15 +48,11 @@ def vertan(points):
     """
     assert len(points) == 4
     projx = [None for _ in range(3)]
-    projy = [None for _ in range(3)]
     for i in range(3):
         projx[i] = abs(points[i + 1].x - points[0].x)
-        projy[i] = abs(points[i + 1].y - points[0].y)
-    x = projx[1] > projx[0] and projx[1] > projx[2]
-    y = projy[1] > projy[0] and projy[1] > projy[2]
+    return projx[1] > projx[0] and projx[1] > projx[2]
     # Stricte ou large? Stricte: passage ponctuel, large direction constante
     # sur un intervalle.
-    return x or y
 
 
 def contloop(cont, start, stop):
@@ -135,7 +131,7 @@ def curves(contour):
     for i in range(n-1):
         start, end = waypoints[i], waypoints[i + 1]
         distance = dist(contour, start, end)
-        precision = min(distance - 1, 5) if distance - 1 >= 2 else 2
+        precision = min(distance - 1, 5) if distance - 1 >= 1 else 1
         pente_s = paratan2slope(tan_param(start, contour, precision, sens=1))
         pente_e = paratan2slope(tan_param(end, contour, precision, sens=-1))
         if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
