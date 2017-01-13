@@ -117,7 +117,7 @@ def list_waypoints(contour):
         start = nextop(contour, start, linedges=linedges)
         linedges.discard(start)  # Avoids looping infinitely
         waypoints.append(start)
-    waypoints[-1] = contour.xys[-1]
+    waypoints[-1] = contour.xys[0]
     return waypoints
 
 
