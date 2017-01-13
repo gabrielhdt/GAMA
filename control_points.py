@@ -3,52 +3,6 @@ import image_elements
 import scipy as sp
 
 
-def pente_moy(pixel, contour, sens=1, precision=5):
-    """pixel un objet de la classe Pixel
-    contour un objet de la classe Contour
-    sens orientation de la tangente
-     precision nombre de pixel pris en compte
-     renvoie la pente de la tangente au contour au point pixel """
-    index = contour.xys.index(pixel)
-    n = len(contour.xys)
-    pente = 0
-    for i in range(1, precision+1):
-        if index + i * sens < 0:
-            other_x = contour.xys[index + i * sens].x
-            other_y = contour.xys[index + i * sens].y
-        else:
-            other_x = contour.xys[(index + i * sens) % n].x
-            other_y = contour.xys[(index + i * sens) % n].y
-        if pixel.x == other_x:
-            return "inf"
-        else:
-            pente += (pixel.y-other_y)/(pixel.x-other_x)
-    return pente/precision
-
-
-def pente_moy2(pixel, contour, precision=5):
-    """pixel un objet de la classe Pixel
-    contour un objet de la classe Contour
-    sens orientation de la tangente
-     precision nombre de pixel pris en compte
-     renvoie la pente de la tangente au contour au point pixel """
-    index = contour.xys.index(pixel)
-    n = len(contour.xys)
-    pente = 0
-    for i in range(-precision, precision+1):
-        if index + i < 0:
-            other_x = contour.xys[index + i].x
-            other_y = contour.xys[index + i].y
-        else:
-            other_x = contour.xys[(index + i) % n].x
-            other_y = contour.xys[(index + i) % n].y
-        if pixel.x == other_x:
-            return "inf"
-        else:
-            pente += (pixel.y-other_y)/(pixel.x-other_x)
-    return pente/precision
-
-
 def tan_param(startpix, contour, precision=5, sens=1):
     """Donne les coefficients de l'équation paramétrique de la tangente:
     G(t) = (x(t), y(t)) = (a*t, b*t), i.e. a et b. S'inspire
