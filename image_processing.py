@@ -14,13 +14,16 @@ import matplotlib.pyplot as plt
 import image_elements
 
 
-def Matriceniveauxdegris(matriceRGB):
-    (a,b,c)=matriceRGB.shape #ici matriceRGB est la matrice RGB de l'image choisie
-    Matrice_gray = np.zeros(shape=(a,b)) #Matrice_gray pour Matriceniveauxdegris
+def pic2greylvl(matrgb):
+    (a, b, c)=matrgb.shape
+    matgl = np.zeros(shape=(a,b))  # matrix greylevels
     for i in range (a):
         for j in range (b):
-            Matrice_gray[i][j]+=((matriceRGB[i][j][0]/255)*0.2126+(matriceRGB[i][j][1]/255)*0.7152+(matriceRGB[i][j][2]/255)*0.0722)
-    return Matrice_gray
+            matgl[i][j] += (((matrgb[i][j][0]/255)*0.2126 +
+                            (matrgb[i][j][1]/255)*0.7152 +
+                            (matrgb[i][j][2]/255)*0.0722))
+    return matgl
+
 
 def regroupement_couleur(matricenb, seuil):
     """
@@ -113,14 +116,11 @@ def detection_contour(matrgb, matng, begpix, seuil=0.01):
         begpix = notreadneighbours.pop()
         contour.xys |= contourec(begpix, notreadneighbours)
     contour.xys.discard(None)
-    # Contour attributes
-    liste_zone = []  # liste_zone is the list of read pixels surrounded by the contour
-    for row in range(matng.shape[0]):
-        for col in range(matng.shape[1]):
-            if matread_loc[row, col]:
-                liste_zone.append((row, col))
-    row, col = liste_zone.pop()
-    contour.colour = matrgb[row - 1, col - 1, :]
+    # Setting colour
+    truecoords = np.where(matread_loc)
+    coord = truecoords[0][0], truecoords[1][0]
+    colour = matrgb[coord[0] - 1, coord[1] - 1, :]
+    contour.colour = vec2hex(colour)
     return contour, matread_loc
 
 
@@ -128,7 +128,7 @@ def clamp(x):
         return max(0, min(x, 255))
 
 
-def vec_to_hex(colour_contour):
+def vec2hex(colour_contour):
     """
     Converts RGB colour to a 6 digit code
     corresponding to the hexadecimal form
@@ -136,7 +136,7 @@ def vec_to_hex(colour_contour):
     r = colour_contour[0]
     g = colour_contour[1]
     b = colour_contour[2]
-    "#{0:02x}{1:02x}{2:02x}".format(clamp(r), clamp(g), clamp(b))
+    return "#{0:02x}{1:02x}{2:02x}".format(clamp(r), clamp(g), clamp(b))
 
 
 def contours_image(matrgb, seuil=0.01):
@@ -147,7 +147,7 @@ def contours_image(matrgb, seuil=0.01):
     seuil -- float, min difference of colour between two pixels to create
         a contour
     """
-    matngb = Matriceniveauxdegris(matrgb)
+    matngb = pic2greylvl(matrgb)
     matngb = regroupement_couleur(matngb, seuil=seuil)
     matngb = add_border(matngb)
     contset = set()
