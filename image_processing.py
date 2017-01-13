@@ -16,7 +16,7 @@ import image_elements
 
 def Matriceniveauxdegris(matriceRGB):
     (a,b,c)=matriceRGB.shape #ici matriceRGB est la matrice RGB de l'image choisie
-    Matrice_gray=np.zeros(shape=(a,b)) #Matrice_gray pour Matriceniveauxdegris
+    Matrice_gray = np.zeros(shape=(a,b)) #Matrice_gray pour Matriceniveauxdegris
     for i in range (a):
         for j in range (b):
             Matrice_gray[i][j]+=((matriceRGB[i][j][0]/255)*0.2126+(matriceRGB[i][j][1]/255)*0.7152+(matriceRGB[i][j][2]/255)*0.0722)
@@ -54,7 +54,7 @@ def add_border(matng):
     return matng_border
 
 
-def detection_contour(matng, begpix, seuil=0.01):
+def detection_contour(matrgb, matng, begpix, seuil=0.01):
     """Detects a contour circling a zone of a colour, contour is outside the
     zone of same colour (avoids issues of contours sharing pixels)
     matng -- greylevel matrix
@@ -114,10 +114,32 @@ def detection_contour(matng, begpix, seuil=0.01):
         contour.xys |= contourec(begpix, notreadneighbours)
     contour.xys.discard(None)
     # Contour attributes
+    liste_zone = []  # liste_zone is the list of read pixels surrounded by the contour
+    for row in range(matng.shape[0]):
+        for col in range(matng.shape[1]):
+            if matread_loc[row, col]:
+                liste_zone.append((row, col))
+    row, col = liste_zone.pop()
+    contour.colour = matrgb[row - 1, col - 1, :]
     return contour, matread_loc
 
 
-def contours_image(matngb, seuil=0.01):
+def clamp(x):
+        return max(0, min(x, 255))
+
+
+def vec_to_hex(colour_contour):
+    """
+    Converts RGB colour to a 6 digit code
+    corresponding to the hexadecimal form
+    """
+    r = colour_contour[0]
+    g = colour_contour[1]
+    b = colour_contour[2]
+    "#{0:02x}{1:02x}{2:02x}".format(clamp(r), clamp(g), clamp(b))
+
+
+def contours_image(matrgb, seuil=0.01):
     """
     Donne l'ensemble des contours de la matrice en niveaux de gris avec
     bordure matngb.
@@ -125,6 +147,9 @@ def contours_image(matngb, seuil=0.01):
     seuil -- float, min difference of colour between two pixels to create
         a contour
     """
+    matngb = Matriceniveauxdegris(matrgb)
+    matngb = regroupement_couleur(matngb, seuil=seuil)
+    matngb = add_border(matngb)
     contset = set()
     matread = np.zeros_like(matngb, dtype=bool)
     while False in matread:
@@ -133,7 +158,7 @@ def contours_image(matngb, seuil=0.01):
         notread = notread[0][0], notread[1][0]
         # + 1's compensate border, avoid falling in the border
         begpix = image_elements.Pixel(notread[0], notread[1])
-        cont, upmatread = detection_contour(matngb, begpix, seuil)
+        cont, upmatread = detection_contour(matrgb, matngb, begpix, seuil)
         matread += upmatread
         contset.add(cont)
     contset = contset - set((image_elements.Contour([]), ))  # Removes empty
