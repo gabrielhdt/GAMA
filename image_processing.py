@@ -163,39 +163,3 @@ def contours_image(matrgb, seuil=0.01):
         contset.add(cont)
     contset = contset - set((image_elements.Contour([]), ))  # Removes empty
     return contset
-
-
-def compare_cont(cont1, cont2):
-    """Compares contours returning a float between 0 and 1, corresponding
-    to the resemblance of the two contours (1: a contour is a subset of the
-    other, 0 they are disjoint).
-    """
-    if len(cont1.xys) > len(cont2.xys):  # Asserts cont1 is smaller than cont2
-        cont1, cont2 = cont2, cont1
-    return len(set(cont1.xys) & set(cont2.xys))/len(cont1.xys)
-
-
-def remove_double(contset):
-    """Removes contours that are twice in contset. Modifies contset in place"""
-    for cont1 in contset.copy():
-        for cont2 in contset.copy() - set((cont1, )):
-            resemblance = compare_cont(cont1, cont2)
-            bcont = max(cont1, cont2)  # Bigger contour
-            if resemblance >= 0.75 and bcont in contset:
-                contset.remove(bcont)
-
-
-def unifycont(contlist):
-    """From a contset with each contour twice in it (contour and equivalent),
-    removes the bigger one. Works only if contlist sorted.
-    contlist[k].hasequivin(cont) works only if contlist[k] < cont"""
-    k = 0
-    while k < len(contlist):
-        equifound = False
-        i = k + 1
-        while i < len(contlist) and not equifound:
-            if contlist[k].hasequivin(contlist[i]):
-                equifound = True
-                contlist.remove(max(contlist[k], contlist[i]))
-            i += 1
-        k += 1
