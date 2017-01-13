@@ -125,7 +125,7 @@ def detection_contour(matrgb, matng, begpix, seuil=0.01):
 
 
 def clamp(x):
-        return max(0, min(x, 255))
+    return max(0, min(x, 255))
 
 
 def vec2hex(colour_contour):
@@ -152,10 +152,10 @@ def contours_image(matrgb, seuil=0.01):
     matngb = add_border(matngb)
     contset = set()
     matread = np.zeros_like(matngb, dtype=bool)
-    while False in matread:
+    while False in matread[1:-1, 1:-1]:
         # Finds false in matread without border
-        notread = np.where(matread == False)
-        notread = notread[0][0], notread[1][0]
+        notread = np.where(matread[1:-1, 1:-1] == False)
+        notread = notread[0][0] + 1, notread[1][0] + 1
         # + 1's compensate border, avoid falling in the border
         begpix = image_elements.Pixel(notread[0], notread[1])
         cont, upmatread = detection_contour(matrgb, matngb, begpix, seuil)
@@ -163,3 +163,8 @@ def contours_image(matrgb, seuil=0.01):
         contset.add(cont)
     contset = contset - set((image_elements.Contour([]), ))  # Removes empty
     return contset
+
+
+def ordercontlist(contlist):
+    """Orders contour in contlist"""
+    contlist.sort(key=lambda cont: min((pix.x for pix in cont.xys)))
