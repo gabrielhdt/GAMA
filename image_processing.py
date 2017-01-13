@@ -55,7 +55,7 @@ def add_border(matng):
     return matng_border
 
 
-def detection_contour(matrgb, matng, begpix, seuil=0.01):
+def detection_contour(matrgb, matng, begpix):
     """Detects a contour circling a zone of a colour, contour is outside the
     zone of same colour (avoids issues of contours sharing pixels)
     matng -- greylevel matrix
@@ -70,7 +70,7 @@ def detection_contour(matrgb, matng, begpix, seuil=0.01):
     # Removing pixels from another zone from notreadneighbours
     for neighbour in notreadneighbours.copy():
         neighcolour = matng[neighbour.x, neighbour.y]
-        if abs(neighcolour - begcolour) > seuil:
+        if abs(neighcolour - begcolour) > 0:
             notreadneighbours.remove(neighbour)
     contour = image_elements.Contour(set())
 
@@ -93,7 +93,7 @@ def detection_contour(matrgb, matng, begpix, seuil=0.01):
         contour_part = set()
         for neighbour in neighbourhood:
             neighcolour = matng[neighbour.x, neighbour.y]
-            if abs(neighcolour - inscolour) > seuil:
+            if abs(neighcolour - inscolour) > 0:
                 contour_found = True
                 notreadneighbours.remove(neighbour)
                 contour_part.add(neighbour)
@@ -156,7 +156,7 @@ def contours_image(matrgb, seuil=0.01):
         notread = notread[0][0] + 1, notread[1][0] + 1
         # + 1's compensate border, avoid falling in the border
         begpix = image_elements.Pixel(notread[0], notread[1])
-        cont, upmatread = detection_contour(matrgb, matngb, begpix, seuil)
+        cont, upmatread = detection_contour(matrgb, matngb, begpix)
         matread += upmatread
         contset.add(cont)
     contset = contset - set((image_elements.Contour([]), ))  # Removes empty
