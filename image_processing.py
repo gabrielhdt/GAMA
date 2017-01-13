@@ -8,20 +8,18 @@ Notations:
 Matriceniveauxdegris: niveau de gris entre 0 et 1, avec coefficients
 (0.2126,0.7152,0.0722) pour (R,G,B)/ Wikipedia
 """
-import scipy.misc as smp
 import numpy as np
-import matplotlib.pyplot as plt
 import image_elements
 
 
 def pic2greylvl(matrgb):
-    (a, b, c)=matrgb.shape
-    matgl = np.zeros(shape=(a,b))  # matrix greylevels
-    for i in range (a):
-        for j in range (b):
-            matgl[i][j] += (((matrgb[i][j][0]/255)*0.2126 +
+    (a, b, c) = matrgb.shape
+    matgl = np.zeros(shape=(a, b))  # matrix greylevels
+    for i in range(a):
+        for j in range(b):
+            matgl[i][j] += ((matrgb[i][j][0]/255)*0.2126 +
                             (matrgb[i][j][1]/255)*0.7152 +
-                            (matrgb[i][j][2]/255)*0.0722))
+                            (matrgb[i][j][2]/255)*0.0722)
     return matgl
 
 
