@@ -69,7 +69,7 @@ def contloop(cont, start, stop):
         return cont.xys[start:stop] + cont.xys[0:stop - length]
 
 
-def find_inflexion(contour, start, linedges=set()):
+def nextop(contour, start, linedges=set()):
     """Renvoie le pixel correspondant au point de controle d arrivee
     de la portion de contour partant du pixel start:
     soit le premier point d'inflexion rencontre, soit le dernier point
@@ -118,86 +118,49 @@ def list_waypoints(contour):
     waypoints = [start]
     linedges = contour.scanlines()
     while start != contour.xys[-1]:
-        start = find_inflexion(contour, start, linedges=linedges)
+        start = nextop(contour, start, linedges=linedges)
         linedges.discard(start)  # Avoids looping infinitely
         waypoints.append(start)
     waypoints[-1] = contour.xys[-1]
     return waypoints
 
 
-def curves(contours):
-    curves = []
-    for contour in contours:
-        waypoints = list_waypoints(contour)
-        n = len(waypoints)
-        for i in range (n-1):
-            start, end = waypoints[i], waypoints[i + 1]
-            distance = dist(contour, start, end)
-            precision = min(distance - 1, 5) if distance - 1 >= 2 else 2
-            pente_s = paratan2slope(tan_param(start, contour, precision, sens=1))
-            pente_e = paratan2slope(tan_param(end, contour, precision, sens=-1))
-            if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
-                middle_x = (start.x + end.x) / 2
-                middle_y = (start.y + end.y) / 2
-            elif "inf" in (pente_e, pente_s):
-                if pente_s == "inf":
-                    middle_x = start.x
-                    middle_y = end.y + pente_e * (end.x - start.x)
-                elif pente_e == "inf":
-                    middle_x = end.x
-                    middle_y = start.y + pente_s * (start.x - end.x)
-            elif 0 in (pente_e, pente_s):
-                if pente_s == 0:
-                    middle_x = end.x + (start.y - end.y) / pente_e
-                    middle_y = start.y
-                elif pente_e == 0:
-                    middle_x = start.x + (end.y - start.y) / pente_s
-                    middle_y = end.y
-            else:  # pente_s != 0 and pente_e != 0:
-                coef = 1 / (pente_s - pente_e)
-                middle_x = coef * (pente_s * start.x - pente_e * end.x + end.y - start.y)
-                middle_y = pente_s * (middle_x - start.x) + start.y
-            curves.append(sp.array([[start.x, start.y], [middle_x, middle_y], [end.x, end.y]]))
-    return curves
-
-def control(contour, start, linedges=set()):
-    """Renvoie le triple de points de controle pour tracer une courbe de
-    Bezier quadratique sous forme d'un array scipy (concorde avec
-    writesvg.add_polybezier)
-    correspondant a la portion du contour qui commence au pixel start
-    Est censée être lancée par list_curves.
+def curves(contour):
+    """Creates b-splines for contour
+    contour -- Contour()
     """
-    if start in linedges:
-        linedges.remove(start)
-    end = find_inflexion(contour, start, linedges)
-    distance = dist(contour, start, end)
-    # On ne calcule pas la tangentes avec le pixel d'arrivée si possible, mais
-    # la précision doit être supérieure à 2 pour mener les calculs (iss14)
-    precision = min(distance - 1, 5) if distance - 1 >= 2 else 2
-    pente_s = paratan2slope(tan_param(start, contour, precision, sens=1))
-    pente_e = paratan2slope(tan_param(end, contour, precision, sens=-1))
-    if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
-        middle_x = (start.x + end.x)/2
-        middle_y = (start.y + end.y)/2
-    elif "inf" in (pente_e, pente_s):
-        if pente_s == "inf":
-            middle_x = start.x
-            middle_y = end.y + pente_e * (end.x - start.x)
-        elif pente_e == "inf":
-            middle_x = end.x
-            middle_y = start.y + pente_s * (start.x - end.x)
-    elif 0 in (pente_e, pente_s):
-        if pente_s == 0:
-            middle_x = end.x + (start.y - end.y)/pente_e
-            middle_y = start.y
-        elif pente_e == 0:
-            middle_x = start.x + (end.y - start.y)/pente_s
-            middle_y = end.y
-    else:   #pente_s != 0 and pente_e != 0:
-        coef = 1/(pente_s - pente_e)
-        middle_x = coef*(pente_s*start.x - pente_e*end.x + end.y - start.y)
-        middle_y = pente_s*(middle_x - start.x) + start.y
-    return sp.array([[start.x, start.y], [middle_x, middle_y], [end.x, end.y]])
+    curves = []
+    waypoints = list_waypoints(contour)
+    n = len(waypoints)
+    for i in range(n-1):
+        start, end = waypoints[i], waypoints[i + 1]
+        distance = dist(contour, start, end)
+        precision = min(distance - 1, 5) if distance - 1 >= 2 else 2
+        pente_s = paratan2slope(tan_param(start, contour, precision, sens=1))
+        pente_e = paratan2slope(tan_param(end, contour, precision, sens=-1))
+        if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
+            middle_x = (start.x + end.x) / 2
+            middle_y = (start.y + end.y) / 2
+        elif "inf" in (pente_e, pente_s):
+            if pente_s == "inf":
+                middle_x = start.x
+                middle_y = end.y + pente_e * (end.x - start.x)
+            elif pente_e == "inf":
+                middle_x = end.x
+                middle_y = start.y + pente_s * (start.x - end.x)
+        elif 0 in (pente_e, pente_s):
+            if pente_s == 0:
+                middle_x = end.x + (start.y - end.y) / pente_e
+                middle_y = start.y
+            elif pente_e == 0:
+                middle_x = start.x + (end.y - start.y) / pente_s
+                middle_y = end.y
+        else:  # pente_s != 0 and pente_e != 0:
+            coef = 1 / (pente_s - pente_e)
+            middle_x = coef * (pente_s * start.x - pente_e * end.x + end.y - start.y)
+            middle_y = pente_s * (middle_x - start.x) + start.y
+        curves.append(sp.array([[start.x, start.y], [middle_x, middle_y], [end.x, end.y]]))
+    return curves
 
 
 def dist(cont, pix1, pix2):
@@ -210,22 +173,6 @@ def dist(cont, pix1, pix2):
     gind = max(cont.xys.index(pix1), cont.xys.index(pix2))
     length = len(cont.xys)
     return min(gind - lind, length - gind + lind)
-
-
-def list_curves(contours):
-    """Renvoie la liste de l ensemble des courbes a tracer,
-    a partir de la liste de l ensemble des contours
-    contours -- liste de image_elements.Contour()"""
-    curves = []
-    for contour in contours:
-        linedges = contour.scanlines()
-        start = contour.xys[0]
-        c_end = contour.xys[-1]
-        while start != c_end:
-            curve = control(contour, start, linedges=linedges)
-            start = image_elements.Pixel(curve[2][0], curve[2][1])
-            curves.append(curve)
-    return curves
 
 
 def curves2curvemat(curves):
