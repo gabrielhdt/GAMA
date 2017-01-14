@@ -3,7 +3,7 @@ import image_elements
 import scipy as sp
 
 
-def tan_param(startpix, contour, precision=5, sens=1):
+def tan_param(hookpix, contour, precisionb=3, precisiona=3, sens=1):
     """Donne les coefficients de l'équation paramétrique de la tangente:
     G(t) = (x(t), y(t)) = (a*t, b*t), i.e. a et b. S'inspire
     grandement de pente_moy. Sens détermine si les points à moyenner sont en
@@ -13,23 +13,43 @@ def tan_param(startpix, contour, precision=5, sens=1):
     precision -- int, nombre de pixels sur lesquels sont fait la moyenne
     sens -- dans {-1, 1}
     """
-    index = contour.xys.index(startpix)
+    index = contour.xys.index(hookpix)
     n = len(contour.xys)
     delta_x_mean = 0
     delta_y_mean = 0
-    for i in range(1, precision + 1):
+    """
+    for i in range(-precisionb, precisiona + 1):
+        precision = precisionb if i <= 0 else precisiona
         other_x = contour.xys[(index + i*sens) % n].x
         other_y = contour.xys[(index + i*sens) % n].y
-        delta_x_mean += other_x - startpix.x
-        delta_y_mean += other_y - startpix.y
-    return delta_x_mean/precision, delta_y_mean/precision
+        delta_x_mean += (other_x - hookpix.x)/precision
+        delta_y_mean += (other_y - hookpix.y)/precision
+    """
+    for i in range(-precisionb, 0):
+        precision = precisionb if i <= 0 else precisiona
+        other_x = contour.xys[(index + i*sens) % n].x
+        other_y = contour.xys[(index + i*sens) % n].y
+        delta_x_mean -= (other_x - hookpix.x)/precision
+        delta_y_mean -= (other_y - hookpix.y)/precision
+    for i in range(1, precisiona + 1):
+        precision = precisionb if i <= 0 else precisiona
+        other_x = contour.xys[(index + i*sens) % n].x
+        other_y = contour.xys[(index + i*sens) % n].y
+        delta_x_mean += (other_x - hookpix.x)/precision
+        delta_y_mean += (other_y - hookpix.y)/precision
+    return delta_x_mean, delta_y_mean
 
 
 def paratan2slope(delta_xy):
     """Pente associée à la tangente paramétrée par delta_x, delta_y
     delta_xy -- itérable à deux éléments, delta_x en 0 et delta_y en 1"""
     assert len(delta_xy) == 2
-    return "inf" if delta_xy[0] == 0 else delta_xy[1]/delta_xy[0]
+    if abs(delta_xy[0]) <= 1e-10:
+        return "inf"
+    elif abs(delta_xy[1]) <= 1e-10:
+        return 0
+    else:
+        return delta_xy[1]/delta_xy[0]
 
 
 def clockwise(p1, p2, p3):
@@ -132,8 +152,9 @@ def curves(contour):
         start, end = waypoints[i], waypoints[i + 1]
         distance = dist(contour, start, end)
         precision = min(distance, 5)
-        pente_s = paratan2slope(tan_param(start, contour, precision, sens=1))
-        pente_e = paratan2slope(tan_param(end, contour, precision, sens=-1))
+        pente_s = paratan2slope(tan_param(start, contour, sens=1))
+        pente_e = paratan2slope(tan_param(end, contour, sens=-1))
+        print(pente_e, pente_s)
         if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
             middle_x = (start.x + end.x) / 2
             middle_y = (start.y + end.y) / 2
