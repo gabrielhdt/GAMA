@@ -294,24 +294,28 @@ class Contour(object):
         cxys = self.xys[1:]  # Shortcut
         linedges = set()  # Don't care about order
         aligned = 0
+        threshold = max(int(len(self.xys)*0.03), 3)  # Chosen after tests
+        print(threshold, len(self.xys))
         for i, pix in enumerate(cxys):
             # choordinate stands for change of coordinate (we mean both)...
             choordinate = not(pix.x == self.xys[i].x or pix.y == self.xys[i].y)
             if not choordinate:
                 aligned += 1
                 # If last pixel of contour in a line
-                if pix == cxys[-1] and aligned >= 3:
+                if pix == cxys[-1] and aligned >= threshold:
                     for inlinepix in cxys[i - aligned + 1:i]:
                         linedges.remove(inlinepix)
-                elif pix == cxys[-1] and aligned == 2:  # Particular case
+                # Particular case
+                elif pix == cxys[-1] and aligned == threshold - 1:
                     linedges.add(pix)
-                elif aligned == 2:  # If 3 points are aligned
-                    for k in range(3):
+                elif aligned == threshold - 1:  # If 3 points are aligned
+                    for k in range(threshold):
                         linedges.add(cxys[i - k])
-                elif aligned >= 3:
+                elif aligned >= threshold:
                     linedges.add(pix)
-            elif aligned >= 2 and choordinate:  # Coordinate change after
-                for inlinepix in cxys[i - aligned:i - 1]:  # aligned sequence
+            # Coordinate change after aligned sequence
+            elif aligned >= threshold - 1 and choordinate:
+                for inlinepix in cxys[i - aligned:i - 1]:
                     linedges.remove(inlinepix)  # Removes line content
                 aligned = 0
             else:  # Coordinate change without any alignement
