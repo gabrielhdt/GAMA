@@ -3,62 +3,11 @@ import image_elements
 import scipy as sp
 
 
-def tan_param(hookpix, contour, precisionb=3, precisiona=3):
-    """Donne les coefficients de l'équation paramétrique de la tangente:
-    G(t) = (x(t), y(t)) = (a*t, b*t), i.e. a et b. S'inspire
-    grandement de pente_moy. Sens détermine si les points à moyenner sont en
-    amont (sens = -1) ou en aval (sens = 1) de startpix.
-    startpix -- image_elements.Pixel() object
-    contour -- image_elements.Contour() object
-    precision -- int, nombre de pixels sur lesquels sont fait la moyenne
-    sens -- dans {-1, 1}
-    """
-    index = contour.xys.index(hookpix)
-    n = len(contour.xys)
-    delta_x_mean = 0
-    delta_y_mean = 0
-    """
-    for i in range(-precisionb, precisiona + 1):
-        precision = precisionb if i <= 0 else precisiona
-        other_x = contour.xys[(index + i*sens) % n].x
-        other_y = contour.xys[(index + i*sens) % n].y
-        delta_x_mean += (other_x - hookpix.x)/precision
-        delta_y_mean += (other_y - hookpix.y)/precision
-    """
-    beforeweight = [weight(i) for i in range(1, precisionb + 1)]
-    beforetotweight = sum(beforeweight)
-    afterweight = [weight(i) for i in range(1, precisiona + 1)]
-    aftertotweight = sum(afterweight)
-    for i in range(-precisionb, 0):
-        other_x = contour.xys[(index + i) % n].x
-        other_y = contour.xys[(index + i) % n].y
-        delta_x_mean -= (other_x - hookpix.x)*beforeweight[abs(i)]/beforetotweight
-        delta_y_mean -= (other_y - hookpix.y)*beforeweight[abs(i)]/beforetotweight
-    for i in range(1, precisiona + 1):
-        other_x = contour.xys[(index + i) % n].x
-        other_y = contour.xys[(index + i) % n].y
-        delta_x_mean += (other_x - hookpix.x)*afterweight[i - 1]/aftertotweight
-        delta_y_mean += (other_y - hookpix.y)*afterweight[i - 1]/aftertotweight
-    return delta_x_mean, delta_y_mean
-
-
 def weight(dist):
     """Gives weight to pixel while processing tangent. Weight depends on the
     distance between the hook and the point
     dist -- integer, distance between hook and pixel"""
     return 2**(-abs(dist))
-
-
-def paratan2slope(delta_xy):
-    """Pente associée à la tangente paramétrée par delta_x, delta_y
-    delta_xy -- itérable à deux éléments, delta_x en 0 et delta_y en 1"""
-    assert len(delta_xy) == 2
-    if abs(delta_xy[0]) <= 1e-10:
-        return "inf"
-    elif abs(delta_xy[1]) <= 1e-10:
-        return 0
-    else:
-        return delta_xy[1]/delta_xy[0]
 
 
 def clockwise(p1, p2, p3):
@@ -156,6 +105,7 @@ def curves(contour):
     contour -- Contour()
     """
     curves = []
+    epsilon = 1
     waypoints = list_waypoints(contour)
     n = len(waypoints)
     for i in range(n):  # Waypoint by waypoint
@@ -168,11 +118,14 @@ def curves(contour):
         start, end = waypoints[i], waypoints[i + 1]
         pente_s = start.slope
         pente_e = end.slope
-        if pente_s == pente_e:
+        if "inf" not in (pente_e, pente_s) and abs(pente_s - pente_e) < epsilon:
             middle_x = (start.x + end.x) / 2
             middle_y = (start.y + end.y) / 2
         elif "inf" in (pente_e, pente_s):
-            if pente_s == "inf":
+            if pente_e == pente_s:
+                middle_x = (start.x + end.x) / 2
+                middle_y = (start.y + end.y) / 2
+            elif pente_s == "inf":
                 middle_x = start.x
                 middle_y = end.y + pente_e * (end.x - start.x)
             elif pente_e == "inf":
