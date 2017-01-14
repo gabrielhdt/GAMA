@@ -105,7 +105,7 @@ def curves(contour):
     contour -- Contour()
     """
     curves = []
-    epsilon = 1
+    epsilon = 1e-5
     waypoints = list_waypoints(contour)
     n = len(waypoints)
     for i in range(n):  # Waypoint by waypoint
@@ -142,8 +142,22 @@ def curves(contour):
             coef = 1 / (pente_s - pente_e)
             middle_x = coef * (pente_s * start.x - pente_e * end.x + end.y - start.y)
             middle_y = pente_s * (middle_x - start.x) + start.y
+        if not validate_flyby((middle_x, middle_y), start, end):
+            middle_x = (start.x + end.x)/2
+            middle_y = (start.y + end.y)/2
         curves.append(sp.array([[start.x, start.y], [middle_x, middle_y], [end.x, end.y]]))
     return curves
+
+
+def validate_flyby(ctrlpt, wayptb, waypta):
+    """Asserts whether ctrlpt is in the square delimited by wayptb and
+    waypta
+    ctrlpt -- tuple, coordinates of ctrlpt
+    wayptb, waypta -- three Waypoint()
+    """
+    minx, maxx = min(waypta.x, wayptb.x), max(waypta.x, wayptb.x)
+    miny, maxy = min(waypta.y, wayptb.y), max(waypta.y, wayptb.y)
+    return minx <= ctrlpt[0] <= maxx and miny <= ctrlpt[1] <= maxy
 
 
 def dist(cont, pix1, pix2):
