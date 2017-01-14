@@ -25,19 +25,28 @@ def tan_param(hookpix, contour, precisionb=3, precisiona=3, sens=1):
         delta_x_mean += (other_x - hookpix.x)/precision
         delta_y_mean += (other_y - hookpix.y)/precision
     """
+    beforeweight = [weight(i) for i in range(1, precisionb + 1)]
+    beforetotweight = sum(beforeweight)
+    afterweight = [weight(i) for i in range(1, precisiona + 1)]
+    aftertotweight = sum(afterweight)
     for i in range(-precisionb, 0):
-        precision = precisionb if i <= 0 else precisiona
         other_x = contour.xys[(index + i*sens) % n].x
         other_y = contour.xys[(index + i*sens) % n].y
-        delta_x_mean -= (other_x - hookpix.x)/precision
-        delta_y_mean -= (other_y - hookpix.y)/precision
+        delta_x_mean -= (other_x - hookpix.x)*beforeweight[i]/beforetotweight
+        delta_y_mean -= (other_y - hookpix.y)*beforeweight[i]/beforetotweight
     for i in range(1, precisiona + 1):
-        precision = precisionb if i <= 0 else precisiona
         other_x = contour.xys[(index + i*sens) % n].x
         other_y = contour.xys[(index + i*sens) % n].y
-        delta_x_mean += (other_x - hookpix.x)/precision
-        delta_y_mean += (other_y - hookpix.y)/precision
+        delta_x_mean += (other_x - hookpix.x)*afterweight[i - 1]/aftertotweight
+        delta_y_mean += (other_y - hookpix.y)*afterweight[i - 1]/aftertotweight
     return delta_x_mean, delta_y_mean
+
+
+def weight(dist):
+    """Gives weight to pixel while processing tangent. Weight depends on the
+    distance between the hook and the point
+    dist -- integer, distance between hook and pixel"""
+    return 2**(-abs(dist))
 
 
 def paratan2slope(delta_xy):
@@ -149,11 +158,12 @@ def curves(contour):
     waypoints = list_waypoints(contour)
     n = len(waypoints)
     for i in range(n-1):
-        start, end = waypoints[i], waypoints[i + 1]
-        distance = dist(contour, start, end)
-        precision = min(distance, 5)
-        pente_s = paratan2slope(tan_param(start, contour, sens=1))
-        pente_e = paratan2slope(tan_param(end, contour, sens=-1))
+        before, start, end = waypoints[i - 1], waypoints[i], waypoints[i + 1]
+        distanceb = min(dist(contour, before, start), 3)
+        distancem = min(dist(contour, start, end), 3)
+        distancea = min(dist(contour, end, waypoints[(i + 2)%n]), 3)
+        pente_s = paratan2slope(tan_param(start, contour, distanceb, distancem, sens=1))
+        pente_e = paratan2slope(tan_param(end, contour, distancem, distancea, sens=-1))
         print(pente_e, pente_s)
         if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
             middle_x = (start.x + end.x) / 2
