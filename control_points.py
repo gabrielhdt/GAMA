@@ -131,7 +131,7 @@ def curves(contour):
     for i in range(n-1):
         start, end = waypoints[i], waypoints[i + 1]
         distance = dist(contour, start, end)
-        precision = min(distance - 1, 5) if distance - 1 >= 1 else 1
+        precision = min(distance, 5)
         pente_s = paratan2slope(tan_param(start, contour, precision, sens=1))
         pente_e = paratan2slope(tan_param(end, contour, precision, sens=-1))
         if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
