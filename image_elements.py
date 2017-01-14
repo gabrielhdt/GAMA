@@ -5,6 +5,48 @@ import scipy as sp
 import control_points
 
 
+class Waypoint:
+    def __init__(self, pix):
+        self.x = pix.x
+        self.y = pix.y
+        self.slope = None
+
+    def computan(self, contour, precision):
+        """Computes tangent to contour for waypoint"""
+
+        def paratan2slope(delta_xy):
+            """Pente associée à la tangente paramétrée par delta_x, delta_y
+            delta_xy -- itérable à deux éléments, delta_x en 0 et delta_y
+            en 1"""
+            assert len(delta_xy) == 2
+            if abs(delta_xy[0]) <= 1e-10:
+                return "inf"
+            elif abs(delta_xy[1]) <= 1e-10:
+                return 0
+            else:
+                return delta_xy[1]/delta_xy[0]
+
+        index = contour.xys.index(self)
+        n = len(contour.xys)
+        delta_x_mean = 0
+        delta_y_mean = 0
+        beforeweight = [control_points.weight(i) for i in range(1, precision + 1)]
+        beforetotweight = sum(beforeweight)
+        afterweight = [control_points.weight(i) for i in range(1, precision + 1)]
+        aftertotweight = sum(afterweight)
+        for i in range(-precision, 0):
+            other_x = contour.xys[(index + i) % n].x
+            other_y = contour.xys[(index + i) % n].y
+            delta_x_mean -= (other_x - self.x)*beforeweight[abs(i) - 1]/beforetotweight
+            delta_y_mean -= (other_y - self.y)*beforeweight[abs(i) - 1]/beforetotweight
+        for i in range(1, precision + 1):
+            other_x = contour.xys[(index + i) % n].x
+            other_y = contour.xys[(index + i) % n].y
+            delta_x_mean += (other_x - self.x)*afterweight[i - 1]/aftertotweight
+            delta_y_mean += (other_y - self.y)*afterweight[i - 1]/aftertotweight
+        self.slope = paratan2slope((delta_x_mean, delta_y_mean))
+
+
 class Pixel(object):
     def __init__(self, x, y):
         self.x = x
@@ -176,7 +218,6 @@ class Contour(object):
         steps, which is the hardest part of the program.
         begpix -- Pixel() on which the inspection will start
         """
-        print("Début boucle")
         loop = []  # Ordered, therefore list
         assert type(self.xys) is set
         # Remove if corner
@@ -233,7 +274,7 @@ class Contour(object):
                 inspix = (xneighbourhood - annoying).pop()
                 self.xys.remove(inspix)
                 if len(clneighbourhood) >= 1:
-                    self.xys.remove(clneighbourhood.pop())
+                    self.xys.discard(clneighbourhood.pop())
             else:
                 inspix = (neighbourhood - annoying).pop()
                 self.xys.remove(inspix)
