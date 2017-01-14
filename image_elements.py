@@ -31,19 +31,18 @@ class Waypoint:
         delta_x_mean = 0
         delta_y_mean = 0
         beforeweight = [control_points.weight(i) for i in range(1, precision + 1)]
-        beforetotweight = sum(beforeweight)
         afterweight = [control_points.weight(i) for i in range(1, precision + 1)]
-        aftertotweight = sum(afterweight)
+        totweight = sum(beforeweight) + sum(afterweight)
         for i in range(-precision, 0):
             other_x = contour.xys[(index + i) % n].x
             other_y = contour.xys[(index + i) % n].y
-            delta_x_mean -= (other_x - self.x)*beforeweight[abs(i) - 1]/beforetotweight
-            delta_y_mean -= (other_y - self.y)*beforeweight[abs(i) - 1]/beforetotweight
+            delta_x_mean += (self.x - other_x)*beforeweight[abs(i) - 1]/totweight
+            delta_y_mean += (self.y - other_y)*beforeweight[abs(i) - 1]/totweight
         for i in range(1, precision + 1):
             other_x = contour.xys[(index + i) % n].x
             other_y = contour.xys[(index + i) % n].y
-            delta_x_mean += (other_x - self.x)*afterweight[i - 1]/aftertotweight
-            delta_y_mean += (other_y - self.y)*afterweight[i - 1]/aftertotweight
+            delta_x_mean += (other_x - self.x)*afterweight[i - 1]/totweight
+            delta_y_mean += (other_y - self.y)*afterweight[i - 1]/totweight
         self.slope = paratan2slope((delta_x_mean, delta_y_mean))
 
 
