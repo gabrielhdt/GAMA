@@ -3,7 +3,7 @@ import image_elements
 import scipy as sp
 
 
-def tan_param(hookpix, contour, precisionb=3, precisiona=3, sens=1):
+def tan_param(hookpix, contour, precisionb=3, precisiona=3):
     """Donne les coefficients de l'équation paramétrique de la tangente:
     G(t) = (x(t), y(t)) = (a*t, b*t), i.e. a et b. S'inspire
     grandement de pente_moy. Sens détermine si les points à moyenner sont en
@@ -30,13 +30,13 @@ def tan_param(hookpix, contour, precisionb=3, precisiona=3, sens=1):
     afterweight = [weight(i) for i in range(1, precisiona + 1)]
     aftertotweight = sum(afterweight)
     for i in range(-precisionb, 0):
-        other_x = contour.xys[(index + i*sens) % n].x
-        other_y = contour.xys[(index + i*sens) % n].y
-        delta_x_mean -= (other_x - hookpix.x)*beforeweight[i]/beforetotweight
-        delta_y_mean -= (other_y - hookpix.y)*beforeweight[i]/beforetotweight
+        other_x = contour.xys[(index + i) % n].x
+        other_y = contour.xys[(index + i) % n].y
+        delta_x_mean -= (other_x - hookpix.x)*beforeweight[abs(i)]/beforetotweight
+        delta_y_mean -= (other_y - hookpix.y)*beforeweight[abs(i)]/beforetotweight
     for i in range(1, precisiona + 1):
-        other_x = contour.xys[(index + i*sens) % n].x
-        other_y = contour.xys[(index + i*sens) % n].y
+        other_x = contour.xys[(index + i) % n].x
+        other_y = contour.xys[(index + i) % n].y
         delta_x_mean += (other_x - hookpix.x)*afterweight[i - 1]/aftertotweight
         delta_y_mean += (other_y - hookpix.y)*afterweight[i - 1]/aftertotweight
     return delta_x_mean, delta_y_mean
@@ -140,13 +140,14 @@ def nextop(contour, start, linedges=set()):
 
 def list_waypoints(contour):
     start = contour.xys[0]
-    waypoints = [start]
+    waypoints = [image_elements.Waypoint(start)]
     linedges = contour.scanlines()
+    #linedges = set()
     while start != contour.xys[-1]:
         start = nextop(contour, start, linedges=linedges)
         linedges.discard(start)  # Avoids looping infinitely
-        waypoints.append(start)
-    waypoints[-1] = contour.xys[0]
+        waypoints.append(image_elements.Waypoint(start))
+    waypoints[-1] = image_elements.Waypoint(contour.xys[0])
     return waypoints
 
 
@@ -157,15 +158,17 @@ def curves(contour):
     curves = []
     waypoints = list_waypoints(contour)
     n = len(waypoints)
+    for i in range(n):  # Waypoint by waypoint
+        before, after = waypoints[i - 1], waypoints[(i + 1)%n]
+        distanceb = min(dist(contour, before, waypoints[i]), 3)
+        distancea = min(dist(contour, waypoints[i], after), 3)
+        precision = min(distancea, distanceb)
+        waypoints[i].computan(contour, precision)
     for i in range(n-1):
-        before, start, end = waypoints[i - 1], waypoints[i], waypoints[i + 1]
-        distanceb = min(dist(contour, before, start), 3)
-        distancem = min(dist(contour, start, end), 3)
-        distancea = min(dist(contour, end, waypoints[(i + 2)%n]), 3)
-        pente_s = paratan2slope(tan_param(start, contour, distanceb, distancem, sens=1))
-        pente_e = paratan2slope(tan_param(end, contour, distancem, distancea, sens=-1))
-        print(pente_e, pente_s)
-        if pente_s == pente_e:  # A préciser, utilisation d'une cubique?
+        start, end = waypoints[i], waypoints[i + 1]
+        pente_s = start.slope
+        pente_e = end.slope
+        if pente_s == pente_e:
             middle_x = (start.x + end.x) / 2
             middle_y = (start.y + end.y) / 2
         elif "inf" in (pente_e, pente_s):
