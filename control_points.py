@@ -123,21 +123,21 @@ def curves(contour):
         def invtaneq(point, y):
             return (y - point.y)/point.slope + point.x
         sqcentre = (start.x + end.x)/2, (start.y + end.y)/2
+        # Projs along y axis and x axis [y axis, x axis]
         if start.slope is "inf":
-            print("offSfhFHeh")
+            end_projs = [taneq(end, sqcentre[0]), invtaneq(end, sqcentre[1])]
+        elif end.slope is "inf":
+            start_projs = [taneq(start, sqcentre[0]), invtaneq(start, sqcentre[1])]
+        else:
+            start_projs = [taneq(start, sqcentre[0]), invtaneq(start, sqcentre[1])]
+            end_projs = [taneq(end, sqcentre[0]), invtaneq(end, sqcentre[1])]
+        if start.slope is "inf":
             startctrl = (start.x, sqcentre[1])
-            end_projs = [None, None]
-            end_projs[0] = taneq(end, sqcentre[0])
-            end_projs[1] = invtaneq(end, sqcentre[1])
             if abs(end_projs[0] - sqcentre[1]) < abs(end_projs[1] - sqcentre[0]):
                 endctrl = sqcentre[0], end_projs[0]
             else:
                 endctrl = end_projs[1], sqcentre[1]
         elif end.slope is "inf":
-            print("dzhdiqzd")
-            start_projs = [None, None]  # Proj along y axis and x axis
-            start_projs[0] = taneq(start, sqcentre[0])
-            start_projs[1] = invtaneq(start, sqcentre[1])
             if abs(start_projs[0] - sqcentre[1]) < abs(start_projs[1] - sqcentre[0]):
                 startctrl = sqcentre[0], start_projs[0]
             else:
@@ -145,17 +145,11 @@ def curves(contour):
             endctrl = (end.x, sqcentre[1])
         else:
             # Choose start projection along y axis in 0
-            start_projs = [None, None]  # Proj along y axis and x axis
-            start_projs[0] = taneq(start, sqcentre[0])
-            start_projs[1] = invtaneq(start, sqcentre[1])
             if abs(start_projs[0] - sqcentre[1]) < abs(start_projs[1] - sqcentre[0]):
                 startctrl = sqcentre[0], start_projs[0]
             else:
                 startctrl = start_projs[1], sqcentre[1]
             # Choose end projection
-            end_projs = [None, None]
-            end_projs[0] = taneq(end, sqcentre[0])
-            end_projs[1] = invtaneq(end, sqcentre[1])
             if abs(end_projs[0] - sqcentre[1]) < abs(end_projs[1] - sqcentre[0]):
                 endctrl = sqcentre[0], end_projs[0]
             else:
