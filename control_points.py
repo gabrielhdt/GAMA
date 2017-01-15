@@ -3,13 +3,6 @@ import image_elements
 import scipy as sp
 
 
-def weight(dist):
-    """Gives weight to pixel while processing tangent. Weight depends on the
-    distance between the hook and the point
-    dist -- integer, distance between hook and pixel"""
-    return 2**(-abs(dist))
-
-
 def clockwise(p1, p2, p3):
     """Renvoie True si la rotation pour aller du vecteur p2p1 p3p1 se fait en
     sens horaire (par calcul du déterminant)"""
@@ -54,6 +47,7 @@ def nextop(contour, start, linedges=set()):
     contour -- image_elements.Contour() object
     start -- pixel de début, image_elements.Pixel() object
     """
+    factor = 20
     cxys = contour.xys  # Shortcut
     start_index = cxys.index(start)
     n = len(cxys) - 1  # dernier indice disponible
@@ -61,38 +55,53 @@ def nextop(contour, start, linedges=set()):
     if start_index + 1 > n or start_index + 2 > n:
         return contour.xys[-1]
     # Initialisation
+    found = (False, "")
     sens = clockwise(start, contour.xys[start_index + 1],
                      contour.xys[start_index + 2])
     new_sens = sens
     is_vert = vertan(contloop(contour, start_index, start_index + 4))
     if is_vert:  # Si tangente directement verticale
         return cxys[start_index + 2]
-    while new_sens == sens and not is_vert:
+    while not found[0]:
         if cxys[start_index] in linedges:
-            return cxys[start_index]
+            found = (True, "linedges")
         elif start_index + 3 > n:  # dernier point de contour atteint...
-            return contour.xys[-1]  # ...sans inflexion
+            found = (True, "trespass")  # ...sans inflexion
         start_index += 1  # Préparation de la prochaine boucle
         is_vert = vertan([start] + \
             contloop(contour, start_index + 1, start_index + 4))
-        new_sens = clockwise(start, contour.xys[start_index + 1],
-                             contour.xys[start_index + 2])
-    if is_vert:  # Vérifie s'il y a une fin de ligne avant
+        new_sens = clockwise(contour.xys[start_index],
+                             contour.xys[(start_index + 1*factor)%n],
+                             contour.xys[(start_index + 2*factor)%n])
+        # and not found[0] avoids changing reason of leaving
+        if new_sens != sens and not found[0]:
+            found = (True, "clockwise")
+        elif is_vert and not found[0]:
+            found = (True, "vertan")
+    if found[1] is "linedges":
+        return cxys[start_index - 1]  # Previous point
+    elif found[1] is "trespass":
+        return cxys[-1]
+    elif found[1] is "vertan":  # Vérifie s'il y a une fin de ligne avant
         contemp = set(cxys[start_index - 1:start_index + 2]) & linedges
-        if len(contemp) > 0:
+        if len(contemp) > 0:  # i.e. there is a linedge
             return contemp.pop()
         else:
             return cxys[start_index + 2] if is_vert else cxys[start_index + 1]
-    else:
-        return cxys[start_index + 2] if is_vert else cxys[start_index + 1]
+    elif found[1] is "clockwise":
+        if start_index + factor >= n:
+            return cxys[-1]
+        else:
+            return cxys[start_index + factor]
 
 
 def list_waypoints(contour):
     start = contour.xys[0]
     waypoints = [image_elements.Waypoint(start)]
     linedges = contour.scanlines()
-    #linedges = set()
+    counter = 0
     while start != contour.xys[-1]:
+        counter += 1
         start = nextop(contour, start, linedges=linedges)
         linedges.discard(start)  # Avoids looping infinitely
         waypoints.append(image_elements.Waypoint(start))
