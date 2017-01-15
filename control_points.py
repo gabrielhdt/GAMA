@@ -113,27 +113,54 @@ def curves(contour):
     """
     def usecub(start, end):
         """Gives cubic control points. Here start and end are control points
-        associated with start point and end point.
+        associated with start point and end point. Points are referenced by
+        [x, y].
         start, end -- Waypoint()
         """
+        def taneq(point, x):
+            return point.slope*(x - point.x) + point.y
+        
+        def invtaneq(point, y):
+            return (y - point.y)/point.slope + point.x
         sqcentre = (start.x + end.x)/2, (start.y + end.y)/2
-        # Choose start projection along y axis in 0
-        start_projs = [None, None]  # Proj along y axis and x axis
-        start_projs[0] = start.slope*(sqcentre[0] - start.x) + start.y
-        start_projs[1] = (sqcentre[1] - start.y)/start.slope + start.x
-        if abs(start_projs[0]) < abs(start_projs[1]):
-            start = sqcentre[0], start_projs[0]
+        if start.slope is "inf":
+            print("offSfhFHeh")
+            startctrl = (start.x, sqcentre[1])
+            end_projs = [None, None]
+            end_projs[0] = taneq(end, sqcentre[0])
+            end_projs[1] = invtaneq(end, sqcentre[1])
+            if abs(end_projs[0] - sqcentre[1]) < abs(end_projs[1] - sqcentre[0]):
+                endctrl = sqcentre[0], end_projs[0]
+            else:
+                endctrl = end_projs[1], sqcentre[1]
+        elif end.slope is "inf":
+            print("dzhdiqzd")
+            start_projs = [None, None]  # Proj along y axis and x axis
+            start_projs[0] = start.slope*(sqcentre[0] - start.x) + start.y
+            start_projs[1] = (sqcentre[1] - start.y)/start.slope + start.x
+            if abs(start_projs[0] - sqcentre[1]) < abs(start_projs[1] - sqcentre[0]):
+                startctrl = sqcentre[0], start_projs[0]
+            else:
+                startctrl = start_projs[1], sqcentre[1]
+            endctrl = (end.x, sqcentre[1])
         else:
-            start = start_projs[1], sqcentre[1]
-        # Choose end projection
-        end_projs = [None, None]
-        end_projs[0] = end.slope*(sqcentre[0] - end.x) + end.y
-        end_projs[1] = (sqcentre[1] - end.y)/pente_e + end.x
-        if abs(end_projs[0]) < abs(end_projs[1]):
-            end = sqcentre[0], end_projs[0]
-        else:
-            end = end_projs[1], sqcentre[1]
-        return start, end
+            # Choose start projection along y axis in 0
+            start_projs = [None, None]  # Proj along y axis and x axis
+            start_projs[0] = taneq(start, sqcentre[0])
+            start_projs[1] = invtaneq(start, sqcentre[1])
+            if abs(start_projs[0] - sqcentre[1]) < abs(start_projs[1] - sqcentre[0]):
+                startctrl = sqcentre[0], start_projs[0]
+            else:
+                startctrl = start_projs[1], sqcentre[1]
+            # Choose end projection
+            end_projs = [None, None]
+            end_projs[0] = taneq(end, sqcentre[0])
+            end_projs[1] = invtaneq(end, sqcentre[1])
+            if abs(end_projs[0] - sqcentre[1]) < abs(end_projs[1] - sqcentre[0]):
+                endctrl = sqcentre[0], end_projs[0]
+            else:
+                endctrl = end_projs[1], sqcentre[1]
+        return startctrl, endctrl
 
     curves = []
     epsilon = 1e-5
@@ -174,7 +201,7 @@ def curves(contour):
             middle_x = coef * (pente_s * start.x - pente_e * end.x + end.y - start.y)
             middle_y = pente_s * (middle_x - start.x) + start.y
         needscub = not validate_flyby((middle_x, middle_y), start, end)
-        if needscub and "inf" not in (pente_e, pente_s) and 0 not in (pente_e, pente_s):
+        if needscub and 0 not in (pente_e, pente_s):
             middle_s, middle_e = usecub(start, end)
             curves.append(sp.array([[start.x, start.y],
                                     [middle_s[0], middle_s[1]],
