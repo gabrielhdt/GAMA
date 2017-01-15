@@ -10,6 +10,7 @@ class Waypoint:
         self.x = pix.x
         self.y = pix.y
         self.slope = None
+        self.needscub = False
 
     def computan(self, contour, precision):
         """Computes tangent to contour for waypoint"""
