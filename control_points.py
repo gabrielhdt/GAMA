@@ -117,26 +117,22 @@ def curves(contour):
         start, end -- Waypoint()
         """
         sqcentre = (start.x + end.x)/2, (start.y + end.y)/2
-        # xaxis: projects along x axis of sqcentre on tan line (y stays same)
-        start_xaxis = [None, None]
-        end_xaxis = [None, None]
-        start_xaxis[0] = sqcentre[0]
-        start_xaxis[1] = start.slope*(sqcentre[0] - start.x) + start.y
-        end_xaxis[0] = sqcentre[0]
-        end_xaxis[1] = end.slope*(sqcentre[0] - end.x) + end.y
-        # yaxis: projects along y axis of sqcentre on tan lines (x stays same)
-        start_yaxis = [None, None]
-        end_yaxis = [None, None]
-        start_yaxis[1] = sqcentre[1]
-        start_yaxis[0] = (sqcentre[1] - start.y)/pente_s + start.x
-        end_yaxis[1] = sqcentre[1]
-        end_yaxis[0] = (sqcentre[1] - end.y)/pente_e + end.y
-        if (start_xaxis[1] - sqcentre[1])*(end_xaxis[1] - sqcentre[1]) < 0:
-            start = start_xaxis
-            end = end_xaxis
+        # Choose start projection along y axis in 0
+        start_projs = [None, None]  # Proj along y axis and x axis
+        start_projs[0] = start.slope*(sqcentre[0] - start.x) + start.y
+        start_projs[1] = (sqcentre[1] - start.y)/start.slope + start.x
+        if abs(start_projs[0]) < abs(start_projs[1]):
+            start = sqcentre[0], start_projs[0]
         else:
-            start = start_yaxis
-            end = end_yaxis
+            start = start_projs[1], sqcentre[1]
+        # Choose end projection
+        end_projs = [None, None]
+        end_projs[0] = end.slope*(sqcentre[0] - end.x) + end.y
+        end_projs[1] = (sqcentre[1] - end.y)/pente_e + end.x
+        if abs(end_projs[0]) < abs(end_projs[1]):
+            end = sqcentre[0], end_projs[0]
+        else:
+            end = end_projs[1], sqcentre[1]
         return start, end
 
     curves = []
@@ -145,15 +141,18 @@ def curves(contour):
     n = len(waypoints)
     for i in range(n):  # Waypoint by waypoint
         before, after = waypoints[i - 1], waypoints[(i + 1)%n]
-        distanceb = min(dist(contour, before, waypoints[i]), 3)
-        distancea = min(dist(contour, waypoints[i], after), 3)
+        distanceb = max(dist(contour, before, waypoints[i]), 3)
+        distancea = max(dist(contour, waypoints[i], after), 3)
         precision = min(distancea, distanceb)
         waypoints[i].computan(contour, precision)
     for i in range(n-1):
         start, end = waypoints[i], waypoints[i + 1]
         pente_s = start.slope
         pente_e = end.slope
-        if "inf" in (pente_e, pente_s):
+        if "inf" not in (pente_e, pente_s) and abs(pente_s - pente_e) < epsilon:
+            middle_x = (start.x + end.x) / 2
+            middle_y = (start.y + end.y) / 2
+        elif "inf" in (pente_e, pente_s):
             if pente_e == pente_s:
                 middle_x = (start.x + end.x) / 2
                 middle_y = (start.y + end.y) / 2
