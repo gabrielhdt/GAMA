@@ -176,31 +176,11 @@ def curves(contour):
             middle_y = pente_s * (middle_x - start.x) + start.y
         needscub = not validate_flyby((middle_x, middle_y), start, end)
         if needscub and "inf" not in (pente_e, pente_s) and 0 not in (pente_e, pente_s):
-            sqcentre = (start.x + end.x)/2, (start.y + end.y)/2
-            print(sqcentre, pente_e, pente_s)
-            # middle_xsx: X coord, Start slope, proj on X axis
-            # Proj of x of sqcentre on tan lines
-            middle_xsx = sqcentre[0]
-            middle_ysx = pente_s*(sqcentre[0] - start.x) + start.y
-            middle_xex = sqcentre[0]
-            middle_yex = pente_e*(sqcentre[0] - end.x) + end.y
-            # Proj of y of sqcentre on tan lines
-            middle_ysy = sqcentre[1]
-            middle_xsy = (sqcentre[1] - start.y)/pente_s + start.x
-            middle_yey = sqcentre[1]
-            middle_xey = (sqcentre[1] - end.y)/pente_e + end.y
-            if (middle_ysx - sqcentre[1])*(middle_yex - sqcentre[1]) < 0:
-                middle_xs = middle_xsy
-                middle_ys = middle_ysy
-                middle_xe = middle_xey
-                middle_ye = middle_yey
-            else:
-                middle_xs = middle_xsx
-                middle_ys = middle_ysx
-                middle_xe = middle_xex
-                middle_ye = middle_yex
-            curves.append(sp.array([[start.x, start.y], [middle_xs, middle_ys],
-                                    [middle_xe, middle_ye], [end.x, end.y]]))
+            middle_s, middle_e = usecub(start, end)
+            curves.append(sp.array([[start.x, start.y],
+                                    [middle_s[0], middle_s[1]],
+                                    [middle_e[0], middle_e[1]],
+                                    [end.x, end.y]]))
         else:
             curves.append(sp.array([[start.x, start.y], [middle_x, middle_y],
                                     [middle_x, middle_y], [end.x, end.y]]))
