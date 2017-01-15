@@ -136,8 +136,6 @@ def curves(contour):
         elif end.slope is "inf":
             print("dzhdiqzd")
             start_projs = [None, None]  # Proj along y axis and x axis
-#            start_projs[0] = start.slope*(sqcentre[0] - start.x) + start.y
-#            start_projs[1] = (sqcentre[1] - start.y)/start.slope + start.x
             start_projs[0] = taneq(start, sqcentre[0])
             start_projs[1] = invtaneq(start, sqcentre[1])
             if abs(start_projs[0] - sqcentre[1]) < abs(start_projs[1] - sqcentre[0]):
