@@ -40,6 +40,14 @@ class SvgFile:
         self.write(" Q {} {}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
         self.write(", {} {}".format(ctrl_pts[2, 0], ctrl_pts[2, 1]))
 
+    def begin_bezierc(self, ctrl_pts):
+        """Draws first Bezier of
+        ctrl_pts -- list of 3 points"""
+        self.write("M {} {}".format(ctrl_pts[0, 0], ctrl_pts[0, 1]))
+        self.write(" C {} {}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
+        self.write(", {} {}".format(ctrl_pts[2, 0], ctrl_pts[2, 1]))
+        self.write(", {} {}".format(ctrl_pts[3, 0], ctrl_pts[3, 1]))
+
     def close_path(self, colours):
         """Closes path and add parameters
         colours -- dictionnary containing colours: stroke and fill
@@ -54,6 +62,11 @@ class SvgFile:
             being defined by previous point
         """
         for i in range(2):
+            self.write(", {} {}".format(ctrl_pts[i, 0], ctrl_pts[i, 1]))
+
+    def add_polybezierc(self, ctrl_pts):
+        """Adds cubic polybezier"""
+        for i in range(3):
             self.write(", {} {}".format(ctrl_pts[i, 0], ctrl_pts[i, 1]))
 
     def close_svg(self):
@@ -76,6 +89,15 @@ class SvgFile:
         self.begin_bezier(ctrl_mat[:4, ])
         for i in range(3, 3 + 2*n_bezier, 2):
             self.add_polybezier(ctrl_mat[i:i + 2, ])
+        self.close_path(colours)
+
+    def draw_contourc(self, ctrl_mat, colours):
+        assert ctrl_mat[4:, ].shape[0] % 3 == 0
+        n_bezier = ctrl_mat[4:, ].shape[0]//3  # Number of curves
+        self.open_path()
+        self.begin_bezierc(ctrl_mat[:4, ])
+        for i in range(4, 4 + 3*n_bezier, 3):
+            self.add_polybezierc(ctrl_mat[i:i + 3, ])
         self.close_path(colours)
 
     def draw_pix(self, pix):
