@@ -26,12 +26,18 @@ class Waypoint:
             else:
                 return delta_xy[1]/delta_xy[0]
 
+        def weight(dist):
+            """Gives weight to pixel while processing tangent.
+            Weight depends on the distance between the hook and the point
+            dist -- integer, distance between hook and pixel"""
+            return 2**(-abs(dist))
+
         index = contour.xys.index(self)
         n = len(contour.xys)
         delta_x_mean = 0
         delta_y_mean = 0
-        beforeweight = [control_points.weight(i) for i in range(1, precision + 1)]
-        afterweight = [control_points.weight(i) for i in range(1, precision + 1)]
+        beforeweight = [weight(i) for i in range(1, precision + 1)]
+        afterweight = [weight(i) for i in range(1, precision + 1)]
         totweight = sum(beforeweight) + sum(afterweight)
         for i in range(-precision, 0):
             other_x = contour.xys[(index + i) % n].x
