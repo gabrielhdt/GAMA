@@ -96,12 +96,20 @@ def nextop(contour, start, linedges=set()):
 
 
 def list_waypoints(contour):
+    """Creates list of fly over waypoints. Waypoints are given by nextop,
+    and one waypoint is added between the two (middle)
+    contour -- Contour()
+    """
     start = contour.xys[0]
     waypoints = [image_elements.Waypoint(start)]
     linedges = contour.scanlines()
     while start != contour.xys[-1]:
+        currentindex = contour.xys.index(start)
         start = nextop(contour, start, linedges=linedges)
         linedges.discard(start)  # Avoids looping infinitely
+        newindex = contour.xys.index(start)
+        interwaypt = image_elements.Waypoint(contour.xys[(currentindex + newindex)//2])
+        waypoints.append(interwaypt)
         waypoints.append(image_elements.Waypoint(start))
     waypoints[-1] = image_elements.Waypoint(contour.xys[0])
     return waypoints
