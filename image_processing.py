@@ -1,18 +1,13 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Matrice de niveaux de gris, "moyenne" pour chaque triplet RGB.
-Classement par seuils de niveaux de gris,detection des contours pour
-chaque zone.
-Notations:
-Matriceniveauxdegris: niveau de gris entre 0 et 1, avec coefficients
-(0.2126,0.7152,0.0722) pour (R,G,B)/ Wikipedia
+Operations performed on the image, from raw image to contours
 """
 import numpy as np
 import image_elements
 
 
 def pic2greylvl(matrgb):
+    """Coefficient found on wikipedia"""
     (a, b, c) = matrgb.shape
     matgl = np.zeros(shape=(a, b))  # matrix greylevels
     for i in range(a):
