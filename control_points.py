@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
-import image_elements
+"""
+Processing of control points, called waypoints and tangents. From contours to
+Bezier curves
+"""
 import numpy as np
+import image_elements
 
 
 def norm(pix1, pix2):
@@ -130,11 +134,20 @@ def curves(contour):
         [x, y].
         start, end -- Waypoint()
         """
-        def taneq(point, x):
-            return point.slope*(x - point.x) + point.y
-        
-        def invtaneq(point, y):
-            return (y - point.y)/point.slope + point.x
+        def taneq(fowaypt, xeval):
+            """Returns y of point on tangent of fowaypt at xeval
+            fowaypt -- fly over waypoint Waypoint()
+            xeval -- float
+            """
+            return fowaypt.slope*(xeval - fowaypt.x) + fowaypt.y
+
+        def invtaneq(fowaypt, yeval):
+            """Inverse function of taneq, gives x of point on tangent of
+            fowaypt at yeval
+            fowaypt -- fly over waypoint Waypoint()
+            yeval -- float
+            """
+            return (yeval - fowaypt.y)/fowaypt.slope + fowaypt.x
         bagheera = 1/3  # Brings cub back to waypoint
         sqcentre = (start.x + end.x)/2, (start.y + end.y)/2
         # Projs along y axis and x axis [y axis, x axis]
@@ -280,6 +293,7 @@ def curves2curvemat(curves):
 
 
 def curves2curvematc(curves):
+    """Same as above for cubic curves"""
     curvemat = np.zeros((4 + 3 * (len(curves)-1), 2))
     curvemat[:4, ] = curves[0].copy()
     for i, curve in enumerate(curves[1:]):
