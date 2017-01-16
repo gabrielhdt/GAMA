@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 """Defines graphical elements which will be used in the program"""
-import scipy.special
-import scipy as sp
-import control_points
 
 
-class Waypoint:
+class Waypoint(object):
+    """Points over which the Bezier curve will pass"""
     def __init__(self, pix):
         self.x = pix.x
         self.y = pix.y
@@ -54,6 +52,7 @@ class Waypoint:
 
 
 class Pixel(object):
+    """A Pixel of the picture"""
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -164,6 +163,7 @@ class Pixel(object):
 
 
 class Contour(object):
+    """A set or list of pixel circling an area of a same colour"""
     def __init__(self, xys):
         """
         xys -- list or set of pixels
