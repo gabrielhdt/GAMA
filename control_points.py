@@ -3,6 +3,11 @@ import image_elements
 import scipy as sp
 
 
+def norm(pix1, pix2):
+    """pix -- duets of coordinates (x, y)"""
+    return sp.sqrt((pix1[0] - pix2[0])**2 + (pix1[1] - pix2[1])**2)
+
+
 def clockwise(p1, p2, p3):
     """Renvoie True si la rotation pour aller du vecteur p2p1 p3p1 se fait en
     sens horaire (par calcul du déterminant)"""
@@ -139,30 +144,42 @@ def curves(contour):
         else:
             start_projs = [taneq(start, sqcentre[0]), invtaneq(start, sqcentre[1])]
             end_projs = [taneq(end, sqcentre[0]), invtaneq(end, sqcentre[1])]
+        # Creating flyby waypoints
         if start.slope is "inf":
             startctrl = (start.x, sqcentre[1])
+            endctrl = [None, None]
+            endctrl[0] = sqcentre[0], end_projs[0]
+            endctrl[1] = end_projs[1], sqcentre[1]
+            ctrlduets = [(startctrl, endctrl[0]), (startctrl, endctrl[1])]
             if abs(end_projs[0] - sqcentre[1]) < abs(end_projs[1] - sqcentre[0]):
                 endctrl = sqcentre[0], end_projs[0]
             else:
-                endctrl = end_projs[1], sqcentre[1]
+                endctrl = end_projs[1], (end.y + sqcentre[1])/2
         elif end.slope is "inf":
-            if abs(start_projs[0] - sqcentre[1]) < abs(start_projs[1] - sqcentre[0]):
-                startctrl = sqcentre[0], start_projs[0]
-            else:
-                startctrl = start_projs[1], sqcentre[1]
+            startctrl = [None, None]
+            startctrl[0] = sqcentre[0], start_projs[0]
+            startctrl[1] = start_projs[1], sqcentre[1]
             endctrl = (end.x, sqcentre[1])
-        else:
-            # Choose start projection along y axis in 0
+            ctrlduets = [(startctrl[0], endctrl), (startctrl[1], endctrl)]
             if abs(start_projs[0] - sqcentre[1]) < abs(start_projs[1] - sqcentre[0]):
                 startctrl = sqcentre[0], start_projs[0]
             else:
                 startctrl = start_projs[1], sqcentre[1]
-            # Choose end projection
-            if abs(end_projs[0] - sqcentre[1]) < abs(end_projs[1] - sqcentre[0]):
-                endctrl = sqcentre[0], end_projs[0]
-            else:
-                endctrl = end_projs[1], sqcentre[1]
-        return startctrl, endctrl
+        else:
+            startctrl = [None, None]
+            startctrl[0] = sqcentre[0], start_projs[0]
+            startctrl[1] = start_projs[1], sqcentre[1]
+            endctrl = [None, None]
+            endctrl[0] = sqcentre[0], end_projs[0]
+            endctrl[1] = end_projs[1], sqcentre[1]
+            # Choosing waypoint processing distance between them
+            ctrlduets = []
+            for i in range(2):
+                for j in range(2):
+                    ctrlduets.append((startctrl[i], endctrl[j]))
+        # Choose best duet
+        ctrlduet = min(ctrlduets, key=lambda x: norm(x[0], x[1]))
+        return ctrlduet
 
     curves = []
     epsilon = 1e-5
