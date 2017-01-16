@@ -135,6 +135,7 @@ def curves(contour):
         
         def invtaneq(point, y):
             return (y - point.y)/point.slope + point.x
+        bagheera = 1/3  # Brings cub back to waypoint
         sqcentre = (start.x + end.x)/2, (start.y + end.y)/2
         # Projs along y axis and x axis [y axis, x axis]
         if start.slope is "inf":
@@ -177,8 +178,13 @@ def curves(contour):
             for i in range(2):
                 for j in range(2):
                     ctrlduets.append((startctrl[i], endctrl[j]))
-        # Choose best duet
-        ctrlduet = min(ctrlduets, key=lambda x: norm(x[0], x[1]))
+        # Choose best duet, ctrlduetemp [startctrl, endctrl]
+        ctrlduetemp = min(ctrlduets, key=lambda x: norm(x[0], x[1]))
+        ctrlduet = [None, None]
+        ctrlduet[0] = (start.x + bagheera*(ctrlduetemp[0][0] - start.x),
+                       start.y + bagheera*(ctrlduetemp[0][1] - start.y))
+        ctrlduet[1] = (end.x + bagheera*(ctrlduetemp[1][0] - end.x),
+                       end.y + bagheera*(ctrlduetemp[1][1] - end.y))
         return ctrlduet
 
     curves = []
