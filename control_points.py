@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import image_elements
-import scipy as sp
+import numpy as np
 
 
 def norm(pix1, pix2):
     """pix -- duets of coordinates (x, y)"""
-    return sp.sqrt((pix1[0] - pix2[0])**2 + (pix1[1] - pix2[1])**2)
+    return np.sqrt((pix1[0] - pix2[0])**2 + (pix1[1] - pix2[1])**2)
 
 
 def clockwise(p1, p2, p3):
@@ -228,7 +228,7 @@ def curves(contour):
         needscub = not validate_flyby((middle_x, middle_y), start, end)
         if needscub and 0 not in (pente_e, pente_s):
             middle_s, middle_e = usecub(start, end)
-            curves.append(sp.array([[start.x, start.y],
+            curves.append(np.array([[start.x, start.y],
                                     [middle_s[0], middle_s[1]],
                                     [middle_e[0], middle_e[1]],
                                     [end.x, end.y]]))
@@ -237,7 +237,7 @@ def curves(contour):
             startctrl_y = start.y + (2/3)*(middle_y - start.y)
             endctrl_x = end.x + (2/3)*(middle_x - end.x)
             endctrl_y = end.y + (2/3)*(middle_y - end.y)
-            curves.append(sp.array([[start.x, start.y],
+            curves.append(np.array([[start.x, start.y],
                                     [startctrl_x, startctrl_y],
                                     [endctrl_x, endctrl_y], [end.x, end.y]]))
     return curves
@@ -272,7 +272,7 @@ def curves2curvemat(curves):
     element of curves, except for curves[0].
     curves -- list of curves, i.e. list of arrays
     """
-    curvemat = sp.zeros((3 + 2*(len(curves) - 1), 2))
+    curvemat = np.zeros((3 + 2*(len(curves) - 1), 2))
     curvemat[:3, ] = curves[0].copy()
     for i, curve in enumerate(curves[1:]):
         curvemat[2*i + 3:2*i + 5, ] = curve[1:, ].copy()  # Not 1st point
@@ -280,7 +280,7 @@ def curves2curvemat(curves):
 
 
 def curves2curvematc(curves):
-    curvemat = sp.zeros((4 + 3 * (len(curves)-1), 2))
+    curvemat = np.zeros((4 + 3 * (len(curves)-1), 2))
     curvemat[:4, ] = curves[0].copy()
     for i, curve in enumerate(curves[1:]):
         curvemat[3*i + 4:3*i + 7, ] = curve[1:, ].copy()  # Not 1st point
