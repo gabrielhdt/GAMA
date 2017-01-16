@@ -10,33 +10,26 @@ import control_points
 
 
 def main(imagefile):
-    seuil = 0.01
+    seuil = 0.3
     matrgb = scipy.misc.imread(imagefile)
-    matgl = image_processing.Matriceniveauxdegris(matrgb)
-    matgl = image_processing.add_border(matgl)
-    matgl = image_processing.regroupement_couleur(matgl, seuil)
-    dim = matgl.shape
-    contset = image_processing.contours_image(matgl, seuil)
-    separated_cont = []
+    dim = matrgb.shape
+    print("Contours")
+    contset = image_processing.contours_image(matrgb, seuil=seuil)
+    print("Séparation")
     for cont in contset:
-        separated_cont += image_processing.separate_all_contours(cont)
-    contset = set(separated_cont)
-    image_processing.remove_double(contset)
+        cont.optimseparate()
+    contset = list(contset)
+    image_processing.ordercontlist(contset)
+    dim = matrgb.shape
+    svgfile = writesvg.SvgFile("out.svg", dim)
+    print("Écriture")
+    curves = []
     for cont in contset:
-        cont.skinnier()
-    svgnames = []
-    for i, cont in enumerate(contset):
-        svgnames.append("main{}.svg".format(i))
-    svgfiles = []
-    for i, name in enumerate(svgnames):
-        svgfiles.append(writesvg.SvgFile(svgnames[i], dim))
-    for i, cont in enumerate(contset):
-        curves = control_points.list_curves([cont])
-        curvemat = control_points.curves2curvemat(curves)
-        svgfiles[i].draw_contour_pix(cont)
-        svgfiles[i].draw_contour(curvemat)
-        svgfiles[i].close_svg()
-
+        curves = control_points.curves(cont)
+        curvemat = control_points.curves2curvematc(curves)
+        colours = {"fill": cont.colour, "stroke": cont.colour}
+        svgfile.draw_contourc(curvemat, colours)
+    svgfile.close_svg()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
