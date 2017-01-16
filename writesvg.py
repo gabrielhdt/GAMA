@@ -36,17 +36,17 @@ class SvgFile:
         """Draws first Bezier of path
         ctrl_pts -- list of 3 points
         """
-        self.write("M {} {}".format(ctrl_pts[0, 0], ctrl_pts[0, 1]))
-        self.write(" Q {} {}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
-        self.write(", {} {}".format(ctrl_pts[2, 0], ctrl_pts[2, 1]))
+        self.write("M {:.3f} {:.3f}".format(ctrl_pts[0, 0], ctrl_pts[0, 1]))
+        self.write(" Q {:.3f} {:.3f}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
+        self.write(", {:.3f} {:.3f}".format(ctrl_pts[2, 0], ctrl_pts[2, 1]))
 
     def begin_bezierc(self, ctrl_pts):
         """Draws first Bezier of
         ctrl_pts -- list of 3 points"""
-        self.write("M {} {}".format(ctrl_pts[0, 0], ctrl_pts[0, 1]))
-        self.write(" C {} {}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
-        self.write(", {} {}".format(ctrl_pts[2, 0], ctrl_pts[2, 1]))
-        self.write(", {} {}".format(ctrl_pts[3, 0], ctrl_pts[3, 1]))
+        self.write("M {:.3f} {:.3f}".format(ctrl_pts[0, 0], ctrl_pts[0, 1]))
+        self.write(" C {:.3f} {:.3f}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
+        self.write(", {:.3f} {:.3f}".format(ctrl_pts[2, 0], ctrl_pts[2, 1]))
+        self.write(", {:.3f} {:.3f}".format(ctrl_pts[3, 0], ctrl_pts[3, 1]))
 
     def close_path(self, colours):
         """Closes path and add parameters
@@ -62,12 +62,12 @@ class SvgFile:
             being defined by previous point
         """
         for i in range(2):
-            self.write(", {} {}".format(ctrl_pts[i, 0], ctrl_pts[i, 1]))
+            self.write(", {:.3f} {:.3f}".format(ctrl_pts[i, 0], ctrl_pts[i, 1]))
 
     def add_polybezierc(self, ctrl_pts):
         """Adds cubic polybezier"""
         for i in range(3):
-            self.write(", {} {}".format(ctrl_pts[i, 0], ctrl_pts[i, 1]))
+            self.write(", {:.3f} {:.3f}".format(ctrl_pts[i, 0], ctrl_pts[i, 1]))
 
     def close_svg(self):
         """Closes svg file"""
