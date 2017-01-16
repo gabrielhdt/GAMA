@@ -47,7 +47,7 @@ def nextop(contour, start, linedges=set()):
     contour -- image_elements.Contour() object
     start -- pixel de début, image_elements.Pixel() object
     """
-    factor = len(contour.xys)//250
+    factor = len(contour.xys)//150
     cxys = contour.xys  # Shortcut
     start_index = cxys.index(start)
     n = len(cxys) - 1  # dernier indice disponible
@@ -210,8 +210,13 @@ def curves(contour):
                                     [middle_e[0], middle_e[1]],
                                     [end.x, end.y]]))
         else:
-            curves.append(sp.array([[start.x, start.y], [middle_x, middle_y],
-                                    [middle_x, middle_y], [end.x, end.y]]))
+            startctrl_x = start.x + (2/3)*(middle_x - start.x)
+            startctrl_y = start.y + (2/3)*(middle_y - start.y)
+            endctrl_x = end.x + (2/3)*(middle_x - end.x)
+            endctrl_y = end.y + (2/3)*(middle_y - end.y)
+            curves.append(sp.array([[start.x, start.y],
+                                    [startctrl_x, startctrl_y],
+                                    [endctrl_x, endctrl_y], [end.x, end.y]]))
     return curves
 
 
