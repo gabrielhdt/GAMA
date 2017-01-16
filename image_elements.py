@@ -20,9 +20,9 @@ class Waypoint:
             delta_xy -- itérable à deux éléments, delta_x en 0 et delta_y
             en 1"""
             assert len(delta_xy) == 2
-            if abs(delta_xy[0]) <= 1e-10:
+            if abs(delta_xy[0]) <= 1e-15:
                 return "inf"
-            elif abs(delta_xy[1]) <= 1e-10:
+            elif abs(delta_xy[1]) <= 1e-15:
                 return 0
             else:
                 return delta_xy[1]/delta_xy[0]
@@ -302,7 +302,6 @@ class Contour(object):
         linedges = set()  # Don't care about order
         aligned = 0
         threshold = max(int(len(self.xys)*0.03), 3)  # Chosen after tests
-        print(threshold, len(self.xys))
         for i, pix in enumerate(cxys):
             # choordinate stands for change of coordinate (we mean both)...
             choordinate = not(pix.x == self.xys[i].x or pix.y == self.xys[i].y)
