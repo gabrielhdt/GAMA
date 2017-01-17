@@ -16,9 +16,17 @@ def main(imagefile):
     print("Contours")
     contset = image_processing.contours_image(matrgb, seuil=seuil)
     print("Séparation")
-    for cont in contset:
-        cont.optimseparate()
     contset = list(contset)
+    navailablecont = len(contset)
+    i = 0
+    while i < navailablecont:
+        try:
+            contset[i].optimseparate()
+            i += 1
+        except KeyError:
+            print("Failed to determine contour")
+            contset.pop(i)
+            navailablecont -= 1
     image_processing.ordercontlist(contset)
     dim = matrgb.shape
     svgfile = writesvg.SvgFile("out.svg", dim)
