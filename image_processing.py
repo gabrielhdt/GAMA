@@ -18,6 +18,25 @@ def pic2greylvl(matrgb):
     return matgl
 
 
+def colourgrouping(matgl, ngl):
+    """Limits the number of greylevels in the image. Apply it BEFORE
+    adding border.
+    matgl -- greylevels matrix, coefficients in [0, 1]
+    ngl -- int, number of grey levels to keep
+    """
+    matfilt = np.ones_like(matgl)
+    greylevels = np.linspace(0, 1, ngl)
+    cond = np.where(matgl == 0, True, False)
+    matfilt[cond] = 0*np.ones_like(matgl[cond])
+    for i in range(ngl - 1):
+        mat_condition1 = np.where(matgl > greylevels[i], True, False)
+        mat_condition2 = np.where(matgl <= greylevels[i + 1], True, False)
+        mask = np.logical_and(mat_condition1, mat_condition2)
+        matfilt[mask] = (((greylevels[i] + greylevels[i + 1])/2) *
+                         np.ones_like(matgl[mask]))
+    return matfilt
+
+
 def regroupement_couleur(matricenb, seuil):
     """
     regroupe sous formes d'intervalles les couleurs de la matrice
@@ -132,16 +151,15 @@ def vec2hex(colour_contour):
     return "#{0:02x}{1:02x}{2:02x}".format(clamp(r), clamp(g), clamp(b))
 
 
-def contours_image(matrgb, seuil=0.01):
+def contours_image(matrgb, ngl=8):
     """
     Donne l'ensemble des contours de la matrice en niveaux de gris avec
     bordure matngb.
     matngb -- np.array, greyscale matrix, with added border
-    seuil -- float, min difference of colour between two pixels to create
-        a contour
+    ngl -- number of greylevels to keep in final image
     """
     matngb = pic2greylvl(matrgb)
-    matngb = regroupement_couleur(matngb, seuil=seuil)
+    matngb = colourgrouping(matngb, ngl)
     matngb = add_border(matngb)
     contset = set()
     matread = np.zeros_like(matngb, dtype=bool)
