@@ -71,11 +71,12 @@ def nextop(contour, start, linedges=set()):
     is_vert = vertan(contloop(contour, start_index, start_index + 4))
     if is_vert:  # Si tangente directement verticale
         return cxys[start_index + 2]
+    # 0 for linedges, 1 for trespassing, 2 for clockwise, 3 for vertan
     while not found[0]:
         if cxys[start_index] in linedges:
-            found = (True, "linedges")
+            found = (True, 0)
         elif start_index + 3 > n:  # dernier point de contour atteint...
-            found = (True, "trespass")  # ...sans inflexion
+            found = (True, 1)  # ...sans inflexion
         start_index += 1  # Préparation de la prochaine boucle
         is_vert = vertan([start] + \
             contloop(contour, start_index + 1, start_index + 4))
@@ -84,20 +85,20 @@ def nextop(contour, start, linedges=set()):
                              contour.xys[(start_index + 2*factor)%n])
         # and not found[0] avoids changing reason of leaving
         if new_sens != sens and not found[0]:
-            found = (True, "clockwise")
+            found = (True, 2)
         elif is_vert and not found[0]:
-            found = (True, "vertan")
-    if found[1] is "linedges":
+            found = (True, 3)
+    if found[1] == 0:
         return cxys[start_index - 1]  # Previous point
-    elif found[1] is "trespass":
+    elif found[1] == 1:
         return cxys[-1]
-    elif found[1] is "vertan":  # Vérifie s'il y a une fin de ligne avant
+    elif found[1] == 3:  # Vérifie s'il y a une fin de ligne avant
         contemp = set(cxys[start_index - 1:start_index + 2]) & linedges
         if len(contemp) > 0:  # i.e. there is a linedge
             return contemp.pop()
         else:
             return cxys[start_index + 2] if is_vert else cxys[start_index + 1]
-    elif found[1] is "clockwise":
+    elif found[1] == 2:
         if start_index + factor >= n:
             return cxys[-1]
         else:
