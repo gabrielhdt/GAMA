@@ -9,12 +9,12 @@ import writesvg
 import control_points
 
 
-def main(imagefile, threshold):
-    threshold = float(threshold)
+def main(imagefile, ngreys):
+    ngreys = int(ngreys)
     matrgb = scipy.misc.imread(imagefile)
     dim = matrgb.shape
     print("Contours")
-    contset = image_processing.contours_image(matrgb, seuil=threshold)
+    contset = image_processing.contours_image(matrgb, ngl=ngreys)
     print("Séparation")
     contset = list(contset)
     navailablecont = len(contset)
@@ -47,8 +47,8 @@ if __name__ == "__main__":
     parser.add_argument("imagefile",
                         help="Filename of the picture to be processed",
                         nargs=1)
-    parser.add_argument("threshold",
-                        help="Colour threshold",
+    parser.add_argument("ngls",
+                        help="Number of greylevels to keep",
                         nargs=1)
     parser.parse_args()
     main(sys.argv[1], sys.argv[2])
