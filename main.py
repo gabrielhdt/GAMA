@@ -9,15 +9,16 @@ import writesvg
 import control_points
 
 
-def main(imagefile):
-    seuil = 0.3
+def main(imagefile, threshold):
+    threshold = float(threshold)
     matrgb = scipy.misc.imread(imagefile)
     dim = matrgb.shape
     print("Contours")
-    contset = image_processing.contours_image(matrgb, seuil=seuil)
+    contset = image_processing.contours_image(matrgb, seuil=threshold)
     print("Séparation")
     contset = list(contset)
     navailablecont = len(contset)
+    failedcont = 0
     i = 0
     while i < navailablecont:
         try:
@@ -25,8 +26,10 @@ def main(imagefile):
             i += 1
         except KeyError:
             print("Failed to determine contour")
+            failedcont += 1
             contset.pop(i)
             navailablecont -= 1
+    print("{} contours failed".format(failedcont))
     image_processing.ordercontlist(contset)
     dim = matrgb.shape
     svgfile = writesvg.SvgFile("out.svg", dim)
@@ -44,5 +47,8 @@ if __name__ == "__main__":
     parser.add_argument("imagefile",
                         help="Filename of the picture to be processed",
                         nargs=1)
+    parser.add_argument("threshold",
+                        help="Colour threshold",
+                        nargs=1)
     parser.parse_args()
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])
