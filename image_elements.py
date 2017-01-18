@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Defines graphical elements which will be used in the program"""
+import numpy as np
 
 
 class Waypoint(object):
@@ -9,6 +10,7 @@ class Waypoint(object):
         self.y = pix.y
         self.slope = None
         self.needscub = False
+        self.paratan = None
 
     def computan(self, contour, precision):
         """Computes tangent to contour for waypoint"""
@@ -48,6 +50,7 @@ class Waypoint(object):
             other_y = contour.xys[(index + i) % n].y
             delta_x_mean += (other_x - self.x)*afterweight[i - 1]/totweight
             delta_y_mean += (other_y - self.y)*afterweight[i - 1]/totweight
+        self.paratan = np.array((delta_x_mean, delta_y_mean))
         self.slope = paratan2slope((delta_x_mean, delta_y_mean))
 
 
