@@ -12,6 +12,9 @@ class Waypoint(object):
         self.needscub = False
         self.paratan = None
 
+    def __repr__(self):
+        return "<Waypoint at {}, {}>".format(self.x, self.y)
+
     def computan(self, contour, precision):
         """Computes tangent to contour for waypoint"""
 
@@ -50,7 +53,8 @@ class Waypoint(object):
             other_y = contour.xys[(index + i) % n].y
             delta_x_mean += (other_x - self.x)*afterweight[i - 1]/totweight
             delta_y_mean += (other_y - self.y)*afterweight[i - 1]/totweight
-        self.paratan = np.array((delta_x_mean, delta_y_mean))
+        norm = np.sqrt((delta_x_mean - self.x)**2 + (delta_y_mean - self.y)**2)
+        self.paratan = (1/norm)*np.array((delta_x_mean, delta_y_mean))
         self.slope = paratan2slope((delta_x_mean, delta_y_mean))
 
 
