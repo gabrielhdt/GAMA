@@ -4,12 +4,8 @@ Processing of control points, called waypoints and tangents. From contours to
 Bezier curves
 """
 import numpy as np
+from numpy.linalg import norm
 import image_elements
-
-
-def norm(pix1, pix2):
-    """pix -- duets of coordinates (x, y)"""
-    return np.sqrt((pix1[0] - pix2[0])**2 + (pix1[1] - pix2[1])**2)
 
 
 def clockwise(p1, p2, p3):
@@ -126,13 +122,15 @@ def list_waypoints(contour):
 
 
 def usecub(start, end):
+    """Sets fly by waypoint between start and end"""
     startarr = np.array((start.x, start.y))
     endarr = np.array((end.x, end.y))
-    bagheera = 20*norm(startarr, endarr)  # Brings cub to ctrlpoint
-    startctls = startarr + bagheera*start.paratan, startarr - bagheera*start.paratan
+    bagheera = 4e-1*norm(endarr - startarr)  # Brings cub to ctrlpoint
+    startctls = (startarr + bagheera*start.paratan,
+                 startarr - bagheera*start.paratan)
     endctls = endarr + bagheera*end.paratan, endarr - bagheera*end.paratan
-    startctl = min(startctls, key=lambda x: norm(x, endarr))
-    endctl = min(endctls, key=lambda x: norm(x, startarr))
+    startctl = min(startctls, key=lambda x: norm(x - endarr))
+    endctl = min(endctls, key=lambda x: norm(x - startarr))
     return startctl, endctl
 
 
@@ -141,7 +139,6 @@ def curves(contour):
     contour -- Contour()
     """
     curves = []
-    epsilon = 1e-5
     waypoints = list_waypoints(contour)
     n = len(waypoints)
     for i in range(n):  # Waypoint by waypoint
