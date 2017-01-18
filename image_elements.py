@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Defines graphical elements which will be used in the program"""
-import numpy as np
+from numpy import array
+from numpy.linalg import norm
 
 
 class Waypoint(object):
@@ -8,6 +9,7 @@ class Waypoint(object):
     def __init__(self, pix):
         self.x = pix.x
         self.y = pix.y
+        self.arr = array((pix.x, pix.y))
         self.slope = None
         self.needscub = False
         self.paratan = None
@@ -53,9 +55,14 @@ class Waypoint(object):
             other_y = contour.xys[(index + i) % n].y
             delta_x_mean += (other_x - self.x)*afterweight[i - 1]/totweight
             delta_y_mean += (other_y - self.y)*afterweight[i - 1]/totweight
-        norm = np.sqrt((delta_x_mean - self.x)**2 + (delta_y_mean - self.y)**2)
-        self.paratan = (1/norm)*np.array((delta_x_mean, delta_y_mean))
+        self.paratan = array((delta_x_mean, delta_y_mean))
+        self.normalise()
         self.slope = paratan2slope((delta_x_mean, delta_y_mean))
+
+    def normalise(self):
+        """Normalises tangent coefficient (norm of vector self (dx, dy))"""
+        paranorm = norm(self.paratan)
+        self.paratan = (1/paranorm)*self.paratan
 
 
 class Pixel(object):
