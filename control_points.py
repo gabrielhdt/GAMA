@@ -240,6 +240,8 @@ def curves(contour):
             middle_x = coef * (pente_s * start.x - pente_e * end.x + end.y - start.y)
             middle_y = pente_s * (middle_x - start.x) + start.y
         needscub = not validate_flyby((middle_x, middle_y), start, end)
+        needscub = needscub or start.x == end.x or start.y == end.y
+        needscub = needscub and not "inf" in (start.slope, end.slope)
         if needscub and 0 not in (pente_e, pente_s):
             middle_s, middle_e = usecub(start, end)
             curves.append(np.array([[start.x, start.y],
@@ -254,6 +256,8 @@ def curves(contour):
             curves.append(np.array([[start.x, start.y],
                                     [startctrl_x, startctrl_y],
                                     [endctrl_x, endctrl_y], [end.x, end.y]]))
+            print(np.array([[start.x, start.y], [startctrl_x, startctrl_y],
+                            [endctrl_x, endctrl_y], [end.x, end.y]]))
     return curves
 
 
