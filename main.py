@@ -29,7 +29,9 @@ def main(imagefile, threshold):
             failedcont += 1
             contset.pop(i)
             navailablecont -= 1
-    print("{} contours failed".format(failedcont))
+    failurepc = failedcont*100/navailablecont
+    print("{} contours failed, {:.2f}% of failure".format(failedcont,
+                                                          failurepc))
     image_processing.ordercontlist(contset)
     dim = matrgb.shape
     svgfile = writesvg.SvgFile("out.svg", dim)
