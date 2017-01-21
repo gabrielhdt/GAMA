@@ -4,12 +4,8 @@ Processing of control points, called waypoints and tangents. From contours to
 Bezier curves
 """
 import numpy as np
+from numpy.linalg import norm
 import image_elements
-
-
-def norm(pix1, pix2):
-    """pix -- duets of coordinates (x, y)"""
-    return np.sqrt((pix1[0] - pix2[0])**2 + (pix1[1] - pix2[1])**2)
 
 
 def clockwise(p1, p2, p3):
@@ -125,84 +121,24 @@ def list_waypoints(contour):
     return waypoints
 
 
+def usecub(start, end):
+    """Sets fly by waypoint between start and end"""
+    startarr = np.array((start.x, start.y))
+    endarr = np.array((end.x, end.y))
+    bagheera = 4e-1*norm(endarr - startarr)  # Brings cub to ctrlpoint
+    startctls = (startarr + bagheera*start.paratan,
+                 startarr - bagheera*start.paratan)
+    endctls = endarr + bagheera*end.paratan, endarr - bagheera*end.paratan
+    startctl = min(startctls, key=lambda x: norm(x - endarr))
+    endctl = min(endctls, key=lambda x: norm(x - startarr))
+    return startctl, endctl
+
+
 def curves(contour):
     """Creates Bezier curves for contour
     contour -- Contour()
     """
-    def usecub(start, end):
-        """Gives cubic control points. Here start and end are control points
-        associated with start point and end point. Points are referenced by
-        [x, y].
-        start, end -- Waypoint()
-        """
-        def taneq(fowaypt, xeval):
-            """Returns y of point on tangent of fowaypt at xeval
-            fowaypt -- fly over waypoint Waypoint()
-            xeval -- float
-            """
-            return fowaypt.slope*(xeval - fowaypt.x) + fowaypt.y
-
-        def invtaneq(fowaypt, yeval):
-            """Inverse function of taneq, gives x of point on tangent of
-            fowaypt at yeval
-            fowaypt -- fly over waypoint Waypoint()
-            yeval -- float
-            """
-            return (yeval - fowaypt.y)/fowaypt.slope + fowaypt.x
-        bagheera = 1/3  # Brings cub back to waypoint
-        sqcentre = (start.x + end.x)/2, (start.y + end.y)/2
-        # Projs along y axis and x axis [y axis, x axis]
-        if start.slope is "inf":
-            end_projs = [taneq(end, sqcentre[0]), invtaneq(end, sqcentre[1])]
-        elif end.slope is "inf":
-            start_projs = [taneq(start, sqcentre[0]), invtaneq(start, sqcentre[1])]
-        else:
-            start_projs = [taneq(start, sqcentre[0]), invtaneq(start, sqcentre[1])]
-            end_projs = [taneq(end, sqcentre[0]), invtaneq(end, sqcentre[1])]
-        # Creating flyby waypoints
-        if start.slope is "inf":
-            startctrl = (start.x, sqcentre[1])
-            endctrl = [None, None]
-            endctrl[0] = sqcentre[0], end_projs[0]
-            endctrl[1] = end_projs[1], sqcentre[1]
-            ctrlduets = [(startctrl, endctrl[0]), (startctrl, endctrl[1])]
-            if abs(end_projs[0] - sqcentre[1]) < abs(end_projs[1] - sqcentre[0]):
-                endctrl = sqcentre[0], end_projs[0]
-            else:
-                endctrl = end_projs[1], (end.y + sqcentre[1])/2
-        elif end.slope is "inf":
-            startctrl = [None, None]
-            startctrl[0] = sqcentre[0], start_projs[0]
-            startctrl[1] = start_projs[1], sqcentre[1]
-            endctrl = (end.x, sqcentre[1])
-            ctrlduets = [(startctrl[0], endctrl), (startctrl[1], endctrl)]
-            if abs(start_projs[0] - sqcentre[1]) < abs(start_projs[1] - sqcentre[0]):
-                startctrl = sqcentre[0], start_projs[0]
-            else:
-                startctrl = start_projs[1], sqcentre[1]
-        else:
-            startctrl = [None, None]
-            startctrl[0] = sqcentre[0], start_projs[0]
-            startctrl[1] = start_projs[1], sqcentre[1]
-            endctrl = [None, None]
-            endctrl[0] = sqcentre[0], end_projs[0]
-            endctrl[1] = end_projs[1], sqcentre[1]
-            # Choosing waypoint processing distance between them
-            ctrlduets = []
-            for i in range(2):
-                for j in range(2):
-                    ctrlduets.append((startctrl[i], endctrl[j]))
-        # Choose best duet, ctrlduetemp [startctrl, endctrl]
-        ctrlduetemp = min(ctrlduets, key=lambda x: norm(x[0], x[1]))
-        ctrlduet = [None, None]
-        ctrlduet[0] = (start.x + bagheera*(ctrlduetemp[0][0] - start.x),
-                       start.y + bagheera*(ctrlduetemp[0][1] - start.y))
-        ctrlduet[1] = (end.x + bagheera*(ctrlduetemp[1][0] - end.x),
-                       end.y + bagheera*(ctrlduetemp[1][1] - end.y))
-        return ctrlduet
-
     curves = []
-    epsilon = 1e-5
     waypoints = list_waypoints(contour)
     n = len(waypoints)
     for i in range(n):  # Waypoint by waypoint
@@ -211,49 +147,13 @@ def curves(contour):
         distancea = max(dist(contour, waypoints[i], after), 3)
         precision = min(distancea, distanceb)
         waypoints[i].computan(contour, precision)
-    for i in range(n-1):
+    for i in range(n - 1):
         start, end = waypoints[i], waypoints[i + 1]
-        pente_s = start.slope
-        pente_e = end.slope
-        if "inf" not in (pente_e, pente_s) and abs(pente_s - pente_e) < epsilon:
-            middle_x = (start.x + end.x) / 2
-            middle_y = (start.y + end.y) / 2
-        elif "inf" in (pente_e, pente_s):
-            if pente_e == pente_s:
-                middle_x = (start.x + end.x) / 2
-                middle_y = (start.y + end.y) / 2
-            elif pente_s == "inf":
-                middle_x = start.x
-                middle_y = end.y + pente_e * (end.x - start.x)
-            elif pente_e == "inf":
-                middle_x = end.x
-                middle_y = start.y + pente_s * (start.x - end.x)
-        elif 0 in (pente_e, pente_s):
-            if pente_s == 0:
-                middle_x = end.x + (start.y - end.y) / pente_e
-                middle_y = start.y
-            elif pente_e == 0:
-                middle_x = start.x + (end.y - start.y) / pente_s
-                middle_y = end.y
-        else:  # pente_s != 0 and pente_e != 0:
-            coef = 1 / (pente_s - pente_e)
-            middle_x = coef * (pente_s * start.x - pente_e * end.x + end.y - start.y)
-            middle_y = pente_s * (middle_x - start.x) + start.y
-        needscub = not validate_flyby((middle_x, middle_y), start, end)
-        if needscub and 0 not in (pente_e, pente_s):
-            middle_s, middle_e = usecub(start, end)
-            curves.append(np.array([[start.x, start.y],
-                                    [middle_s[0], middle_s[1]],
-                                    [middle_e[0], middle_e[1]],
-                                    [end.x, end.y]]))
-        else:
-            startctrl_x = start.x + (2/3)*(middle_x - start.x)
-            startctrl_y = start.y + (2/3)*(middle_y - start.y)
-            endctrl_x = end.x + (2/3)*(middle_x - end.x)
-            endctrl_y = end.y + (2/3)*(middle_y - end.y)
-            curves.append(np.array([[start.x, start.y],
-                                    [startctrl_x, startctrl_y],
-                                    [endctrl_x, endctrl_y], [end.x, end.y]]))
+        middle_s, middle_e = usecub(start, end)
+        curves.append(np.array([[start.x, start.y],
+                                [middle_s[0], middle_s[1]],
+                                [middle_e[0], middle_e[1]],
+                                [end.x, end.y]]))
     return curves
 
 
