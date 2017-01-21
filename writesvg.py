@@ -36,17 +36,22 @@ class SvgFile:
         """Draws first Bezier of path
         ctrl_pts -- list of 3 points
         """
-        self.write("M {:.5f} {:.5f}".format(ctrl_pts[0, 0], ctrl_pts[0, 1]))
-        self.write(" Q {:.5f} {:.5f}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
-        self.write(", {:.5f} {:.5f}".format(ctrl_pts[2, 0], ctrl_pts[2, 1]))
+        self.write("M {:d} {:d}".format(int(ctrl_pts[0, 0]),
+                                        int(ctrl_pts[0, 1])))
+        self.write(" Q {:.6f} {:.6f}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
+        self.write(", {:d} {:d}".format(int(ctrl_pts[2, 0]),
+                                        int(ctrl_pts[2, 1])))
 
     def begin_bezierc(self, ctrl_pts):
-        """Draws first Bezier of
+        """Draws first Bezier of contour. Fly over are inted, as they are on
+        pixels, flyby are floats.
         ctrl_pts -- list of 3 points"""
-        self.write("M {:.5f} {:.5f}".format(ctrl_pts[0, 0], ctrl_pts[0, 1]))
-        self.write(" C {:.5f} {:.5f}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
-        self.write(", {:.5f} {:.5f}".format(ctrl_pts[2, 0], ctrl_pts[2, 1]))
-        self.write(", {:.5f} {:.5f}".format(ctrl_pts[3, 0], ctrl_pts[3, 1]))
+        self.write("M {:d} {:d}".format(int(ctrl_pts[0, 0]),
+                                        int(ctrl_pts[0, 1])))
+        self.write(" C {:.6f} {:.6f}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
+        self.write(", {:.6f} {:.6f}".format(ctrl_pts[2, 0], ctrl_pts[2, 1]))
+        self.write(", {:d} {:d}".format(int(ctrl_pts[3, 0]),
+                                        int(ctrl_pts[3, 1])))
 
     def close_path(self, colours):
         """Closes path and add parameters
@@ -57,17 +62,21 @@ class SvgFile:
 
     def add_polybezier(self, ctrl_pts):
         """Adds a quadratic Bezier curve in an opened path, i.e. a
-        polybezier
+        polybezier.
         ctrl_pts -- list of two points, control point and stop point, beginning
             being defined by previous point
         """
-        for i in range(2):
-            self.write(", {:.5f} {:.5f}".format(ctrl_pts[i, 0], ctrl_pts[i, 1]))
+        self.write(", {:.6f} {:.6f}".format(ctrl_pts[0, 0], ctrl_pts[0, 1]))
+        self.write(", {:d} {:d}".format(int(ctrl_pts[1, 0]),
+                                        int(ctrl_pts[1, 1])))
 
     def add_polybezierc(self, ctrl_pts):
-        """Adds cubic polybezier"""
-        for i in range(3):
-            self.write(", {:.5f} {:.5f}".format(ctrl_pts[i, 0], ctrl_pts[i, 1]))
+        """Adds cubic polybezier. Flyover are inted, flyby stay floats"""
+        for i in range(2):
+            self.write(", {:.6f} {:.6f}".format(ctrl_pts[i, 0],
+                                                ctrl_pts[i, 1]))
+        self.write(", {:d} {:d}".format(int(ctrl_pts[2, 0]),
+                                        int(ctrl_pts[2, 1])))
 
     def close_svg(self):
         """Closes svg file"""
