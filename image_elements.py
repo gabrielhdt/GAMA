@@ -169,13 +169,6 @@ class Pixel(object):
         else:
             return pixel_voisins & set(cont.xys)
 
-    def neighbourscont(self, cont):
-        """Returns neighbours that are in contour cont
-        cont -- Contour() object
-        DEPRECATED
-        """
-        return self.neighbours() & set(cont.xys)
-
 
 class Contour(object):
     """A set or list of pixel circling an area of a same colour"""
