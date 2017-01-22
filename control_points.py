@@ -114,7 +114,8 @@ def list_waypoints(contour):
         start = nextop(contour, start, linedges=linedges)
         linedges.discard(start)  # Avoids looping infinitely
         newindex = contour.xys.index(start)
-        interwaypt = image_elements.Waypoint(contour.xys[(currentindex + newindex)//2])
+        interwaypt = image_elements.Waypoint(contour.xys[(currentindex +
+                                                          newindex)//2])
         waypoints.append(interwaypt)
         waypoints.append(image_elements.Waypoint(start))
     waypoints[-1] = image_elements.Waypoint(contour.xys[0])
@@ -193,10 +194,11 @@ def curves2curvemat(curves):
     return curvemat
 
 
-def curves2curvematc(curves):
-    """Same as above for cubic curves"""
-    curvemat = np.zeros((4 + 3 * (len(curves)-1), 2))
-    curvemat[:4, ] = curves[0].copy()
-    for i, curve in enumerate(curves[1:]):
+def curves2curvematc(curvel):
+    """Same as above for cubic curves
+    curvel -- list of curves (i.e. of arrays)"""
+    curvemat = np.zeros((4 + 3 * (len(curvel)-1), 2))
+    curvemat[:4, ] = curvel[0].copy()
+    for i, curve in enumerate(curvel[1:]):
         curvemat[3*i + 4:3*i + 7, ] = curve[1:, ].copy()  # Not 1st point
     return curvemat
