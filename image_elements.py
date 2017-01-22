@@ -192,38 +192,7 @@ class Contour(object):
             if type(self.xys) is list:
                 return int(self.xys[0].x)
             elif type(self.xys) is set:
-                return (int(self.xys.copy().pop().x))
-
-    def pixincommon(self, other):
-        """Returns whether self has a pixel in common with other contour
-        other -- Contour"""
-        return not len(self.xys | other.xys) == len(self.xys) + len(other.xys)
-
-    def disinclude(self, smaller):
-        """Removes in place the smaller contour from self. smaller must have
-        an equivalent in self, which is included in self
-        smaller -- Contour()"""
-        intercont = set()
-        for pix in smaller.xys:
-            # Getting equivalent pixels
-            for neighbour in pix.closest_neighbours(self):
-                intercont.add(neighbour)
-        self.xys -= intercont
-
-    def hasequivin(self, other):
-        """Returns whether self has an equivalent in the other contour.
-        We say equivalent as they won't be exactly the same, but one longer,
-        circling the smaller (due to detection_contour). If each pixel of
-        smaller has a closest_neighbour in bigger, the former has an
-        equivalent in bigger. Will work only if self is circled by other.
-        other -- Contour()
-        """
-        smallen = len(self.xys)
-        samecount = 0
-        for pix in self.xys:
-            if len(pix.closest_neighbours(cont=other)):
-                samecount += 1
-        return samecount == smallen
+                return int(self.xys.copy().pop().x)
 
     def separate_contour(self, begpix):
         """Extracts and replaces self.xys by the greater contour in self,
