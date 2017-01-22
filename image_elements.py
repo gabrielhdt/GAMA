@@ -11,7 +11,6 @@ class Waypoint(object):
         self.y = pix.y
         self.arr = array((pix.x, pix.y))
         self.slope = None
-        self.needscub = False
         self.paratan = None
 
     def __repr__(self):
