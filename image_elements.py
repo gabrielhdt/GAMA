@@ -189,9 +189,9 @@ class Contour(object):
         if len(self.xys) == 0:
             return 0
         else:
-            if type(self.xys) is list:
+            if isinstance(self.xys, list):
                 return int(self.xys[0].x)
-            elif type(self.xys) is set:
+            elif isinstance(self.xys, set):
                 return int(self.xys.copy().pop().x)
 
     def separate_contour(self, begpix):
