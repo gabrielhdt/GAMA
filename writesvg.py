@@ -1,7 +1,8 @@
 """Defines a class for creating a svgfile"""
 
 
-class SvgFile:
+class SvgFile(object):
+    """A SVG files, with methods to write bezier curves, pixels and close it"""
     def __init__(self, name, dim):
         """Links a file to object
         name -- name of the file (string)
@@ -26,7 +27,7 @@ class SvgFile:
         self.write("<?xml version=\"1.0\" standalone=\"yes\"?>\n")
         self.write("<svg xmlns=\"http://www.w3.org/2000/svg\"\n")
         self.write("\twidth=\"{}\" height=\"{}\">\n".format(dim[0], dim[1]))
-        self.write("\t<desc>A short description</desc>\n")
+        self.write("\t<desc>Image vectorised by GAMA program</desc>\n")
 
     def open_path(self):
         """Opens a path"""
@@ -71,7 +72,8 @@ class SvgFile:
                                         int(ctrl_pts[1, 1])))
 
     def add_polybezierc(self, ctrl_pts):
-        """Adds cubic polybezier. Flyover are inted, flyby stay floats"""
+        """Adds cubic polybezier. Flyover are inted, flyby stay floats
+        ctrl_pts -- array of 3 floats, shape=(3, 2)"""
         for i in range(2):
             self.write(", {:.6f} {:.6f}".format(ctrl_pts[i, 0],
                                                 ctrl_pts[i, 1]))
@@ -84,11 +86,13 @@ class SvgFile:
         self.file.close()
 
     def draw_contour(self, ctrl_mat, colours=None):
-        """Draws a contour with quadratic bezier curves whose control points are
+        """Draws a contour with quadratic bezier curves which control points
+        are
         in ctrl_mat (a point is given by ctrl_mat[k,:]). To make a loop, first
         point must match last point.
         ctrl_mat -- (n, 2) int array
         colours -- dictionnary containing stroke colour and fill colour
+        Should be removed as cubic Bezier are used
         """
         if colours is None:
             colours = {"fill": "blue", "stroke": "blue"}
@@ -101,6 +105,10 @@ class SvgFile:
         self.close_path(colours)
 
     def draw_contourc(self, ctrl_mat, colours):
+        """Draws contour with cubic Bezier, initially a copy of draw_contour.
+        To loop correctly, last point of ctrl_mat must match first point.
+        ctrl_mat -- control points, (n, 2) float array
+        colours -- dictionnary containing stroke and fill colour"""
         assert ctrl_mat[4:, ].shape[0] % 3 == 0
         n_bezier = ctrl_mat[4:, ].shape[0]//3  # Number of curves
         self.open_path()
@@ -110,7 +118,7 @@ class SvgFile:
         self.close_path(colours)
 
     def draw_pix(self, pix):
-        """Draws a pixel on svg, to see contour results
+        """Draws a pixel on svg, to see contour results, only for demos...
         pix -- image_elemnts.Pixel() element
         """
         self.write("\t<circle")
