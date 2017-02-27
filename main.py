@@ -20,6 +20,7 @@ def main(imagefile, ngreys):
     navailablecont = len(contset)
     for i in range(navailablecont):
         contset[i].optimseparate()
+    contset = list(filter(lambda x: x.xys is not None, contset))
     image_processing.ordercontlist(contset)
     dim = matrgb.shape
     svgfile = writesvg.SvgFile("out.svg", dim)
