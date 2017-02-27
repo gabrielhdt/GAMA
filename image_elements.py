@@ -222,21 +222,32 @@ class Contour(object):
         # Remove if corner
         if begpix.iscorner(cont=self):
             self.xys.remove(begpix)
+        # Choosing first pixel
         begpix = self.xys.copy().pop()
+        while len(begpix.neighbours(cont=self)) < 2:  # If weird pixel...
+            if len(self.xys) <= 2:
+                return None
+            else:
+                self.xys.remove(begpix)
+                begpix = self.xys.copy().pop()
         loop.append(begpix)
         # First step
         tramp = begpix.neighbours(cont=self)
+        if len(tramp) == 0:
+            return None
         inspix = initsteps(begpix, tramp)
         loop.append(inspix)
         # 2nd step
         neighbourhood = inspix.neighbours(cont=self)
+        if len(neighbourhood) == 0:
+            print("Error")
+            return None
         inspix = initsteps(inspix, neighbourhood)
         neighbourhood = inspix.neighbours(cont=self)
+        sparepix = set(neighbourhood)  # Used if KeyError
         self.xys.remove(inspix)
-        sparepix = set()  # Used if KeyError...
-        while inspix not in tramp:
+        while inspix not in tramp and len(sparepix) > 0:
             loop.append(inspix)
-            sparepix |= neighbourhood
             clneighbourhood = neighbourhood & inspix.closest_neighbours()
             xneighbourhood = neighbourhood - clneighbourhood
             try:
@@ -250,6 +261,7 @@ class Contour(object):
             finally:
                 self.xys.remove(inspix)
                 neighbourhood = inspix.neighbours(cont=self)
+                sparepix.update(neighbourhood)
         loop.append(inspix)
         return loop
 
