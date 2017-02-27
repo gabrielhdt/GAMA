@@ -233,31 +233,23 @@ class Contour(object):
         inspix = initsteps(inspix, neighbourhood)
         neighbourhood = inspix.neighbours(cont=self)
         self.xys.remove(inspix)
+        sparepix = set()  # Used if KeyError...
         while inspix not in tramp:
             loop.append(inspix)
+            sparepix |= neighbourhood
             clneighbourhood = neighbourhood & inspix.closest_neighbours()
             xneighbourhood = neighbourhood - clneighbourhood
-            # For triangles
-            annoying = set([None])
-            if len(neighbourhood) == 2:
-                for xneighbour in xneighbourhood:
-                    if len(xneighbour.neighbours(cont=self) -
-                           set([inspix])) == 0:
-                        annoying = set([xneighbour])
-            if len(neighbourhood) >= 3:
-                for neighbour in neighbourhood:
-                    if len(neighbour.neighbours(cont=self)) == 2:
-                        self.xys.remove(neighbour)
-            # For right angles
-            if len(xneighbourhood) >= 1:
-                inspix = (xneighbourhood - annoying).pop()
+            try:
+                if len(xneighbourhood) > 0:
+                    inspix = xneighbourhood.pop()
+                else:
+                    inspix = clneighbourhood.pop()
+                sparepix.remove(inspix)
+            except KeyError:
+                inspix = sparepix.pop()
+            finally:
                 self.xys.remove(inspix)
-                if len(clneighbourhood) >= 1:
-                    self.xys.discard(clneighbourhood.pop())
-            else:
-                inspix = (neighbourhood - annoying).pop()
-                self.xys.remove(inspix)
-            neighbourhood = inspix.neighbours(cont=self)
+                neighbourhood = inspix.neighbours(cont=self)
         loop.append(inspix)
         return loop
 
