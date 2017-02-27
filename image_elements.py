@@ -201,8 +201,24 @@ class Contour(object):
         steps, which is the hardest part of the program.
         begpix -- Pixel() on which the inspection will start
         """
+        assert isinstance(self.xys, set)
+
+        def initsteps(pix, initneighbourhood):
+            """Automation of two init steps
+            Two in-place modif: removing pix then anglepix (if it exists)
+            """
+            clneighbourhood = pix.closest_neighbours(cont=self)
+            xneighbourhood = initneighbourhood - clneighbourhood
+            self.xys.remove(pix)
+            if len(xneighbourhood) >= 1:
+                ninspix = xneighbourhood.pop()
+                anglepix = clneighbourhood & ninspix.neighbours(cont=self)
+                self.xys.discard(anglepix)
+            else:
+                ninspix = clneighbourhood.pop()
+            return ninspix
+
         loop = []  # Ordered, therefore list
-        assert type(self.xys) is set
         # Remove if corner
         if begpix.iscorner(cont=self):
             self.xys.remove(begpix)
@@ -210,31 +226,11 @@ class Contour(object):
         loop.append(begpix)
         # First step
         tramp = begpix.neighbours(cont=self)
-        clneighbourhood = begpix.closest_neighbours(cont=self)
-        xneighbourhood = tramp - clneighbourhood
-        if len(xneighbourhood) >= 1:
-            self.xys.remove(begpix)
-            inspix = xneighbourhood.pop()
-            # Remove pixel in angle
-            anglepix = clneighbourhood & inspix.neighbours(cont=self)
-            self.xys.discard(anglepix)
-        else:
-            self.xys.remove(begpix)
-            inspix = clneighbourhood.pop()
+        inspix = initsteps(begpix, tramp)
         loop.append(inspix)
         # 2nd step
         neighbourhood = inspix.neighbours(cont=self)
-        clneighbourhood = inspix.closest_neighbours(cont=self)
-        xneighbourhood = neighbourhood - clneighbourhood
-        if len(xneighbourhood) >= 1:
-            self.xys.remove(inspix)
-            inspix = xneighbourhood.pop()
-            # Remove pixel in angle
-            anglepix = clneighbourhood & inspix.neighbours(cont=self)
-            self.xys.discard(anglepix)
-        else:
-            self.xys.remove(inspix)
-            inspix = clneighbourhood.pop()
+        inspix = initsteps(inspix, neighbourhood)
         neighbourhood = inspix.neighbours(cont=self)
         self.xys.remove(inspix)
         while inspix not in tramp:
