@@ -18,20 +18,8 @@ def main(imagefile, ngreys):
     print("Séparation")
     contset = list(contset)
     navailablecont = len(contset)
-    failedcont = 0
-    i = 0
-    while i < navailablecont:
-        try:
-            contset[i].optimseparate()
-            i += 1
-        except KeyError:
-            print("Failed to determine contour")
-            failedcont += 1
-            contset.pop(i)
-            navailablecont -= 1
-    failurepc = failedcont*100/navailablecont
-    print("{} contours failed, {:.2f}% of failure".format(failedcont,
-                                                          failurepc))
+    for i in range(navailablecont):
+        contset[i].optimseparate()
     image_processing.ordercontlist(contset)
     dim = matrgb.shape
     svgfile = writesvg.SvgFile("out.svg", dim)
@@ -43,6 +31,7 @@ def main(imagefile, ngreys):
         colours = {"fill": cont.colour, "stroke": cont.colour}
         svgfile.draw_contourc(curvemat, colours)
     svgfile.close_svg()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
