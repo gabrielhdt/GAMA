@@ -203,53 +203,15 @@ class Contour(object):
         """
         assert isinstance(self.xys, set)
 
-        def initsteps(pix, initneighbourhood):
-            """Automation of two init steps
-            Two in-place modif: removing pix then anglepix (if it exists)
-            """
-            clneighbourhood = pix.closest_neighbours(cont=self)
-            xneighbourhood = initneighbourhood - clneighbourhood
-            self.xys.remove(pix)
-            if len(xneighbourhood) >= 1:
-                ninspix = xneighbourhood.pop()
-                anglepix = clneighbourhood & ninspix.neighbours(cont=self)
-                self.xys.discard(anglepix)
-            else:
-                ninspix = clneighbourhood.pop()
-            return ninspix
-
         loop = []  # Ordered, therefore list
-        # Remove if corner
-        if begpix.iscorner(cont=self):
-            self.xys.remove(begpix)
-            begpix = begpix.neighbours(cont=self).copy().pop()
-        # Choosing first pixel
-        while len(begpix.neighbours(cont=self)) < 2:  # If weird pixel...
-            if len(self.xys) <= 2:
-                return None
-            else:
-                self.xys.remove(begpix)
-                begpix = self.xys.copy().pop()
-        loop.append(begpix)
-        # First step
-        tramp = begpix.neighbours(cont=self)
-        if len(tramp) == 0:
-            return None
-        inspix = initsteps(begpix, tramp)
-        loop.append(inspix)
-        # 2nd step
-        neighbourhood = inspix.neighbours(cont=self)
-        if len(neighbourhood) == 0:
-            print("Error")
-            return None
-        inspix = initsteps(inspix, neighbourhood)
-        neighbourhood = inspix.neighbours(cont=self)
-        sparepix = set(neighbourhood)  # Used if KeyError
+        inspix = begpix
         self.xys.remove(inspix)
-        while inspix not in tramp and len(sparepix) > 0:
-            loop.append(inspix)
-            clneighbourhood = neighbourhood & inspix.closest_neighbours()
-            xneighbourhood = neighbourhood - clneighbourhood
+        loop.append(inspix)
+        neighbourhood = inspix.neighbours(cont=self)
+        clneighbourhood = neighbourhood & inspix.closest_neighbours()
+        xneighbourhood = neighbourhood - clneighbourhood
+        sparepix = set(neighbourhood)  # Used if KeyError
+        while len(sparepix) > 0:
             try:
                 if len(xneighbourhood) > 0:
                     inspix = xneighbourhood.pop()
@@ -260,9 +222,11 @@ class Contour(object):
                 inspix = sparepix.pop()
             finally:
                 self.xys.remove(inspix)
+                loop.append(inspix)
                 neighbourhood = inspix.neighbours(cont=self)
+                clneighbourhood = neighbourhood & inspix.closest_neighbours()
+                xneighbourhood = neighbourhood - clneighbourhood
                 sparepix.update(neighbourhood)
-        loop.append(inspix)
         return loop
 
     def optimseparate(self):
