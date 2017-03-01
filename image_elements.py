@@ -222,8 +222,8 @@ class Contour(object):
         # Remove if corner
         if begpix.iscorner(cont=self):
             self.xys.remove(begpix)
+            begpix = begpix.neighbours(cont=self).copy().pop()
         # Choosing first pixel
-        begpix = self.xys.copy().pop()
         while len(begpix.neighbours(cont=self)) < 2:  # If weird pixel...
             if len(self.xys) <= 2:
                 return None
