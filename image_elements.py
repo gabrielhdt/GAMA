@@ -210,7 +210,7 @@ class Contour(object):
         neighbourhood = inspix.neighbours(cont=self)
         clneighbourhood = neighbourhood & inspix.closest_neighbours()
         xneighbourhood = neighbourhood - clneighbourhood
-        sparepix = neighbourhood  # Used if KeyError
+        sparepix = list(neighbourhood)  # Used if KeyError
         while len(sparepix) > 0:
             try:
                 if len(xneighbourhood) > 0:
@@ -226,7 +226,9 @@ class Contour(object):
                 neighbourhood = inspix.neighbours(cont=self)
                 clneighbourhood = neighbourhood & inspix.closest_neighbours()
                 xneighbourhood = neighbourhood - clneighbourhood
-                sparepix.update(neighbourhood)
+                for px in neighbourhood:
+                    if px not in sparepix:
+                        sparepix.append(px)
         return loop
 
     def optimseparate(self):
@@ -234,6 +236,10 @@ class Contour(object):
         from border"""
         pix = min(self.xys, key=lambda p: abs(p.x))
         self.xys = self.separate_contour(pix)
+
+    def sort_cont(self):
+        """Sorts pixels in self.xys"""
+        pass
 
     def scanlines(self):
         """Looks for straight lines with length greater than 3 pixels.
