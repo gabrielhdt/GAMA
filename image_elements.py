@@ -210,7 +210,7 @@ class Contour(object):
         neighbourhood = inspix.neighbours(cont=self)
         clneighbourhood = neighbourhood & inspix.closest_neighbours()
         xneighbourhood = neighbourhood - clneighbourhood
-        sparepix = set(neighbourhood)  # Used if KeyError
+        sparepix = neighbourhood  # Used if KeyError
         while len(sparepix) > 0:
             try:
                 if len(xneighbourhood) > 0:
