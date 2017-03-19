@@ -245,12 +245,12 @@ class Contour(object):
     def sort_cont(self):
         """Sorts pixels in self.xys. First tests whether next pixel is in
         the neighbourhood. If not, searches for nearer pixel. Needs time..."""
-        def normpx(x, y):
-            return norm((x.x, x.y), (y.x, y.y))
+        def distpx(v1, v2):
+            return norm((v1.x - v2.x, v1.y - v2.y))
 
         def search_nearer(px, cont):
             """Searches nearer pixel of px in cont"""
-            dists = map(lambda x: normpx(px, x), cont)
+            dists = map(lambda x: distpx(px, x), cont)
             return argmin(dists)
 
         cont = self.xys  # Shortcut
@@ -262,8 +262,8 @@ class Contour(object):
                 sortcont.append(cont.pop(pos))
             else:
                 pos = search_nearer(sortcont[-1], cont)
-                leave = (normpx(sortcont[-1], cont[pos]) <=
-                         normpx(sortcont[-1], sortcont[0]))
+                leave = (distpx(sortcont[-1], cont[pos]) <=
+                         distpx(sortcont[-1], sortcont[0]))
                 if not leave:
                     sortcont.append(cont.pop(pos))
             leave = leave or len(cont) == 0
