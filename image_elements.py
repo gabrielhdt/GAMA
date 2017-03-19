@@ -2,6 +2,7 @@
 """Defines graphical elements which will be used in the program"""
 from numpy import array
 from numpy.linalg import norm
+from numpy import argmin
 
 
 class Waypoint(object):
@@ -169,6 +170,10 @@ class Pixel(object):
         else:
             return pixel_voisins & set(cont.xys)
 
+    def is_neighbour_quick(self, other):
+        """Quick way to test whether other is in neighbourhood of self"""
+        return abs(self.x - other.x) <= 1 and abs(self.x - other.y) <= 1
+
 
 class Contour(object):
     """A set or list of pixel circling an area of a same colour"""
@@ -238,8 +243,31 @@ class Contour(object):
         self.xys = self.separate_contour(pix)
 
     def sort_cont(self):
-        """Sorts pixels in self.xys"""
-        pass
+        """Sorts pixels in self.xys. First tests whether next pixel is in
+        the neighbourhood. If not, searches for nearer pixel. Needs time..."""
+        def normpx(x, y):
+            return norm((x.x, x.y), (y.x, y.y))
+
+        def search_nearer(px, cont):
+            """Searches nearer pixel of px in cont"""
+            dists = map(lambda x: normpx(px, x), cont)
+            return argmin(dists)
+
+        cont = self.xys  # Shortcut
+        leave = False
+        pos = 0  # Position in cont
+        sortcont = [cont.pop(0)]
+        while not leave:
+            if sortcont[-1].is_neighbour_quick(cont[pos]):
+                sortcont.append(cont.pop(pos))
+            else:
+                pos = search_nearer(sortcont[-1], cont)
+                leave = (normpx(sortcont[-1], cont[pos]) <=
+                         normpx(sortcont[-1], sortcont[0]))
+                if not leave:
+                    sortcont.append(cont.pop(pos))
+            leave = leave or len(cont) == 0
+        return sortcont
 
     def scanlines(self):
         """Looks for straight lines with length greater than 3 pixels.
