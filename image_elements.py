@@ -267,7 +267,7 @@ class Contour(object):
                 if not leave:
                     sortcont.append(cont.pop(pos))
             leave = leave or len(cont) == 0
-        return sortcont
+        self.xys = sortcont
 
     def scanlines(self):
         """Looks for straight lines with length greater than 3 pixels.
