@@ -36,11 +36,8 @@ def main(imagefile, ngreys):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("imagefile",
-                        help="Filename of the picture to be processed",
-                        nargs=1)
-    parser.add_argument("ngls",
-                        help="Number of greylevels to keep",
-                        nargs=1)
+    parser.add_argument(
+        "imagefile", help="Filename of the picture to be processed", nargs=1)
+    parser.add_argument("ngls", help="Number of greylevels to keep", nargs=1)
     parser.parse_args()
     main(sys.argv[1], sys.argv[2])

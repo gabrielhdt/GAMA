@@ -6,6 +6,7 @@ from numpy.linalg import norm
 
 class Waypoint(object):
     """Points over which the Bezier curve will pass"""
+
     def __init__(self, pix):
         self.x = pix.x
         self.y = pix.y
@@ -29,7 +30,7 @@ class Waypoint(object):
             elif abs(delta_xy[1]) <= 1e-15:
                 return 0
             else:
-                return delta_xy[1]/delta_xy[0]
+                return delta_xy[1] / delta_xy[0]
 
         def weight(dist):
             """Gives weight to pixel while processing tangent.
@@ -47,15 +48,15 @@ class Waypoint(object):
         for i in range(-precision, 0):
             other_x = contour.xys[(index + i) % n].x
             other_y = contour.xys[(index + i) % n].y
-            delta_x_mean += ((self.x - other_x) *
-                             beforeweight[abs(i) - 1]/totweight)
-            delta_y_mean += ((self.y - other_y) *
-                             beforeweight[abs(i) - 1]/totweight)
+            delta_x_mean += (
+                (self.x - other_x) * beforeweight[abs(i) - 1] / totweight)
+            delta_y_mean += (
+                (self.y - other_y) * beforeweight[abs(i) - 1] / totweight)
         for i in range(1, precision + 1):
             other_x = contour.xys[(index + i) % n].x
             other_y = contour.xys[(index + i) % n].y
-            delta_x_mean += (other_x - self.x)*afterweight[i - 1]/totweight
-            delta_y_mean += (other_y - self.y)*afterweight[i - 1]/totweight
+            delta_x_mean += (other_x - self.x) * afterweight[i - 1] / totweight
+            delta_y_mean += (other_y - self.y) * afterweight[i - 1] / totweight
         self.paratan = array((delta_x_mean, delta_y_mean))
         self.normalise()
         self.slope = paratan2slope((delta_x_mean, delta_y_mean))
@@ -63,11 +64,12 @@ class Waypoint(object):
     def normalise(self):
         """Normalises tangent coefficient (norm of vector self (dx, dy))"""
         paranorm = norm(self.paratan)
-        self.paratan = (1/paranorm)*self.paratan
+        self.paratan = (1 / paranorm) * self.paratan
 
 
 class Pixel(object):
     """A Pixel of the picture"""
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -82,7 +84,7 @@ class Pixel(object):
         return (self.x, self.y) != (other.x, other.y)
 
     def __hash__(self):
-        return 1000000000*int(self.x) + int(self.y)  # Should be int anyway
+        return 1000000000 * int(self.x) + int(self.y)  # Should be int anyway
 
     def adjs(self, matread):
         """ Returns neighbours that have not been read (according to matread)
@@ -141,8 +143,8 @@ class Pixel(object):
         x = self.x
         y = self.y
         pixel_voisins = set()
-        for k in range(x-1, x+2):
-            for j in range(y-1, y+2):
+        for k in range(x - 1, x + 2):
+            for j in range(y - 1, y + 2):
                 if not(k == x and j == y) and \
                         k >= 0 and j >= 0:
                     pixel_voisins.add(Pixel(k, j))
@@ -160,8 +162,8 @@ class Pixel(object):
         x = self.x
         y = self.y
         pixel_voisins = set()
-        for k in range(x-1, x+2):
-            for j in range(y-1, y+2):
+        for k in range(x - 1, x + 2):
+            for j in range(y - 1, y + 2):
                 if (k == x) ^ (j == y) and k >= 0 and j >= 0:
                     pixel_voisins.add(Pixel(k, j))
         if cont is None:
@@ -172,6 +174,7 @@ class Pixel(object):
 
 class Contour(object):
     """A set or list of pixel circling an area of a same colour"""
+
     def __init__(self, xys):
         """
         xys -- list or set of pixels
@@ -278,10 +281,11 @@ class Contour(object):
         cxys = self.xys[1:]  # Shortcut
         linedges = set()  # Don't care about order
         aligned = 0
-        threshold = max(int(len(self.xys)*0.03), 3)  # Chosen after tests
+        threshold = max(int(len(self.xys) * 0.03), 3)  # Chosen after tests
         for i, pix in enumerate(cxys):
             # choordinate stands for change of coordinate (we mean both)...
-            choordinate = not(pix.x == self.xys[i].x or pix.y == self.xys[i].y)
+            choordinate = not (pix.x == self.xys[i].x or
+                               pix.y == self.xys[i].y)
             if not choordinate:
                 aligned += 1
                 # If last pixel of contour in a line

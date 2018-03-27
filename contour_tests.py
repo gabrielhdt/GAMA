@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import image_elements as ie
 
-
 square = ie.Contour([])  # A square
 square.xys += [ie.Pixel(10 + i, i) for i in range(10, 21)]
 square.xys += [ie.Pixel(30 - i, 20 + i) for i in range(1, 11)]

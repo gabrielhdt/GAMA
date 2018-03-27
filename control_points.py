@@ -52,7 +52,7 @@ def nextop(contour, start, linedges=set()):
     contour -- image_elements.Contour() object
     start -- pixel de début, image_elements.Pixel() object
     """
-    factor = len(contour.xys)//150
+    factor = len(contour.xys) // 150
     cxys = contour.xys  # Shortcut
     start_index = cxys.index(start)
     n = len(cxys) - 1  # dernier indice disponible
@@ -77,8 +77,8 @@ def nextop(contour, start, linedges=set()):
         is_vert = vertan([start] + \
             contloop(contour, start_index + 1, start_index + 4))
         new_sens = clockwise(contour.xys[start_index],
-                             contour.xys[(start_index + 1*factor)%n],
-                             contour.xys[(start_index + 2*factor)%n])
+                             contour.xys[(start_index + 1 * factor) % n],
+                             contour.xys[(start_index + 2 * factor) % n])
         # and not found[0] avoids changing reason of leaving
         if new_sens != sens and not found[0]:
             found = (True, 2)
@@ -114,8 +114,8 @@ def list_waypoints(contour):
         start = nextop(contour, start, linedges=linedges)
         linedges.discard(start)  # Avoids looping infinitely
         newindex = contour.xys.index(start)
-        interwaypt = image_elements.Waypoint(contour.xys[(currentindex +
-                                                          newindex)//2])
+        interwaypt = image_elements.Waypoint(
+            contour.xys[(currentindex + newindex) // 2])
         waypoints.append(interwaypt)
         waypoints.append(image_elements.Waypoint(start))
     waypoints[-1] = image_elements.Waypoint(contour.xys[0])
@@ -126,10 +126,10 @@ def usecub(start, end):
     """Sets fly by waypoint between start and end"""
     startarr = np.array((start.x, start.y))
     endarr = np.array((end.x, end.y))
-    bagheera = 4e-1*norm(endarr - startarr)  # Brings cub to ctrlpoint
-    startctls = (startarr + bagheera*start.paratan,
-                 startarr - bagheera*start.paratan)
-    endctls = endarr + bagheera*end.paratan, endarr - bagheera*end.paratan
+    bagheera = 4e-1 * norm(endarr - startarr)  # Brings cub to ctrlpoint
+    startctls = (startarr + bagheera * start.paratan,
+                 startarr - bagheera * start.paratan)
+    endctls = endarr + bagheera * end.paratan, endarr - bagheera * end.paratan
     startctl = min(startctls, key=lambda x: norm(x - endarr))
     endctl = min(endctls, key=lambda x: norm(x - startarr))
     return startctl, endctl
@@ -143,7 +143,7 @@ def curves(contour):
     waypoints = list_waypoints(contour)
     n = len(waypoints)
     for i in range(n):  # Waypoint by waypoint
-        before, after = waypoints[i - 1], waypoints[(i + 1)%n]
+        before, after = waypoints[i - 1], waypoints[(i + 1) % n]
         distanceb = max(dist(contour, before, waypoints[i]), 3)
         distancea = max(dist(contour, waypoints[i], after), 3)
         precision = min(distancea, distanceb)
@@ -151,10 +151,9 @@ def curves(contour):
     for i in range(n - 1):
         start, end = waypoints[i], waypoints[i + 1]
         middle_s, middle_e = usecub(start, end)
-        curves.append(np.array([[start.x, start.y],
-                                [middle_s[0], middle_s[1]],
-                                [middle_e[0], middle_e[1]],
-                                [end.x, end.y]]))
+        curves.append(
+            np.array([[start.x, start.y], [middle_s[0], middle_s[1]],
+                      [middle_e[0], middle_e[1]], [end.x, end.y]]))
     return curves
 
 
@@ -187,18 +186,18 @@ def curves2curvemat(curves):
     element of curves, except for curves[0].
     curves -- list of curves, i.e. list of arrays
     """
-    curvemat = np.zeros((3 + 2*(len(curves) - 1), 2))
+    curvemat = np.zeros((3 + 2 * (len(curves) - 1), 2))
     curvemat[:3, ] = curves[0].copy()
     for i, curve in enumerate(curves[1:]):
-        curvemat[2*i + 3:2*i + 5, ] = curve[1:, ].copy()  # Not 1st point
+        curvemat[2 * i + 3:2 * i + 5, ] = curve[1:, ].copy()  # Not 1st point
     return curvemat
 
 
 def curves2curvematc(curvel):
     """Same as above for cubic curves
     curvel -- list of curves (i.e. of arrays)"""
-    curvemat = np.zeros((4 + 3 * (len(curvel)-1), 2))
+    curvemat = np.zeros((4 + 3 * (len(curvel) - 1), 2))
     curvemat[:4, ] = curvel[0].copy()
     for i, curve in enumerate(curvel[1:]):
-        curvemat[3*i + 4:3*i + 7, ] = curve[1:, ].copy()  # Not 1st point
+        curvemat[3 * i + 4:3 * i + 7, ] = curve[1:, ].copy()  # Not 1st point
     return curvemat

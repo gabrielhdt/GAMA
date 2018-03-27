@@ -3,6 +3,7 @@
 
 class SvgFile(object):
     """A SVG files, with methods to write bezier curves, pixels and close it"""
+
     def __init__(self, name, dim):
         """Links a file to object
         name -- name of the file (string)
@@ -37,22 +38,22 @@ class SvgFile(object):
         """Draws first Bezier of path
         ctrl_pts -- list of 3 points
         """
-        self.write("M {:d} {:d}".format(int(ctrl_pts[0, 0]),
-                                        int(ctrl_pts[0, 1])))
+        self.write(
+            "M {:d} {:d}".format(int(ctrl_pts[0, 0]), int(ctrl_pts[0, 1])))
         self.write(" Q {:.6f} {:.6f}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
-        self.write(", {:d} {:d}".format(int(ctrl_pts[2, 0]),
-                                        int(ctrl_pts[2, 1])))
+        self.write(
+            ", {:d} {:d}".format(int(ctrl_pts[2, 0]), int(ctrl_pts[2, 1])))
 
     def begin_bezierc(self, ctrl_pts):
         """Draws first Bezier of contour. Fly over are inted, as they are on
         pixels, flyby are floats.
         ctrl_pts -- list of 3 points"""
-        self.write("M {:d} {:d}".format(int(ctrl_pts[0, 0]),
-                                        int(ctrl_pts[0, 1])))
+        self.write(
+            "M {:d} {:d}".format(int(ctrl_pts[0, 0]), int(ctrl_pts[0, 1])))
         self.write(" C {:.6f} {:.6f}".format(ctrl_pts[1, 0], ctrl_pts[1, 1]))
         self.write(", {:.6f} {:.6f}".format(ctrl_pts[2, 0], ctrl_pts[2, 1]))
-        self.write(", {:d} {:d}".format(int(ctrl_pts[3, 0]),
-                                        int(ctrl_pts[3, 1])))
+        self.write(
+            ", {:d} {:d}".format(int(ctrl_pts[3, 0]), int(ctrl_pts[3, 1])))
 
     def close_path(self, colours):
         """Closes path and add parameters
@@ -68,17 +69,17 @@ class SvgFile(object):
             being defined by previous point
         """
         self.write(", {:.6f} {:.6f}".format(ctrl_pts[0, 0], ctrl_pts[0, 1]))
-        self.write(", {:d} {:d}".format(int(ctrl_pts[1, 0]),
-                                        int(ctrl_pts[1, 1])))
+        self.write(
+            ", {:d} {:d}".format(int(ctrl_pts[1, 0]), int(ctrl_pts[1, 1])))
 
     def add_polybezierc(self, ctrl_pts):
         """Adds cubic polybezier. Flyover are inted, flyby stay floats
         ctrl_pts -- array of 3 floats, shape=(3, 2)"""
         for i in range(2):
-            self.write(", {:.6f} {:.6f}".format(ctrl_pts[i, 0],
-                                                ctrl_pts[i, 1]))
-        self.write(", {:d} {:d}".format(int(ctrl_pts[2, 0]),
-                                        int(ctrl_pts[2, 1])))
+            self.write(
+                ", {:.6f} {:.6f}".format(ctrl_pts[i, 0], ctrl_pts[i, 1]))
+        self.write(
+            ", {:d} {:d}".format(int(ctrl_pts[2, 0]), int(ctrl_pts[2, 1])))
 
     def close_svg(self):
         """Closes svg file"""
@@ -97,10 +98,10 @@ class SvgFile(object):
         if colours is None:
             colours = {"fill": "blue", "stroke": "blue"}
         assert ctrl_mat[3:, ].shape[0] % 2 == 0  # Pair of points except first
-        n_bezier = ctrl_mat[3:, ].shape[0]//2  # Number of curves
+        n_bezier = ctrl_mat[3:, ].shape[0] // 2  # Number of curves
         self.open_path()
         self.begin_bezier(ctrl_mat[:4, ])
-        for i in range(3, 3 + 2*n_bezier, 2):
+        for i in range(3, 3 + 2 * n_bezier, 2):
             self.add_polybezier(ctrl_mat[i:i + 2, ])
         self.close_path(colours)
 
@@ -110,10 +111,10 @@ class SvgFile(object):
         ctrl_mat -- control points, (n, 2) float array
         colours -- dictionnary containing stroke and fill colour"""
         assert ctrl_mat[4:, ].shape[0] % 3 == 0
-        n_bezier = ctrl_mat[4:, ].shape[0]//3  # Number of curves
+        n_bezier = ctrl_mat[4:, ].shape[0] // 3  # Number of curves
         self.open_path()
         self.begin_bezierc(ctrl_mat[:4, ])
-        for i in range(4, 4 + 3*n_bezier, 3):
+        for i in range(4, 4 + 3 * n_bezier, 3):
             self.add_polybezierc(ctrl_mat[i:i + 3, ])
         self.close_path(colours)
 
@@ -122,7 +123,7 @@ class SvgFile(object):
         pix -- image_elemnts.Pixel() element
         """
         self.write("\t<circle")
-        r = (self.dim[0] + self.dim[1])*1e-3/2
+        r = (self.dim[0] + self.dim[1]) * 1e-3 / 2
         self.write(" cx=\"{}\" cy=\"{}\" r=\"{}\"/>\n".format(pix.x, pix.y, r))
 
     def draw_contour_pix(self, contour):

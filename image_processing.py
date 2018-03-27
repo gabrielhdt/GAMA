@@ -12,9 +12,9 @@ def pic2greylvl(matrgb):
     matgl = np.zeros(shape=(a, b))  # matrix greylevels
     for i in range(a):
         for j in range(b):
-            matgl[i][j] += ((matrgb[i][j][0]/255)*0.2126 +
-                            (matrgb[i][j][1]/255)*0.7152 +
-                            (matrgb[i][j][2]/255)*0.0722)
+            matgl[i][j] += ((matrgb[i][j][0] / 255) * 0.2126 +
+                            (matrgb[i][j][1] / 255) * 0.7152 +
+                            (matrgb[i][j][2] / 255) * 0.0722)
     return matgl
 
 
@@ -27,12 +27,12 @@ def colourgrouping(matgl, ngl):
     matfilt = np.ones_like(matgl)
     greylevels = np.linspace(0, 1, ngl)
     cond = np.where(matgl == 0, True, False)
-    matfilt[cond] = 0*np.ones_like(matgl[cond])
+    matfilt[cond] = 0 * np.ones_like(matgl[cond])
     for i in range(ngl - 1):
         mat_condition1 = np.where(matgl > greylevels[i], True, False)
         mat_condition2 = np.where(matgl <= greylevels[i + 1], True, False)
         mask = np.logical_and(mat_condition1, mat_condition2)
-        matfilt[mask] = (((greylevels[i] + greylevels[i + 1])/2) *
+        matfilt[mask] = (((greylevels[i] + greylevels[i + 1]) / 2) *
                          np.ones_like(matgl[mask]))
     return matfilt
 
@@ -48,12 +48,14 @@ def regroupement_couleur(matricenb, seuil):
     couleur = np.arange(0, 1 + seuil, seuil)
     # Special treatment for 0s...
     cond = np.where(matricenb == 0, True, False)
-    matfilt[cond] = (couleur[0] + couleur[1])/2*np.ones_like(matricenb[cond])
+    matfilt[cond] = (
+        couleur[0] + couleur[1]) / 2 * np.ones_like(matricenb[cond])
     for i in range(len(couleur[:-1])):
         mat_condition1 = np.where(matricenb > couleur[i], True, False)
         mat_condition2 = np.where(matricenb <= couleur[i + 1], True, False)
         mat = np.logical_and(mat_condition1, mat_condition2)
-        matfilt[mat] = min((2*i+1)*seuil/2, 1) * np.ones_like(matricenb[mat])
+        matfilt[mat] = min(
+            (2 * i + 1) * seuil / 2, 1) * np.ones_like(matricenb[mat])
     return matfilt
 
 
@@ -64,8 +66,8 @@ def add_border(matng):
     returns -- a new matrix with borders on each side (lines and rows of 7s)
     """
     (row, col) = matng.shape
-    matng_border = 7*np.ones((row+2, col+2), dtype=float)
-    matng_border[1:row+1, 1:col+1] = matng.copy()
+    matng_border = 7 * np.ones((row + 2, col + 2), dtype=float)
+    matng_border[1:row + 1, 1:col + 1] = matng.copy()
     return matng_border
 
 
