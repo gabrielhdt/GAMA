@@ -54,8 +54,8 @@ def regroupement_couleur(matricenb, seuil):
         mat_condition1 = np.where(matricenb > couleur[i], True, False)
         mat_condition2 = np.where(matricenb <= couleur[i + 1], True, False)
         mat = np.logical_and(mat_condition1, mat_condition2)
-        matfilt[mat] = min(
-            (2 * i + 1) * seuil / 2, 1) * np.ones_like(matricenb[mat])
+        matfilt[mat] = min((2 * i + 1) * seuil / 2,
+                           1) * np.ones_like(matricenb[mat])
     return matfilt
 
 
